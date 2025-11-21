@@ -1,0 +1,3 @@
+[submodule "Shared"]
+	path = Shared
+	url = https://github.com/YannisUsmb/SAE05.A.08_Astralis_Shared.git
