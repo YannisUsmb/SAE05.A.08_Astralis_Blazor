@@ -20,6 +20,7 @@ namespace Astralis_BlazorApp
             });
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+            builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
             builder.Services.AddBlazorBootstrap();
 
