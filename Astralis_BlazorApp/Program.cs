@@ -19,6 +19,7 @@ namespace Astralis_BlazorApp
                 BaseAddress = new Uri("https://localhost:7276/api/")
             });
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
 
             builder.Services.AddBlazorBootstrap();
 
