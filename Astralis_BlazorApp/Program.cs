@@ -1,4 +1,6 @@
 using Astralis_BlazorApp.Components;
+using Astralis_BlazorApp.Services.Implementations;
+using Astralis_BlazorApp.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -16,6 +18,7 @@ namespace Astralis_BlazorApp
             {
                 BaseAddress = new Uri("https://localhost:7276/api/")
             });
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddBlazorBootstrap();
 

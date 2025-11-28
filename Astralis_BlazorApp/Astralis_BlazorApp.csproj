@@ -15,7 +15,10 @@
 
   <ItemGroup>
     <Folder Include="ViewModels\" />
-    <Folder Include="Services\Interfaces\Specific\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Astralis.Shared\Astralis.Shared.csproj" />
   </ItemGroup>
 
 </Project>
