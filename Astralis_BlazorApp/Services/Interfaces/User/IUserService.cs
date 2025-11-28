@@ -8,6 +8,7 @@ namespace Astralis_BlazorApp.Services.Interfaces
         Task<List<UserDetailDto>> GetAllUsers();
         Task<UserDetailDto?> AddUser(UserCreateDto dto);
         Task<UserDetailDto?> UpdateUser(int id, UserUpdateDto dto);
+        Task<UserDetailDto?> DeleteUser(int id);
         Task<bool> ChangePassword(int id, ChangePasswordDto dto);
         Task<AuthResponseDto?> Login(UserLoginDto dto);
     }
