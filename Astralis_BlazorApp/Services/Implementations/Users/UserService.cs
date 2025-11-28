@@ -13,41 +13,60 @@ namespace Astralis_BlazorApp.Services.Implementations
         {
             _httpClient = httpClient;
         }
-        
-        public async Task<UserDetailDto> GetUserById(int id)
+        public async Task<AuthResponseDto?> Login(UserLoginDto dto)
         {
-            return await _httpClient.GetFromJsonAsync<UserDetailDto>($"{Controller}/{id}") 
-                   ?? new UserDetailDto();
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{Controller}/login", dto);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            AuthResponseDto? authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+            return authResponse;
+        }
+        public async Task<UserDetailDto?> GetUserById(int id)
+        {
+            UserDetailDto? user = await _httpClient.GetFromJsonAsync<UserDetailDto>($"{Controller}/{id}");
+            return user;
         }
         
         public async Task<List<UserDetailDto>> GetAllUsers()
         {
-            return await _httpClient.GetFromJsonAsync<List<UserDetailDto>>($"{Controller}") 
-                   ?? new List<UserDetailDto>();
+            List<UserDetailDto>? users = await _httpClient.GetFromJsonAsync<List<UserDetailDto>>($"{Controller}");
+
+            if (users == null)
+            {
+                return new List<UserDetailDto>();
+            }
+
+            return users;
         }
-        
-        public async Task<UserDetailDto> UpdateUser(int id, UserUpdateDto dto)
+
+        public async Task<UserDetailDto?> AddUser( UserCreateDto dto)
         {
-            var response = await _httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{Controller}", dto);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<UserDetailDto>() 
-                   ?? new UserDetailDto();
+            UserDetailDto? createdUser = await response.Content.ReadFromJsonAsync<UserDetailDto>();
+            return createdUser;
         }
-        
-        public async Task<UserDetailDto> AddUser( UserCreateDto dto)
+
+        public async Task<UserDetailDto?> UpdateUser(int id, UserUpdateDto dto)
         {
-            var response = await _httpClient.PostAsJsonAsync($"{Controller}", dto);
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"{Controller}", dto);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<UserDetailDto>() 
-                   ?? new UserDetailDto();
+
+            UserDetailDto? updatedUser = await response.Content.ReadFromJsonAsync<UserDetailDto>();
+            return updatedUser;
         }
-        
+
         public async Task<bool> ChangePassword(int id, ChangePasswordDto dto)
         {
-            var response = await _httpClient.PutAsJsonAsync($"{Controller}/{id}/ChangePassword", dto);
-            response.EnsureSuccessStatusCode();
-            return response.IsSuccessStatusCode;
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"{Controller}/{id}/ChangePassword", dto);
+
+            bool success = response.IsSuccessStatusCode;
+            return success;
         }
     }
 }
