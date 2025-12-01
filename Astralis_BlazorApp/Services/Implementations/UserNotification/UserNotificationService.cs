@@ -8,13 +8,13 @@ namespace Astralis_BlazorApp.Services.Implementations
     {
         private const string Controller = "UserNotifications";
         
-        public async Task<UserNotificationDto> GetUserNotification(int userId, int notificationId)
+        public async Task<UserNotificationDto> GetByIdAsync(int userId, int notificationId)
         {
             UserNotificationDto? notification = await httpClient.GetFromJsonAsync<UserNotificationDto>($"{Controller}/{userId}/notifications/{notificationId}");
             return notification!;
         }
         
-        public async Task<List<UserNotificationDto>> GetUserNotifications(int userId)
+        public async Task<List<UserNotificationDto>> GetAllAsync(int userId)
         {
             List<UserNotificationDto>? notifications = await httpClient.GetFromJsonAsync<List<UserNotificationDto>>($"{Controller}/{userId}/notifications");
 
@@ -26,7 +26,7 @@ namespace Astralis_BlazorApp.Services.Implementations
             return notifications;
         }
         
-        public async Task<UserNotificationDto> AddUserNotification(UserNotificationDto dto)
+        public async Task<UserNotificationDto> AddAsync(UserNotificationDto dto)
         {
             HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/{dto.UserId}/notifications", dto);
             response.EnsureSuccessStatusCode();
@@ -35,16 +35,16 @@ namespace Astralis_BlazorApp.Services.Implementations
             return createdNotification!;
         }
         
-        public async Task<UserNotificationDto> UpdateUserNotification(UserNotificationDto dto)
+        public async Task<UserNotificationDto> UpdateAsync(int userId, int notificationId, UserNotificationDto dto)
         {
-            HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{dto.UserId}/notifications/{dto.NotificationId}", dto);
+            HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{userId}/notifications/{notificationId}", dto);
             response.EnsureSuccessStatusCode();
 
             UserNotificationDto? updatedNotification = await response.Content.ReadFromJsonAsync<UserNotificationDto>();
             return updatedNotification!;
         }
         
-        public async Task<UserNotificationDto> DeleteUserNotification(int userId, int notificationId)
+        public async Task<UserNotificationDto> DeleteAsync(int userId, int notificationId)
         {
             var response = await httpClient.DeleteAsync(
                 $"{Controller}/{userId}/notifications/{notificationId}"

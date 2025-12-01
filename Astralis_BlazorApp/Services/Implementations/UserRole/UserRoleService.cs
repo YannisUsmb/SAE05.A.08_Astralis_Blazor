@@ -8,13 +8,13 @@ namespace Astralis_BlazorApp.Services.Implementations
     {
         private const string Controller = "UserRoles";
         
-        public async Task<UserRoleDto> GetUserRoleById(int id)
+        public async Task<UserRoleDto> GetByIdAsync(int id)
         {
             UserRoleDto? role = await httpClient.GetFromJsonAsync<UserRoleDto>($"{Controller}/{id}");
             return role ?? throw new Exception("Role not found");
         }
         
-        public async Task<List<UserRoleDto>> GetAllUserRoles()
+        public async Task<List<UserRoleDto>> GetAllAsync()
         {
             List<UserRoleDto>? roles = await httpClient.GetFromJsonAsync<List<UserRoleDto>>($"{Controller}");
 

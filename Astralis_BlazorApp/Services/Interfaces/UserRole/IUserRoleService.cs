@@ -4,6 +4,6 @@ namespace Astralis_BlazorApp.Services.Interfaces;
 
 public interface IUserRoleService
 {
-        Task<UserRoleDto> GetUserRoleById(int id);
-        Task<List<UserRoleDto>> GetAllUserRoles();
+        Task<UserRoleDto> GetByIdAsync(int id);
+        Task<List<UserRoleDto>> GetAllAsync();
 }

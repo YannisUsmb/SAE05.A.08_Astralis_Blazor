@@ -4,9 +4,9 @@ namespace Astralis_BlazorApp.Services.Interfaces;
 
 public interface IUserNotificationService
 {
-    Task<UserNotificationDto> GetUserNotification(int userId, int notificationId);
-    Task<List<UserNotificationDto>> GetUserNotifications(int userId);
-    Task<UserNotificationDto> AddUserNotification(UserNotificationDto dto);
-    Task<UserNotificationDto> UpdateUserNotification(UserNotificationDto dto);
-    Task<UserNotificationDto> DeleteUserNotification(int userId, int notificationId);
+    Task<UserNotificationDto> GetByIdAsync(int userId, int notificationId);
+    Task<List<UserNotificationDto>> GetAllAsync(int userId);
+    Task<UserNotificationDto> AddAsync(UserNotificationDto dto);
+    Task<UserNotificationDto> UpdateAsync(int userId, int notificationId, UserNotificationDto dto);
+    Task<UserNotificationDto> DeleteAsync(int userId, int notificationId);
 }
