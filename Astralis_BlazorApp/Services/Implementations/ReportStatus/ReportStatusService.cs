@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations.ReportStatus;
 
 public class ReportStatusService(HttpClient httpClient) : IReportStatusService
 {
-    public const string Controller = "ReportStatus";
+    private const string Controller = "ReportStatus";
     
     public async Task<ReportStatusDto> GetByIdAsync(int id)
     {
