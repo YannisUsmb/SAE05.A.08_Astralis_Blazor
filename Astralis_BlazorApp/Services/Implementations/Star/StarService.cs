@@ -8,19 +8,19 @@ public class StarService(HttpClient httpClient) : IStarService
 {
     private const string Controller = "Stars";
 
-    public async Task<StarDto> GetStarById(int id)
+    public async Task<StarDto> GetByIdAsync(int id)
     {
         StarDto? star = await httpClient.GetFromJsonAsync<StarDto>($"{Controller}/{id}");
         return star ?? throw new Exception($"{Controller} not found");
     }
 
-    public async Task<List<StarDto>> GetAllStars()
+    public async Task<List<StarDto>> GetAllAsync()
     {
         List<StarDto>? stars = await httpClient.GetFromJsonAsync<List<StarDto>>(Controller);
         return stars ?? new List<StarDto>();
     }
     
-    public async Task<StarDto> AddStar(StarCreateDto dto)
+    public async Task<StarDto> AddAsync(StarCreateDto dto)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync(Controller, dto);
         response.EnsureSuccessStatusCode();
@@ -29,7 +29,7 @@ public class StarService(HttpClient httpClient) : IStarService
                ?? throw new Exception("Unable to add star");
     }
 
-    public async Task<StarDto> UpdateStar(int id, StarUpdateDto dto)
+    public async Task<StarDto> UpdateAsync(int id, StarUpdateDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
         response.EnsureSuccessStatusCode();
@@ -38,7 +38,7 @@ public class StarService(HttpClient httpClient) : IStarService
                ?? throw new Exception("Unable to update star");
     }
 
-    public async Task<StarDto> DeleteStar(int id)
+    public async Task<StarDto> DeleteAsync(int id)
     {
         HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}");
         response.EnsureSuccessStatusCode();
@@ -47,7 +47,7 @@ public class StarService(HttpClient httpClient) : IStarService
                ?? throw new Exception("Unable to delete star");
     }
 
-    public async Task<List<StarDto>> GetByReference(string reference)
+    public async Task<List<StarDto>> GetByReferenceAsync(string reference)
     {
         List<StarDto>? stars = await httpClient.GetFromJsonAsync<List<StarDto>>
             ($"{Controller}/reference/{reference}");
@@ -55,11 +55,13 @@ public class StarService(HttpClient httpClient) : IStarService
         return stars ?? new List<StarDto>();
     }
 
-    public async Task<List<StarDto>> GetBySpectralClassId(int id)
+    public async Task<List<StarDto>> GetBySpectralClassIdAsync(int id)
     {
         List<StarDto>? stars = await httpClient.GetFromJsonAsync<List<StarDto>>
             ($"{Controller}/spectral-class/{id}");
 
         return stars ?? new List<StarDto>();
     }
+    
+    // A finir plus tard
 }

@@ -4,11 +4,13 @@ namespace Astralis_BlazorApp.Services.Interfaces;
 
 public interface IStarService
 {
-    Task<StarDto> GetStarById(int id);
-    Task<List<StarDto>> GetAllStars();
-    Task<StarDto> AddStar(StarCreateDto dto);
-    Task<StarDto> UpdateStar(int id, StarUpdateDto dto);
-    Task<StarDto> DeleteStar(int id);
-    Task<List<StarDto>>  GetByReference(string reference);
-    Task<List<StarDto>> GetBySpectralClassId(int id);
+    Task<StarDto> GetByIdAsync(int id);
+    Task<List<StarDto>> GetAllAsync();
+    Task<StarDto> AddAsync(StarCreateDto dto);
+    Task<StarDto> UpdateAsync(int id, StarUpdateDto dto);
+    Task<StarDto> DeleteAsync(int id);
+    Task<List<StarDto>>  GetByReferenceAsync(string reference);
+    Task<List<StarDto>> GetBySpectralClassIdAsync(int id);
+    
+    // A finir plus tard
 }
