@@ -8,9 +8,9 @@ namespace Astralis_BlazorApp.Services.Implementations
     {
         private const string Controller = "Users";
 
-        public async Task<AuthResponseDto?> Login(UserLoginDto dto)
+        public async Task<AuthResponseDto?> LoginAsync(int id, UserLoginDto dto)
         {
-            HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/login", dto);
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/login/{id}", dto);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -20,13 +20,13 @@ namespace Astralis_BlazorApp.Services.Implementations
             AuthResponseDto? authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
             return authResponse;
         }
-        public async Task<UserDetailDto?> GetUserById(int id)
+        public async Task<UserDetailDto?> GetByIdAsync(int id)
         {
             UserDetailDto? user = await httpClient.GetFromJsonAsync<UserDetailDto>($"{Controller}/{id}");
             return user;
         }
         
-        public async Task<List<UserDetailDto>> GetAllUsers()
+        public async Task<List<UserDetailDto>> GetAllAsync()
         {
             List<UserDetailDto>? users = await httpClient.GetFromJsonAsync<List<UserDetailDto>>($"{Controller}");
 
@@ -38,7 +38,7 @@ namespace Astralis_BlazorApp.Services.Implementations
             return users;
         }
 
-        public async Task<UserDetailDto?> AddUser( UserCreateDto dto)
+        public async Task<UserDetailDto?> AddAsync(UserCreateDto dto)
         {
             HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}", dto);
             response.EnsureSuccessStatusCode();
@@ -47,7 +47,7 @@ namespace Astralis_BlazorApp.Services.Implementations
             return createdUser;
         }
 
-        public async Task<UserDetailDto?> UpdateUser(int id, UserUpdateDto dto)
+        public async Task<UserDetailDto?> UpdateAsync(int id, UserUpdateDto dto)
         {
             HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
             response.EnsureSuccessStatusCode();
@@ -56,7 +56,7 @@ namespace Astralis_BlazorApp.Services.Implementations
             return updatedUser;
         }
 
-        public async Task<UserDetailDto?> DeleteUser(int id)
+        public async Task<UserDetailDto?> DeleteAsync(int id)
         {
             HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}");
 
@@ -69,7 +69,7 @@ namespace Astralis_BlazorApp.Services.Implementations
             return deletedUser;
         }
 
-        public async Task<bool> ChangePassword(int id, ChangePasswordDto dto)
+        public async Task<bool> ChangePasswordAsync(int id, ChangePasswordDto dto)
         {
             HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}/ChangePassword", dto);
 

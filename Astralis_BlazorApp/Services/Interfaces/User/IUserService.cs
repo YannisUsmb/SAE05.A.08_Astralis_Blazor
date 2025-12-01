@@ -4,12 +4,12 @@ namespace Astralis_BlazorApp.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<UserDetailDto?> GetUserById(int id);
-        Task<List<UserDetailDto>> GetAllUsers();
-        Task<UserDetailDto?> AddUser(UserCreateDto dto);
-        Task<UserDetailDto?> UpdateUser(int id, UserUpdateDto dto);
-        Task<UserDetailDto?> DeleteUser(int id);
-        Task<bool> ChangePassword(int id, ChangePasswordDto dto);
-        Task<AuthResponseDto?> Login(UserLoginDto dto);
+        Task<UserDetailDto?> GetByIdAsync(int id);
+        Task<List<UserDetailDto>> GetAllAsync();
+        Task<UserDetailDto?> AddAsync(UserCreateDto dto);
+        Task<UserDetailDto?> UpdateAsync(int id, UserUpdateDto dto);
+        Task<UserDetailDto?> DeleteAsync(int id);
+        Task<bool> ChangePasswordAsync(int id, ChangePasswordDto dto);
+        Task<AuthResponseDto?> LoginAsync(int id, UserLoginDto dto);
     }
 }
