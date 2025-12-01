@@ -8,13 +8,13 @@ public class TypeOfArticleService(HttpClient httpClient) : ITypeOfArticleService
 {
     private const string Controller = "TypeOfArticles";
 
-    public async Task<TypeOfArticleDto> GetTypeOfArticleById(int id)
+    public async Task<TypeOfArticleDto> GetByIdAsync(int id)
     {
         TypeOfArticleDto? typeOfArticle = await httpClient.GetFromJsonAsync<TypeOfArticleDto>($"{Controller}/{id}");
         return typeOfArticle ?? throw new Exception("Type of article not found");
     }
 
-    public async Task<List<TypeOfArticleDto>> GetAllTypeOfArticles()
+    public async Task<List<TypeOfArticleDto>> GetAllAsync()
     {
         List<TypeOfArticleDto>? typeOfArticles = await httpClient.GetFromJsonAsync<List<TypeOfArticleDto>>($"{Controller}");
 
@@ -26,7 +26,7 @@ public class TypeOfArticleService(HttpClient httpClient) : ITypeOfArticleService
         return typeOfArticles;
     }
 
-    public async Task<TypeOfArticleDto> AddTypeOfArticle(TypeOfArticleDto dto)
+    public async Task<TypeOfArticleDto> AddAsync(TypeOfArticleDto dto)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync(Controller, dto);
         response.EnsureSuccessStatusCode();
@@ -34,7 +34,7 @@ public class TypeOfArticleService(HttpClient httpClient) : ITypeOfArticleService
         return createdTypeOfArticle ?? throw new Exception("Failed to create type of article");
     }
 
-    public async Task<TypeOfArticleDto> UpdateTypeOfArticle(int id, TypeOfArticleDto dto)
+    public async Task<TypeOfArticleDto> UpdateAsync(int id, TypeOfArticleDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
         response.EnsureSuccessStatusCode();
@@ -42,7 +42,7 @@ public class TypeOfArticleService(HttpClient httpClient) : ITypeOfArticleService
         return updatedTypeOfArticle ?? throw new Exception("Failed to update type of article");
     }
 
-    public async Task<TypeOfArticleDto> DeleteTypeOfArticle(int id)
+    public async Task<TypeOfArticleDto> DeleteAsync(int id)
     {
         HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}");
         response.EnsureSuccessStatusCode();
@@ -50,4 +50,5 @@ public class TypeOfArticleService(HttpClient httpClient) : ITypeOfArticleService
         return deletedTypeOfArticle ?? throw new Exception("Failed to delete type of article");
     }
     
+    // A finir TABLE DE JOINTURE
 }
