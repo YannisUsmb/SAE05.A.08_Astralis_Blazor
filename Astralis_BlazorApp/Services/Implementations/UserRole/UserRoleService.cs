@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations
 {
     public class UserRoleService(HttpClient httpClient) : IUserRoleService
     {
-        private const string Controller = "roles";
+        private const string Controller = "UserRoles";
         
         public async Task<UserRoleDto> GetUserRoleById(int id)
         {

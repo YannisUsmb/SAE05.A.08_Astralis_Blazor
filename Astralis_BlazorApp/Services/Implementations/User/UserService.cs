@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations
 {
     public class UserService(HttpClient httpClient) : IUserService
     {
-        private const string Controller = "users";
+        private const string Controller = "Users";
 
         public async Task<AuthResponseDto?> Login(UserLoginDto dto)
         {

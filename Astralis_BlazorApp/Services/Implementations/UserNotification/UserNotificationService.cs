@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations
 {
     public class UserNotificationService(HttpClient httpClient) : IUserNotificationService
     {
-        private const string Controller = "users";
+        private const string Controller = "UserNotifications";
         
         public async Task<UserNotificationDto> GetUserNotification(int userId, int notificationId)
         {
