@@ -8,7 +8,7 @@ public class ReportService(HttpClient httpClient) : IReportService
 {
     private const string Controller = "Report";
     
-    public async Task<ReportDto> GetByIdAsync(int id)
+    public async Task<ReportDto?> GetByIdAsync(int id)
     {
         ReportDto? report = await httpClient.GetFromJsonAsync<ReportDto>($"{Controller}/{id}");
         return report ?? throw new Exception("Report not found");
