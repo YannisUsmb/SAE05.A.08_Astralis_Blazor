@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations.ProductCategory;
 
 public class ProductCategoryService(HttpClient httpClient) : IProductCategoryService
 {
-    private const string Controller = "ProductCategory";
+    private const string Controller = "ProductCategories";
     
     public async Task<ProductCategoryDto?> GetByIdAsync(int id)
     {

@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations.ReportMotive;
 
 public class ReportMotiveService(HttpClient httpClient) : IReportMotiveService
 {
-    private const string Controller = "ReportMotive";
+    private const string Controller = "ReportMotives";
     
     public async Task<ReportMotiveDto> GetByIdAsync(int id)
     {
