@@ -10,13 +10,13 @@ public class ReportStatusService(HttpClient httpClient) : IReportStatusService
     
     public async Task<ReportStatusDto> GetByIdAsync(int id)
     {
-        var reportStatus = await httpClient.GetFromJsonAsync<ReportStatusDto>($"{Controller}/{id}");
+        ReportStatusDto? reportStatus = await httpClient.GetFromJsonAsync<ReportStatusDto>($"{Controller}/{id}");
         return reportStatus ?? throw new Exception("Report status not found");
     }
     
     public async Task<List<ReportStatusDto>> GetAllAsync()
     {
-        var reportStatuses = await httpClient.GetFromJsonAsync<List<ReportStatusDto>>(Controller);
+        List<ReportStatusDto>? reportStatuses = await httpClient.GetFromJsonAsync<List<ReportStatusDto>>(Controller);
         return reportStatuses ?? new List<ReportStatusDto>();
     }
 }
