@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.ProductCategory;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.ProductCategory;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class ProductCategoryService(HttpClient httpClient) : IProductCategoryService
 {

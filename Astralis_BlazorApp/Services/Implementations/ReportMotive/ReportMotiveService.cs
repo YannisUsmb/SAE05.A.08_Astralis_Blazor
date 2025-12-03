@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.ReportMotive;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.ReportMotive;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class ReportMotiveService(HttpClient httpClient) : IReportMotiveService
 {

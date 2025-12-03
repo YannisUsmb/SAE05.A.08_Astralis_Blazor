@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.ReportStatus;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.ReportStatus;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class ReportStatusService(HttpClient httpClient) : IReportStatusService
 {

@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.Notification;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.Notification;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class NotificationService(HttpClient httpClient) : INotificationService
 {

@@ -1,10 +1,10 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.PlanetType;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.PlanetType;
+namespace Astralis_BlazorApp.Services.Implementations;
 
-public class PlaetTypeService(HttpClient httpClient) : IPlanetTypeService
+public class PlanetTypeService(HttpClient httpClient) : IPlanetTypeService
 {
     private const string Controller = "PlanetTypes";
     

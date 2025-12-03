@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.Planet;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.Planet;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class PlanetService(HttpClient httpClient) : IPlanetService
 {

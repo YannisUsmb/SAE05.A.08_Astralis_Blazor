@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.Satellite;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.Satellite;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class SatelliteService(HttpClient httpClient) : ISatelliteService
 {

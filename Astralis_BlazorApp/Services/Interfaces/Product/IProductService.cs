@@ -1,6 +1,6 @@
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Interfaces.Product;
+namespace Astralis_BlazorApp.Services.Interfaces;
 
 public interface IProductService
 {

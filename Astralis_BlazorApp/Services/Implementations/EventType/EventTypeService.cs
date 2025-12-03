@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.EventType;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.EventType;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class EventTypeService(HttpClient httpClient) : IEventTypeService
 {

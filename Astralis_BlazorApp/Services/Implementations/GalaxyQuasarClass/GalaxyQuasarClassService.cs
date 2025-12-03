@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.GalaxyQuasarClass;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.GalaxyQuasarClass;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class GalaxyQuasarClassService(HttpClient httpClient) : IGalaxyQuasarClassService
 {
