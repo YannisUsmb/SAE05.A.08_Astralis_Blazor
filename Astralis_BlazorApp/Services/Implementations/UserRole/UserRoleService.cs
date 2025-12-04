@@ -17,13 +17,7 @@ namespace Astralis_BlazorApp.Services.Implementations
         public async Task<List<UserRoleDto>> GetAllAsync()
         {
             List<UserRoleDto>? roles = await httpClient.GetFromJsonAsync<List<UserRoleDto>>($"{Controller}");
-
-            if (roles == null)
-            {
-                return new List<UserRoleDto>();
-            }
-
-            return roles;
+            return roles ?? new List<UserRoleDto>();
         }
     }
 }
