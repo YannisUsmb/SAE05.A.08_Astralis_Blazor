@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces.AliasStatus;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
 namespace Astralis_BlazorApp.Services.Implementations;
