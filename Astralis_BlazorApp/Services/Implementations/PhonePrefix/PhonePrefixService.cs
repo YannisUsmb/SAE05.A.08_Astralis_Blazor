@@ -8,7 +8,7 @@ public class PhonePrefixService(HttpClient httpClient) : IPhonePrefixService
 {
     private const string Controller = "PhonePrefixes";
     
-    public async Task<PhonePrefixDto> GetByIdAsync(int id)
+    public async Task<PhonePrefixDto?> GetByIdAsync(int id)
     {
         PhonePrefixDto? phonePrefix = await httpClient.GetFromJsonAsync<PhonePrefixDto>($"{Controller}/{id}");
         return phonePrefix;
