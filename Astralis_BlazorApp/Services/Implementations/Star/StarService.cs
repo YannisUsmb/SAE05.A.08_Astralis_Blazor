@@ -107,14 +107,9 @@ public class StarService(HttpClient httpClient) : IStarService
             queryParams.Add($"minTemperature={filter.MinTemperature.Value}");
         if (filter.MaxTemperature.HasValue)
             queryParams.Add($"maxTemperature={filter.MaxTemperature.Value}");
-        
-        if (filter.SpectralClassIds != null && filter.SpectralClassIds.Count > 0)
-        {
-            foreach (int id in filter.SpectralClassIds)
-            {
-                queryParams.Add($"spectralClassIds={id}");
-            }
-        }
+
+        if (filter.SpectralClassIds is not { Count: > 0 }) return string.Join("&", queryParams);
+        queryParams.AddRange(filter.SpectralClassIds.Select(id => $"spectralClassIds={id}"));
 
         return string.Join("&", queryParams);
     }
