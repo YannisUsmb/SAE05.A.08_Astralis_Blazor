@@ -11,6 +11,5 @@ public interface IStarService
     Task<StarDto> DeleteAsync(int id);
     Task<List<StarDto>>  GetByReferenceAsync(string reference);
     Task<List<StarDto>> GetBySpectralClassIdAsync(int id);
-    
-    // A finir plus tard
+    Task<List<StarDto>> SearchAsync(StarFilterDto filter);
 }
