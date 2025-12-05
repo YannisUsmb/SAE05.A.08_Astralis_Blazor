@@ -80,10 +80,8 @@ public class ProductService(HttpClient httpClient) : IProductService
 
         if (filter.MaxPrice.HasValue)
             queryParams.Add($"maxPrice={filter.MaxPrice.Value}");
-
-        // Utilisation du pattern matching et LINQ pour la liste d'IDs
-        if (filter.ProductCategoryIds is not { Count: > 0 }) return string.Join("&", queryParams);
         
+        if (filter.ProductCategoryIds is not { Count: > 0 }) return string.Join("&", queryParams);
         queryParams.AddRange(filter.ProductCategoryIds.Select(id => $"productCategoryIds={id}"));
 
         return string.Join("&", queryParams);
