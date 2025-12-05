@@ -10,4 +10,5 @@ public interface IReportService
     Task<ReportDto?> UpdateAsync(int id, ReportUpdateDto dto);
     Task<ReportDto?> DeleteAsync(int id);
     Task<List<ReportDto>> GetByDateAsync(DateTime date);
+    Task<List<ReportDto>> SearchAsync(ReportFilterDto filter);
 }

@@ -59,4 +59,32 @@ public class ReportService(HttpClient httpClient) : IReportService
         List<ReportDto>? reports = await httpClient.GetFromJsonAsync<List<ReportDto>>($"{Controller}/date/{dateString}");
         return reports ?? new List<ReportDto>();
     }
+    
+    public async Task<List<ReportDto>> SearchAsync(ReportFilterDto filter)
+    {
+        string queryString = BuildSearchQueryString(filter);
+        string url = $"{Controller}/search?{queryString}";
+
+        List<ReportDto>? reports = await httpClient.GetFromJsonAsync<List<ReportDto>>(url);
+        return reports ?? new List<ReportDto>();
+    }
+
+    private string BuildSearchQueryString(ReportFilterDto filter)
+    {
+        List<string> queryParams = new List<string>();
+
+        if (filter.StatusId.HasValue)
+            queryParams.Add($"statusId={filter.StatusId.Value}");
+
+        if (filter.MotiveId.HasValue)
+            queryParams.Add($"motiveId={filter.MotiveId.Value}");
+        
+        if (filter.MinDate.HasValue)
+            queryParams.Add($"minDate={Uri.EscapeDataString(filter.MinDate.Value.ToString("O"))}");
+
+        if (filter.MaxDate.HasValue)
+            queryParams.Add($"maxDate={Uri.EscapeDataString(filter.MaxDate.Value.ToString("O"))}");
+
+        return string.Join("&", queryParams);
+    }
 }
