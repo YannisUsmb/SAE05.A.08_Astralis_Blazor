@@ -9,5 +9,6 @@ public interface IPlanetService
     Task<PlanetDto?> AddAsync(PlanetCreateDto planet);
     Task<PlanetDto?> UpdateAsync(int id, PlanetUpdateDto planet);
     Task<PlanetDto?> DeleteAsync(int id);
+    Task<List<PlanetDto>> GetByNameAsync(string name);
     Task<List<PlanetDto>> SearchAsync(PlanetFilterDto filter);
 }

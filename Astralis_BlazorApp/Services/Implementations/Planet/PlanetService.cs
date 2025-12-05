@@ -64,55 +64,50 @@ public class PlanetService(HttpClient httpClient) : IPlanetService
     private string ToQueryString(PlanetFilterDto filter)
     {
         List<string> parameters = new List<string>();
-
-        if (!string.IsNullOrEmpty(filter.Name))
-            parameters.Add($"name={Uri.EscapeDataString(filter.Name)}");
         
-        if (filter.PlanetTypeIds != null)
-        {
-            foreach (int id in filter.PlanetTypeIds)
-            {
-                parameters.Add($"planetTypeIds={id}");
-            }
-        }
+        if (!string.IsNullOrWhiteSpace(filter.Name))
+            parameters.Add($"name={Uri.EscapeDataString(filter.Name)}");
 
-        if (filter.DetectionMethodIds != null)
-        {
-            foreach (int id in filter.DetectionMethodIds)
-            {
-                parameters.Add($"detectionMethodIds={id}");
-            }
-        }
+        if (!string.IsNullOrWhiteSpace(filter.Distance))
+            parameters.Add($"distance={Uri.EscapeDataString(filter.Distance)}");
+            
+        if (!string.IsNullOrWhiteSpace(filter.Temperature))
+            parameters.Add($"temperature={Uri.EscapeDataString(filter.Temperature)}");
+        
+        if (!string.IsNullOrWhiteSpace(filter.Radius))
+            parameters.Add($"radius={Uri.EscapeDataString(filter.Radius)}");
+
+        if (!string.IsNullOrWhiteSpace(filter.HostStarMass))
+            parameters.Add($"hostStarMass={Uri.EscapeDataString(filter.HostStarMass)}");
+
+        if (!string.IsNullOrWhiteSpace(filter.HostStarTemperature))
+            parameters.Add($"hostStarTemperature={Uri.EscapeDataString(filter.HostStarTemperature)}");
+        
+        if (filter.PlanetTypeIds is { Count: > 0 })
+            parameters.AddRange(filter.PlanetTypeIds.Select(id => $"planetTypeIds={id}"));
+
+        if (filter.DetectionMethodIds is { Count: > 0 })
+            parameters.AddRange(filter.DetectionMethodIds.Select(id => $"detectionMethodIds={id}"));
         
         if (filter.MinDiscoveryYear.HasValue)
             parameters.Add($"minDiscoveryYear={filter.MinDiscoveryYear}");
-        
         if (filter.MaxDiscoveryYear.HasValue)
             parameters.Add($"maxDiscoveryYear={filter.MaxDiscoveryYear}");
 
         if (filter.MinOrbitalPeriod.HasValue)
             parameters.Add($"minOrbitalPeriod={filter.MinOrbitalPeriod}");
-
         if (filter.MaxOrbitalPeriod.HasValue)
             parameters.Add($"maxOrbitalPeriod={filter.MaxOrbitalPeriod}");
 
         if (filter.MinEccentricity.HasValue)
             parameters.Add($"minEccentricity={filter.MinEccentricity}");
-
         if (filter.MaxEccentricity.HasValue)
             parameters.Add($"maxEccentricity={filter.MaxEccentricity}");
             
         if (filter.MinStellarMagnitude.HasValue)
             parameters.Add($"minStellarMagnitude={filter.MinStellarMagnitude}");
-            
         if (filter.MaxStellarMagnitude.HasValue)
             parameters.Add($"maxStellarMagnitude={filter.MaxStellarMagnitude}");
-        
-        if (!string.IsNullOrEmpty(filter.Distance))
-            parameters.Add($"distance={Uri.EscapeDataString(filter.Distance)}");
-            
-        if (!string.IsNullOrEmpty(filter.Temperature))
-            parameters.Add($"temperature={Uri.EscapeDataString(filter.Temperature)}");
         
         return string.Join("&", parameters);
     }
