@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations;
 
 public class SpectralClassService(HttpClient httpClient) : ISpectralClassService
 {
-    private const string Controller = "SpectralClass";
+    private const string Controller = "SpectralClasses";
     
     public async Task<SpectralClassDto> GetByIdAsync(int id)
     {
@@ -17,12 +17,6 @@ public class SpectralClassService(HttpClient httpClient) : ISpectralClassService
     public async Task<List<SpectralClassDto>> GetAllAsync()
     {
         List<SpectralClassDto>? spectralClasses = await httpClient.GetFromJsonAsync<List<SpectralClassDto>>($"{Controller}");
-
-        if (spectralClasses == null)
-        {
-            return new List<SpectralClassDto>();
-        }
-
-        return spectralClasses;
+        return spectralClasses ?? new List<SpectralClassDto>();
     }
 }
