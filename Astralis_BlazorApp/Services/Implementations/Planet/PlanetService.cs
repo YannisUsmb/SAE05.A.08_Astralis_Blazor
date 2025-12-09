@@ -56,48 +56,44 @@ public class PlanetService(HttpClient httpClient) : IPlanetService
     public async Task<List<PlanetDto>> SearchAsync(PlanetFilterDto filter)
     {
         string queryString = ToQueryString(filter);
-        List<PlanetDto>? planets = await httpClient.GetFromJsonAsync<List<PlanetDto>>($"{Controller}/search?{queryString}");
+        string url = $"{Controller}/search?{queryString}";
         
+        List<PlanetDto>? planets = await httpClient.GetFromJsonAsync<List<PlanetDto>>(url);
         return planets ?? new List<PlanetDto>();
     }
     
     private string ToQueryString(PlanetFilterDto filter)
     {
         List<string> parameters = new List<string>();
-        
+
         if (!string.IsNullOrWhiteSpace(filter.Name))
             parameters.Add($"name={Uri.EscapeDataString(filter.Name)}");
 
-        if (!string.IsNullOrWhiteSpace(filter.Distance))
-            parameters.Add($"distance={Uri.EscapeDataString(filter.Distance)}");
-            
-        if (!string.IsNullOrWhiteSpace(filter.Temperature))
-            parameters.Add($"temperature={Uri.EscapeDataString(filter.Temperature)}");
-        
-        if (!string.IsNullOrWhiteSpace(filter.Radius))
-            parameters.Add($"radius={Uri.EscapeDataString(filter.Radius)}");
-
-        if (!string.IsNullOrWhiteSpace(filter.HostStarMass))
-            parameters.Add($"hostStarMass={Uri.EscapeDataString(filter.HostStarMass)}");
-
-        if (!string.IsNullOrWhiteSpace(filter.HostStarTemperature))
-            parameters.Add($"hostStarTemperature={Uri.EscapeDataString(filter.HostStarTemperature)}");
-        
         if (filter.PlanetTypeIds is { Count: > 0 })
             parameters.AddRange(filter.PlanetTypeIds.Select(id => $"planetTypeIds={id}"));
 
         if (filter.DetectionMethodIds is { Count: > 0 })
             parameters.AddRange(filter.DetectionMethodIds.Select(id => $"detectionMethodIds={id}"));
-        
+
+        if (filter.MinDistance.HasValue)
+            parameters.Add($"minDistance={filter.MinDistance}");
+        if (filter.MaxDistance.HasValue)
+            parameters.Add($"maxDistance={filter.MaxDistance}");
+
+        if (filter.MinMass.HasValue)
+            parameters.Add($"minMass={filter.MinMass}");
+        if (filter.MaxMass.HasValue)
+            parameters.Add($"maxMass={filter.MaxMass}");
+
+        if (filter.MinRadius.HasValue)
+            parameters.Add($"minRadius={filter.MinRadius}");
+        if (filter.MaxRadius.HasValue)
+            parameters.Add($"maxRadius={filter.MaxRadius}");
+
         if (filter.MinDiscoveryYear.HasValue)
             parameters.Add($"minDiscoveryYear={filter.MinDiscoveryYear}");
         if (filter.MaxDiscoveryYear.HasValue)
             parameters.Add($"maxDiscoveryYear={filter.MaxDiscoveryYear}");
-
-        if (filter.MinOrbitalPeriod.HasValue)
-            parameters.Add($"minOrbitalPeriod={filter.MinOrbitalPeriod}");
-        if (filter.MaxOrbitalPeriod.HasValue)
-            parameters.Add($"maxOrbitalPeriod={filter.MaxOrbitalPeriod}");
 
         if (filter.MinEccentricity.HasValue)
             parameters.Add($"minEccentricity={filter.MinEccentricity}");
