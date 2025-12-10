@@ -32,4 +32,30 @@ public class AudioService(HttpClient httpClient) : IAudioService
         List<AudioDto>? audios = await httpClient.GetFromJsonAsync<List<AudioDto>>($"{Controller}/category/{id}");
         return audios ?? new List<AudioDto>();
     }
+    
+    public async Task<List<AudioDto>> SearchAsync(AudioFilterDto filter)
+    {
+        string queryString = ToQueryString(filter);
+        string url = $"{Controller}/Search?{queryString}";
+
+        List<AudioDto>? audios = await httpClient.GetFromJsonAsync<List<AudioDto>>(url);
+        return audios ?? new List<AudioDto>();
+    }
+    
+    private string ToQueryString(AudioFilterDto filter)
+    {
+        var parameters = new List<string>();
+        
+        if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+        {
+            parameters.Add($"searchTerm={Uri.EscapeDataString(filter.SearchTerm)}");
+        }
+        
+        if (filter.CelestialBodyTypeIds is { Count: > 0 })
+        {
+            parameters.AddRange(filter.CelestialBodyTypeIds.Select(id => $"celestialBodyTypeIds={id}"));
+        }
+
+        return string.Join("&", parameters);
+    }
 }

@@ -8,4 +8,5 @@ public interface IAudioService
     Task<List<AudioDto>> GetAllAsync();
     Task<List<AudioDto>> GetByTitleAsync(string title);
     Task<List<AudioDto>> GetByCategoryIdAsync(int id);
+    Task<List<AudioDto>> SearchAsync(AudioFilterDto filter);
 }
