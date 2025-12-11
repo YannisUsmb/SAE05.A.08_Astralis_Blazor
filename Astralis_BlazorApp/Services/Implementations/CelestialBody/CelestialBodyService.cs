@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 
-namespace Astralis_BlazorApp.Services.Implementations.CelestialBody;
+namespace Astralis_BlazorApp.Services.Implementations;
 
 public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
 {
