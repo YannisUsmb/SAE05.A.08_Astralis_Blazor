@@ -1,0 +1,131 @@
+@page "/celestial-bodies"
+@inject CelestialBodyViewModel ViewModel
+
+<PageTitle>Corps Célestes – Astralis</PageTitle>
+
+<div class="content-wrapper">
+
+    @if (!ViewModel.Is3DVisible)
+    {
+        <div class="page-header">
+            <h1>Explorer les Corps Célestes</h1>
+            <p class="page-description">Découvrez les planètes, étoiles et galaxies observables.</p>
+
+            <div class="filters-container">
+                
+                <input type="text" 
+                       class="filter-input" 
+                       placeholder="🔍 Rechercher..." 
+                       @bind="ViewModel.Filter.SearchText" 
+                       @bind:event="oninput"
+                       @onkeyup="ViewModel.OnFilterChanged" /> 
+
+                <select class="filter-input" 
+                        @bind="ViewModel.SelectedTypeId" 
+                        @bind:after="ViewModel.OnFilterChanged">
+                    <option value="0">Tous les types</option>
+                    @foreach (var type in ViewModel.CelestialBodyTypes)
+                    {
+                        <option value="@type.Id">@type.Label</option>
+                    }
+                </select>
+
+                <select class="filter-input">
+                    <option value="name">Nom (A–Z)</option>
+                    <option disabled>Distance (Bientôt)</option>
+                    <option disabled>Masse (Bientôt)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bodies-grid">
+            @if (ViewModel.IsLoading)
+            {
+                <div class="text-center text-white w-100" style="grid-column: 1 / -1;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Récupération des données...</p>
+                </div>
+            }
+            else if (ViewModel.CelestialBodies.Count == 0)
+            {
+                <div class="text-center text-white w-100" style="grid-column: 1 / -1;">
+                    <p>Aucun corps céleste trouvé 🪐</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var body in ViewModel.CelestialBodies)
+                {
+                    <div class="body-card" @onclick="() => ViewModel.ShowDetails(body)">
+                        <img src="" alt="@body.Name" />
+                        
+                        <div class="body-info">
+                            <h3>@body.Name</h3>
+                            <p>
+                                <span class="badge-type">@body.CelestialBodyTypeName</span>
+                                <br/>
+                                <small class="text-muted">
+                                    @(string.IsNullOrEmpty(body.Alias) ? "Pas d'alias" : body.Alias)
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (!ViewModel.IsLoading && ViewModel.CelestialBodies.Count > 0)
+        {
+            <div class="pagination-container d-flex justify-content-center align-items-center mt-5 gap-3">
+                
+                <button class="btn btn-astralis-outline" 
+                        @onclick="ViewModel.PreviousPage" 
+                        disabled="@(ViewModel.CurrentPage == 1)">
+                    <i class="bi bi-chevron-left"></i> Précédent
+                </button>
+
+                <span class="text-white fw-bold">Page @ViewModel.CurrentPage</span>
+
+                <button class="btn btn-astralis-outline" 
+                        @onclick="ViewModel.NextPage" 
+                        disabled="@(!ViewModel.HasNextPage)">
+                    Suivant <i class="bi bi-chevron-right"></i>
+                </button>
+                
+            </div>
+        }
+    }
+
+    @if (ViewModel.Is3DVisible && ViewModel.SelectedBody != null)
+    {
+        <div class="detail-container glass-effect">
+            <h1 class="text-white mb-2">@ViewModel.SelectedBody.Name</h1>
+            <h4 style="color: #a76dff;">@ViewModel.SelectedBody.CelestialBodyTypeName</h4>
+            
+            <div class="mock-3d-view">
+                <i class="bi bi-box-seam fs-1 text-white-50"></i>
+                <p class="mt-3 text-white-50">Visualisation 3D</p>
+            </div>
+
+            <div class="text-start mt-4 p-3 border border-secondary rounded">
+                <p class="text-white"><strong>Alias :</strong> @(ViewModel.SelectedBody.Alias ?? "N/A")</p>
+                <p class="text-white-50 fst-italic">
+                    Note : Pour voir la Distance, la Masse ou la Température, il faudra créer une méthode GetById dans le Service qui renvoie le PlanetDto complet au lieu du CelestialBodyListDto.
+                </p>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-astralis-outline" @onclick="ViewModel.BackToList">
+                    Retour à la liste
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+}

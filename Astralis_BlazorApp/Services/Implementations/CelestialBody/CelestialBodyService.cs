@@ -53,19 +53,27 @@ public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
         return entities ?? new List<CelestialBodyListDto>();
     }
 
-    public async Task<List<CelestialBodyListDto>> SearchAsync(CelestialBodyFilterDto filter)
+    // --- CORRECTION ICI ---
+    public async Task<List<CelestialBodyListDto>> SearchAsync(CelestialBodyFilterDto filter, int pageNumber, int pageSize)
     {
-        string queryString = ToQueryString(filter);
+        // On passe pageNumber et pageSize à la méthode privée
+        string queryString = ToQueryString(filter, pageNumber, pageSize);
         string url = $"{Controller}/Search?{queryString}";
 
         List<CelestialBodyListDto>? entities = await httpClient.GetFromJsonAsync<List<CelestialBodyListDto>>(url);
         return entities ?? new List<CelestialBodyListDto>();
     }
 
-    private string ToQueryString(CelestialBodyFilterDto filter)
+    // --- MODIFICATION DE LA MÉTHODE PRIVÉE ---
+    private string ToQueryString(CelestialBodyFilterDto filter, int pageNumber, int pageSize)
     {
         List<string> parameters = new List<string>();
 
+        // 1. On ajoute la pagination dans la liste finale
+        parameters.Add($"pageNumber={pageNumber}");
+        parameters.Add($"pageSize={pageSize}");
+
+        // 2. On ajoute les filtres
         if (!string.IsNullOrWhiteSpace(filter.SearchText))
             parameters.Add($"searchText={Uri.EscapeDataString(filter.SearchText)}");
         

@@ -1,16 +1,116 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+@inject NavigationManager Navigation
+
+<div class="d-flex flex-column min-vh-100">
+    
+    <div class="starfield">
+        @for (int i = 0; i < 50; i++)
+        {
+            <div class="star" style="@GetRandomStarStyle()"></div>
+        }
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+    <nav class="navbar navbar-expand-lg fixed-top glass-effect navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="/assets/logoAstralis.png" alt="Astralis" height="40">
+                </a>
 
-        <article class="content px-4">
-            @Body
-        </article>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-4">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Accueil</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="celestial-bodies">Corps Célestes</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="evenements">Événements</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="articles">Articles</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="audios">Audios</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="boutique">Boutique</NavLink>
+                    </li>
+                </ul>
+                
+                <div class="d-flex gap-2 mt-3 mt-lg-0">
+                    <NavLink href="connexion" class="btn btn-astralis-outline btn-sm px-3">Connexion</NavLink>
+                    <NavLink href="premium" class="btn btn-astralis-premium btn-sm px-3">Mettre à niveau</NavLink>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 pt-5 mt-5">
+        @Body
     </main>
+
+    <footer class="footer-glass text-secondary py-5 mt-auto">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="text-white mb-3 ls-1">ASTRALIS</h5>
+                    <p class="small text-white-50">
+                        Plateforme avancée de données spatiales pour chercheurs, astronomes et passionnés.
+                    </p>
+                </div>
+
+                <div class="col-lg-2 col-md-6 offset-lg-1">
+                    <h6 class="text-white text-uppercase small fw-bold mb-3">Plateforme</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><NavLink href="corps-celestes" class="text-white-50 text-decoration-none hover-white">Base de données</NavLink></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none hover-white">Accès API</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white text-uppercase small fw-bold mb-3">Ressources</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><NavLink href="articles" class="text-white-50 text-decoration-none hover-white">Articles</NavLink></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none hover-white">Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white text-uppercase small fw-bold mb-3">Entreprise</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="#" class="text-white-50 text-decoration-none hover-white">À propos</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none hover-white">Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row mt-5 pt-4 border-top border-white-10">
+                <div class="col-md-6 text-center text-md-start small text-white-50">
+                    © 2025 Astralis. Tous droits réservés.
+                </div>
+                <div class="col-md-6 text-center text-md-end small text-white-50">
+                    Propulsé par les données ouvertes de la NASA
+                </div>
+            </div>
+        </div>
+    </footer>
 </div>
+
+@code {
+    // Génération aléatoire des étoiles
+    private string GetRandomStarStyle()
+    {
+        var random = new Random();
+        var top = random.Next(0, 100);
+        var left = random.Next(0, 100);
+        var delay = random.NextDouble() * 4;
+        var size = random.Next(1, 3);
+        
+        return $"top: {top}%; left: {left}%; width: {size}px; height: {size}px; animation-delay: {delay}s;";
+    }
+}
