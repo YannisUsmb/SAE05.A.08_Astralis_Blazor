@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject MainLayoutViewModel ViewModel
+
+@using Microsoft.AspNetCore.Components.Authorization
 
 <div class="d-flex flex-column min-vh-100">
     
@@ -42,10 +45,26 @@
                     </li>
                 </ul>
                 
-                <div class="d-flex gap-2 mt-3 mt-lg-0">
-                    <NavLink href="connexion" class="btn btn-astralis-outline btn-sm px-3">Connexion</NavLink>
-                    <NavLink href="premium" class="btn btn-astralis-premium btn-sm px-3">Mettre à niveau</NavLink>
-                </div>
+                <AuthorizeView>
+                    <Authorized>
+                        <NavLink href="profil" class="btn btn-astralis-outline btn-sm px-3">Profil</NavLink>
+
+                        <button class="btn btn-astralis-premium btn-sm px-3" @onclick="ViewModel.LogoutAsync">
+                            Déconnexion
+                        </button>
+
+                        <AuthorizeView Policy="MustBePremium" Context="premiumContext">
+                            <NotAuthorized>
+                                <NavLink href="premium" class="btn btn-astralis-premium btn-sm px-3">Mettre à niveau</NavLink>
+                            </NotAuthorized>
+                        </AuthorizeView>
+
+                    </Authorized>
+                    <NotAuthorized>
+                        <NavLink href="connexion" class="btn btn-astralis-outline btn-sm px-3">Connexion</NavLink>
+                        <NavLink href="inscription" class="btn btn-astralis-premium btn-sm px-3">Inscription</NavLink>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
         </div>
     </nav>

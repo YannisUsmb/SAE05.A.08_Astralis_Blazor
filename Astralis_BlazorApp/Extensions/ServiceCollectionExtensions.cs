@@ -1,5 +1,6 @@
 using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Astralis_BlazorApp.Extensions;
 
@@ -52,6 +53,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IArticleService, ArticleService>();
         services.AddScoped<IAliasStatusService, AliasStatusService>();
         services.AddScoped<IAddressService, AddressService>();
+
+        services.AddScoped<CustomAuthProvider>();
+        services.AddScoped<AuthenticationStateProvider>(provider =>
+            provider.GetRequiredService<CustomAuthProvider>());
 
         return services;
     }
