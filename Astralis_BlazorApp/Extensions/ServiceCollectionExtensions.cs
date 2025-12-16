@@ -44,6 +44,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICelestialBodyTypeService, CelestialBodyTypeService>();
         services.AddScoped<ICelestialBodyService, CelestialBodyService>();
         services.AddScoped<ICartItemService, CartItemService>();
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAudioService, AudioService>();
         services.AddScoped<IAsteroidService, AsteroidService>();
         services.AddScoped<IArticleTypeService, ArticleTypeService>();

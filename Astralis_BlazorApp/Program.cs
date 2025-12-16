@@ -1,6 +1,8 @@
 using Astralis_BlazorApp.Components;
 using Astralis_BlazorApp.Extensions;
+using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.ViewModels;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -21,8 +23,14 @@ namespace Astralis_BlazorApp
             builder.Services.AddApplicationServices();
             builder.Services.AddScoped<HomeViewModel>();
             builder.Services.AddScoped<CelestialBodyViewModel>();
+            builder.Services.AddScoped<LoginViewModel>();
 
             builder.Services.AddBlazorBootstrap();
+
+            builder.Services.AddAuthorizationCore();
+            builder.Services.AddScoped<CustomAuthProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
+                provider.GetRequiredService<CustomAuthProvider>());
 
             await builder.Build().RunAsync();
         }

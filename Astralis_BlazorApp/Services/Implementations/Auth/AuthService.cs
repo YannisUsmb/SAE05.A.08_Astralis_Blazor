@@ -3,59 +3,72 @@ using Astralis_BlazorApp.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 
-namespace Astralis_BlazorApp.Services.Implementations;
-
-public class AuthService : IAuthService
+namespace Astralis_BlazorApp.Services.Implementations
 {
-    private readonly HttpClient _httpClient;
-    private readonly AuthenticationStateProvider _authStateProvider;
-
-    public AuthService(HttpClient httpClient, AuthenticationStateProvider authStateProvider)
+    public class AuthService : IAuthService
     {
-        _httpClient = httpClient;
-        _authStateProvider = authStateProvider;
-    }
+        private const string Controller = "Auth";
+        private readonly HttpClient _httpClient;
+        private readonly AuthenticationStateProvider _authStateProvider;
 
-    public async Task<AuthResponseDto?> Login(UserLoginDto loginDto)
-    {
-        var response = await _httpClient.PostAsJsonAsync("api/Auth/Login", loginDto);
-
-        if (response.IsSuccessStatusCode)
+        public AuthService(HttpClient httpClient, AuthenticationStateProvider authStateProvider)
         {
-            var userResult = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-
-            ((CustomAuthProvider)_authStateProvider).MarkUserAsAuthenticated(userResult);
-
-            return userResult;
+            _httpClient = httpClient;
+            _authStateProvider = authStateProvider;
         }
 
-        return null;
-    }
-
-    public async Task Logout()
-    {
-        await _httpClient.PostAsync("api/Auth/Logout", null);
-
-        ((CustomAuthProvider)_authStateProvider).MarkUserAsLoggedOut();
-    }
-
-    public async Task<bool> CheckUserSession()
-    {
-        try
+        public async Task<AuthResponseDto?> Login(UserLoginDto loginDto)
         {
-            var response = await _httpClient.GetAsync("api/Auth/Me");
+            var response = await _httpClient.PostAsJsonAsync($"{Controller}/Login", loginDto);
 
             if (response.IsSuccessStatusCode)
             {
                 var userResult = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-                ((CustomAuthProvider)_authStateProvider).MarkUserAsAuthenticated(userResult);
-                return true;
+
+                if (_authStateProvider is CustomAuthProvider customProvider)
+                {
+                    customProvider.MarkUserAsAuthenticated(userResult!);
+                }
+
+                return userResult;
             }
-        }
-        catch
-        {
+
+            return null;
         }
 
-        return false;
+        public async Task Logout()
+        {
+            await _httpClient.PostAsync($"{Controller}/Logout", null);
+
+            if (_authStateProvider is CustomAuthProvider customProvider)
+            {
+                customProvider.MarkUserAsLoggedOut();
+            }
+        }
+
+        public async Task<bool> CheckUserSession()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{Controller}/Me");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var userResult = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+
+                    if (_authStateProvider is CustomAuthProvider customProvider)
+                    {
+                        customProvider.MarkUserAsAuthenticated(userResult!);
+                    }
+                    return true;
+                }
+            }
+            catch
+            {
+                // Silent management: the user is simply not logged in.
+            }
+
+            return false;
+        }
     }
 }
