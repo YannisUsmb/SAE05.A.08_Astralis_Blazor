@@ -10,6 +10,5 @@ namespace Astralis_BlazorApp.Services.Interfaces
         Task<UserDetailDto?> UpdateAsync(int id, UserUpdateDto dto);
         Task<UserDetailDto?> DeleteAsync(int id);
         Task<bool> ChangePasswordAsync(int id, ChangePasswordDto dto);
-        Task<AuthResponseDto?> LoginAsync(string identifier, UserLoginDto dto);
     }
 }

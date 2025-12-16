@@ -8,18 +8,6 @@ namespace Astralis_BlazorApp.Services.Implementations
     {
         private const string Controller = "Users";
 
-        public async Task<AuthResponseDto?> LoginAsync(string identifier, UserLoginDto dto)
-        {
-            HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/login/{identifier}", dto);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return null;
-            }
-
-            AuthResponseDto? authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-            return authResponse;
-        }
         public async Task<UserDetailDto?> GetByIdAsync(int id)
         {
             UserDetailDto? user = await httpClient.GetFromJsonAsync<UserDetailDto>($"{Controller}/{id}");
