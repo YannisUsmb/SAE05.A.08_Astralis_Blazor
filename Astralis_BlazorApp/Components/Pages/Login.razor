@@ -1,5 +1,81 @@
-﻿<h3>Login</h3>
+﻿@page "/connexion"
+@using Astralis.Shared.DTOs
+@inject LoginViewModel ViewModel
 
-@code {
+<PageTitle>Connexion – Astralis</PageTitle>
 
-}
+<div class="login-wrapper">
+    <div class="login-card dual">
+
+        <div class="login-left">
+            <h1>Connexion</h1>
+            <p>Accédez à votre espace Astralis pour explorer les données du cosmos.</p>
+
+            <EditForm Model="ViewModel.LoginData" OnValidSubmit="ViewModel.LoginAsync">
+                <DataAnnotationsValidator />
+
+                @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @ViewModel.ErrorMessage
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label for="login">Identifiant, mail ou téléphone</label>
+                    <InputText id="login"
+                               class="form-control-astralis"
+                               placeholder="Votre Identifiant, mail ou téléphone"
+                               @bind-Value="ViewModel.LoginData.Identifier" />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <InputText type="password"
+                               id="password"
+                               class="form-control-astralis"
+                               placeholder="Votre mot de passe"
+                               @bind-Value="ViewModel.LoginData.Password" />
+                </div>
+
+                <button type="submit" class="btn-login" disabled="@ViewModel.IsLoading">
+                    @if (ViewModel.IsLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Connexion en cours...</span>
+                    }
+                    else
+                    {
+                        <span>Se connecter</span>
+                    }
+                </button>
+
+                <div class="login-footer">
+                    <p>Pas encore de compte ? <NavLink href="premium">S'inscrire</NavLink></p>
+                    <p><a href="#">Mot de passe oublié ?</a></p>
+                </div>
+            </EditForm>
+        </div>
+
+        <div class="login-right">
+            <h2>Autres connexions</h2>
+            <div class="social-login">
+                <button type="button" class="btn-social">
+                    <img src="/assets/google.svg" alt="Google" width="24" height="24" />
+                    <span>Continuer avec Google</span>
+                </button>
+
+                <button type="button" class="btn-social">
+                    <img src="/assets/facebook.svg" alt="Facebook" width="24" height="24" />
+                    <span>Continuer avec Facebook</span>
+                </button>
+
+                <button type="button" class="btn-social">
+                    <img src="/assets/microsoft.svg" alt="Microsoft" width="24" height="24" />
+                    <span>Continuer avec Microsoft</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

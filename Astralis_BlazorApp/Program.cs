@@ -23,6 +23,7 @@ namespace Astralis_BlazorApp
             builder.Services.AddApplicationServices();
             builder.Services.AddScoped<HomeViewModel>();
             builder.Services.AddScoped<CelestialBodyViewModel>();
+            builder.Services.AddScoped<LoginViewModel>();
 
             builder.Services.AddBlazorBootstrap();
 
