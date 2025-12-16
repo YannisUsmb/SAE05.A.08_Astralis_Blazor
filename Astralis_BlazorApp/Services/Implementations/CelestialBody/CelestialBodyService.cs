@@ -52,6 +52,13 @@ public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
         List<CelestialBodyListDto>? entities = await httpClient.GetFromJsonAsync<List<CelestialBodyListDto>>($"{Controller}/reference/{Uri.EscapeDataString(name)}");
         return entities ?? new List<CelestialBodyListDto>();
     }
+    
+    public async Task<List<CelestialBodySubtypeDto>> GetSubtypesAsync(int mainTypeId)
+    {
+        // Appel au nouvel endpoint du controller
+        List<CelestialBodySubtypeDto>? subtypes = await httpClient.GetFromJsonAsync<List<CelestialBodySubtypeDto>>($"{Controller}/Subtypes/{mainTypeId}");
+        return subtypes ?? new List<CelestialBodySubtypeDto>();
+    }
 
     // --- CORRECTION ICI ---
     public async Task<List<CelestialBodyListDto>> SearchAsync(CelestialBodyFilterDto filter, int pageNumber, int pageSize)
@@ -85,6 +92,11 @@ public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
         if (filter.IsDiscovery.HasValue)
             parameters.Add($"isDiscovery={filter.IsDiscovery.Value}");
 
+        if (filter.SubtypeId.HasValue && filter.SubtypeId.Value > 0)
+        {
+            parameters.Add($"subtypeId={filter.SubtypeId.Value}");
+        }
+        
         return string.Join("&", parameters);
     }
 }

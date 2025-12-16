@@ -10,4 +10,5 @@ public interface ICelestialBodyService
     Task<CelestialBodyListDto?> DeleteAsync(int id);
     Task<List<CelestialBodyListDto>> GetByNameAsync(string name);
     Task<List<CelestialBodyListDto>> SearchAsync(CelestialBodyFilterDto filter, int pageNumber, int pageSize);
+    Task<List<CelestialBodySubtypeDto>> GetSubtypesAsync(int mainTypeId);
 }

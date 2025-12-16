@@ -7,48 +7,60 @@
 
     @if (!ViewModel.Is3DVisible)
     {
-        <div class="page-header">
-            <h1>Explorer les Corps Célestes</h1>
-            <p class="page-description">Découvrez les planètes, étoiles et galaxies observables.</p>
+        <div class="filters-container">
+    
+            <input type="text" 
+                   class="filter-input" 
+                   placeholder="🔍 Rechercher un corps céleste..."
+                   @bind="ViewModel.Filter.SearchText" 
+                   @bind:event="oninput"
+                   @onkeyup="ViewModel.OnFilterChanged" /> 
 
-            <div class="filters-container">
-                
-                <input type="text" 
-                       class="filter-input" 
-                       placeholder="🔍 Rechercher..." 
-                       @bind="ViewModel.Filter.SearchText" 
-                       @bind:event="oninput"
-                       @onkeyup="ViewModel.OnFilterChanged" /> 
+            <select class="filter-input" 
+                    @bind="ViewModel.SelectedTypeId" 
+                    @bind:after="ViewModel.OnTypeChanged">
+                <option value="0">Toutes les catégories</option>
+                @foreach (var type in ViewModel.CelestialBodyTypes)
+                {
+                    <option value="@type.Id">@type.Label</option>
+                }
+            </select>
 
-                <select class="filter-input" 
-                        @bind="ViewModel.SelectedTypeId" 
-                        @bind:after="ViewModel.OnFilterChanged">
-                    <option value="0">Tous les types</option>
-                    @foreach (var type in ViewModel.CelestialBodyTypes)
-                    {
-                        <option value="@type.Id">@type.Label</option>
-                    }
-                </select>
+            @{
+                var showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0;
+            }
+            
+            <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")" 
+                    @bind="ViewModel.SelectedSubtypeId"
+                    @bind:after="ViewModel.OnSubtypeChanged">
+        
+                <option value="0">Toutes les sous-catégories</option>
+        
+                @foreach (var sub in ViewModel.CelestialSubtypes)
+                {
+                    <option value="@sub.Id">@sub.Label</option>
+                }
+            </select>
 
-                <select class="filter-input">
-                    <option value="name">Nom (A–Z)</option>
-                    <option disabled>Distance (Bientôt)</option>
-                    <option disabled>Masse (Bientôt)</option>
-                </select>
-            </div>
+            <select class="filter-input">
+                <option value="name">Nom (A–Z)</option>
+                <option disabled>Distance (Bientôt)</option>
+                <option disabled>Masse (Bientôt)</option>
+            </select>
+
         </div>
 
         <div class="bodies-grid">
             @if (ViewModel.IsLoading)
             {
-                <div class="text-center text-white w-100" style="grid-column: 1 / -1;">
+                <div class="text-center text-white w-100">
                     <div class="spinner-border text-primary" role="status"></div>
                     <p class="mt-2">Récupération des données...</p>
                 </div>
             }
             else if (ViewModel.CelestialBodies.Count == 0)
             {
-                <div class="text-center text-white w-100" style="grid-column: 1 / -1;">
+                <div class="text-center text-white w-100">
                     <p>Aucun corps céleste trouvé 🪐</p>
                 </div>
             }
