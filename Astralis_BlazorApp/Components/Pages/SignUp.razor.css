@@ -1,0 +1,209 @@
+﻿.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 180px); /* Ajusté pour laisser de la place au header/footer */
+    padding: 2rem 1rem;
+}
+
+/* double card */
+.login-card.dual {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(25px);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(120, 80, 255, 0.15);
+    max-width: 1000px; /* Un peu plus large que le login */
+    width: 100%;
+    /* Hauteur max pour forcer le scroll interne sur petits écrans */
+    max-height: 85vh;
+    animation: fadeUp 0.8s ease;
+}
+
+/* left part with scroll */
+.login-left {
+    flex: 1.2; /* Un peu plus d'espace pour le formulaire */
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    /* Gestion du scroll interne si le formulaire est trop grand */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #5f3dc4 rgba(0,0,0,0.2);
+}
+
+    /* Custom Scrollbar Webkit */
+    .login-left::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .login-left::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.1);
+    }
+
+    .login-left::-webkit-scrollbar-thumb {
+        background-color: #5f3dc4;
+        border-radius: 10px;
+    }
+
+    .login-left h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.8rem;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-left p {
+        color: #b3b3c6;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+/* form elements */
+.form-group {
+    margin-bottom: 1rem; /* Réduit un peu l'espace vertical */
+}
+
+label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #d8d8e6;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+::deep .form-control-astralis {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(15, 15, 35, 0.7);
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+}
+
+    ::deep .form-control-astralis:focus {
+        outline: none;
+        border-color: #a76dff;
+        background: rgba(20, 20, 45, 0.9);
+    }
+
+/* Pour le Select */
+::deep select.form-control-astralis option {
+    background-color: #1a1b3d;
+    color: white;
+}
+
+::deep .validation-message {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+}
+
+/* login button */
+.btn-login {
+    width: 100%;
+    background: linear-gradient(90deg, #9d4edd, #5f3dc4);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    padding: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+    .btn-login:hover:not(:disabled) {
+        filter: brightness(1.15);
+        transform: translateY(-2px);
+    }
+
+    .btn-login:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+/* footer */
+.login-footer {
+    margin-top: 1.5rem;
+    color: #bcbcd3;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+    .login-footer a {
+        color: #a76dff;
+        text-decoration: none;
+    }
+
+/* right part */
+.login-right {
+    flex: 0.8;
+    background: rgba(30, 10, 60, 0.4);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+    .login-right h2 {
+        color: #fff;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+    }
+
+/* socials */
+.social-login {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0.8rem;
+    width: 100%;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+    .btn-social:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+/* responsive */
+@media (max-width: 850px) {
+    .login-card.dual {
+        flex-direction: column;
+        max-height: none; /* On laisse la hauteur libre sur mobile */
+    }
+
+    .login-left {
+        overflow-y: visible; /* Pas de scroll interne sur mobile, on scroll toute la page */
+    }
+
+    .login-right {
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+    }
+}
