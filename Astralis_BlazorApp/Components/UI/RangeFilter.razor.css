@@ -1,0 +1,75 @@
+.range-filter-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.filter-pill {
+    background: rgba(43, 18, 88, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e0e0e0;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.filter-pill:hover {
+    border-color: #a76dff;
+    box-shadow: 0 0 8px rgba(167, 109, 255, 0.3);
+}
+
+.filter-pill.active {
+    background: #a76dff;
+    border-color: #a76dff;
+    color: white;
+    font-weight: 600;
+}
+
+/* Le Popup */
+.range-popup {
+    position: absolute;
+    top: 115%;
+    left: 0;
+    z-index: 1000;
+    background: #1a1a2e;
+    border: 1px solid rgba(167, 109, 255, 0.3);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    min-width: 260px;
+}
+
+.range-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    border-radius: 6px;
+    padding: 6px;
+    width: 80px;
+    text-align: center;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-bottom: 2px;
+}
+
+.btn-xs-reset {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.click-overlay {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    z-index: 999;
+}

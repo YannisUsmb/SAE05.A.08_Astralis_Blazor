@@ -63,40 +63,17 @@ public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
     // --- CORRECTION ICI ---
     public async Task<List<CelestialBodyListDto>> SearchAsync(CelestialBodyFilterDto filter, int pageNumber, int pageSize)
     {
-        // On passe pageNumber et pageSize à la méthode privée
-        string queryString = ToQueryString(filter, pageNumber, pageSize);
-        string url = $"{Controller}/Search?{queryString}";
-
-        List<CelestialBodyListDto>? entities = await httpClient.GetFromJsonAsync<List<CelestialBodyListDto>>(url);
-        return entities ?? new List<CelestialBodyListDto>();
-    }
-
-    // --- MODIFICATION DE LA MÉTHODE PRIVÉE ---
-    private string ToQueryString(CelestialBodyFilterDto filter, int pageNumber, int pageSize)
-    {
-        List<string> parameters = new List<string>();
-
-        // 1. On ajoute la pagination dans la liste finale
-        parameters.Add($"pageNumber={pageNumber}");
-        parameters.Add($"pageSize={pageSize}");
-
-        // 2. On ajoute les filtres
-        if (!string.IsNullOrWhiteSpace(filter.SearchText))
-            parameters.Add($"searchText={Uri.EscapeDataString(filter.SearchText)}");
+        string url = $"{Controller}/Search?pageNumber={pageNumber}&pageSize={pageSize}";
         
-        if (filter.CelestialBodyTypeIds is { Count: > 0 })
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync(url, filter);
+        
+        if (response.IsSuccessStatusCode)
         {
-            parameters.AddRange(filter.CelestialBodyTypeIds.Select(id => $"celestialBodyTypeIds={id}"));
-        }
-
-        if (filter.IsDiscovery.HasValue)
-            parameters.Add($"isDiscovery={filter.IsDiscovery.Value}");
-
-        if (filter.SubtypeId.HasValue && filter.SubtypeId.Value > 0)
-        {
-            parameters.Add($"subtypeId={filter.SubtypeId.Value}");
+            return await response.Content.ReadFromJsonAsync<List<CelestialBodyListDto>>() 
+                   ?? new List<CelestialBodyListDto>();
         }
         
-        return string.Join("&", parameters);
+        return new List<CelestialBodyListDto>();
     }
+    
 }

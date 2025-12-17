@@ -1,0 +1,92 @@
+<div class="range-filter-wrapper">
+    <button class="filter-pill @(HasValue ? "active" : "")" @onclick="ToggleOpen">
+        @Label
+        @if (HasValue)
+        {
+            <i class="bi bi-check-circle-fill ms-2"></i>
+        }
+        else
+        {
+            <i class="bi bi-chevron-down ms-2" style="font-size: 0.8em;"></i>
+        }
+    </button>
+
+    @if (_isOpen)
+    {
+        <div class="range-popup glass-effect animate-fade-in">
+            <div class="d-flex gap-2 align-items-center mb-2">
+                <div class="input-group">
+                    <span class="input-label">Min</span>
+                    <input type="number" class="range-input" 
+                           value="@MinValue" 
+                           @onchange="OnMinChanged" 
+                           placeholder="-" />
+                </div>
+                <span class="separator text-white">-</span>
+                <div class="input-group">
+                    <span class="input-label">Max</span>
+                    <input type="number" class="range-input" 
+                           value="@MaxValue" 
+                           @onchange="OnMaxChanged" 
+                           placeholder="-" />
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                 <button class="btn-xs-reset" @onclick="Reset">Effacer</button>
+            </div>
+        </div>
+        
+        <div class="click-overlay" @onclick="Close"></div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "Filtre";
+    
+    [Parameter] public decimal? MinValue { get; set; }
+    [Parameter] public EventCallback<decimal?> MinValueChanged { get; set; }
+
+    [Parameter] public decimal? MaxValue { get; set; }
+    [Parameter] public EventCallback<decimal?> MaxValueChanged { get; set; }
+
+    [Parameter] public EventCallback OnSearchTriggered { get; set; }
+
+    private bool _isOpen = false;
+    private bool HasValue => MinValue.HasValue || MaxValue.HasValue;
+
+    private void ToggleOpen() => _isOpen = !_isOpen;
+    private void Close() => _isOpen = false;
+
+    private async Task OnMinChanged(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
+            MinValue = val;
+        else
+            MinValue = null;
+
+        await MinValueChanged.InvokeAsync(MinValue);
+        await OnSearchTriggered.InvokeAsync();
+    }
+
+    private async Task OnMaxChanged(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
+            MaxValue = val;
+        else
+            MaxValue = null;
+
+        await MaxValueChanged.InvokeAsync(MaxValue);
+        await OnSearchTriggered.InvokeAsync();
+    }
+    
+    private async Task Reset()
+    {
+        MinValue = null;
+        MaxValue = null;
+        await MinValueChanged.InvokeAsync(null);
+        await MaxValueChanged.InvokeAsync(null);
+        await OnSearchTriggered.InvokeAsync();
+        Close();
+    }
+}

@@ -19,6 +19,8 @@ public partial class CelestialBodyViewModel : ObservableObject
     
     [ObservableProperty] private int selectedTypeId = 0;
     [ObservableProperty] private int selectedSubtypeId = 0;
+    
+    [ObservableProperty] private string sortBy = "name";
 
     [ObservableProperty] private int currentPage = 1;
     [ObservableProperty] private int pageSize = 30;
@@ -67,17 +69,74 @@ public partial class CelestialBodyViewModel : ObservableObject
             
             HasNextPage = results.Count == PageSize;
 
-            var sortedResults = results.OrderBy(x => x.Name).ToList();
-            CelestialBodies = new ObservableCollection<CelestialBodyListDto>(sortedResults);
+            CelestialBodies = new ObservableCollection<CelestialBodyListDto>(results);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Erreur recherche : {ex.Message}");
+            CelestialBodies.Clear();
         }
         finally
         {
             IsLoading = false;
         }
+    }
+    
+    
+    public async Task OnTypeChanged()
+    {
+        Filter.PlanetFilter = null;
+        Filter.StarFilter = null;
+        Filter.AsteroidFilter = null;
+        Filter.GalaxyFilter = null;
+        Filter.CometFilter = null;
+        Filter.SatelliteFilter = null;
+
+        switch (SelectedTypeId)
+        {
+            case 1: Filter.StarFilter = new StarFilterDto(); break;
+            case 2: Filter.PlanetFilter = new PlanetFilterDto(); break;
+            case 3: Filter.AsteroidFilter = new AsteroidFilterDto(); break;
+            case 4: Filter.SatelliteFilter = new SatelliteFilterDto(); break;
+            case 5: Filter.GalaxyFilter = new GalaxyQuasarFilterDto(); break;
+            case 6: Filter.CometFilter = new CometFilterDto(); break;
+            
+        }
+
+        SelectedSubtypeId = 0;
+        Filter.SubtypeId = null;
+        
+        if (SelectedTypeId == 0)
+        {
+            CelestialSubtypes.Clear();
+        }
+        else
+        {
+            var result = await _bodyService.GetSubtypesAsync(SelectedTypeId);
+            CelestialSubtypes = new ObservableCollection<CelestialBodySubtypeDto>(result);
+        }
+
+        await OnFilterChanged();
+    }
+    
+    public async Task OnSubtypeChanged()
+    {
+        Filter.SubtypeId = SelectedSubtypeId == 0 ? null : SelectedSubtypeId;
+        await OnFilterChanged();
+    }
+    
+    public async Task OnSortChanged()
+    {
+        Filter.SortBy = SortBy;
+        Filter.SortAscending = true;
+        
+        await OnFilterChanged();
+    }
+    
+    public async Task OnFilterChanged()
+    {
+        CurrentPage = 1;
+        await SearchDataAsync();
     }
     
     [RelayCommand]
@@ -112,36 +171,5 @@ public partial class CelestialBodyViewModel : ObservableObject
             CurrentPage--;
             await SearchDataAsync();
         }
-    }
-    
-    public async Task OnTypeChanged()
-    {
-        SelectedSubtypeId = 0;
-        Filter.SubtypeId = null;
-        
-        if (SelectedTypeId == 0)
-        {
-            celestialSubtypes.Clear();
-        }
-        else
-        {
-            List<CelestialBodySubtypeDto> result = await _bodyService.GetSubtypesAsync(SelectedTypeId);
-            celestialSubtypes = new ObservableCollection<CelestialBodySubtypeDto>(result);
-        }
-        
-        await OnFilterChanged();
-    }
-    
-    public async Task OnSubtypeChanged()
-    {
-        Filter.SubtypeId = SelectedSubtypeId == 0 ? null : SelectedSubtypeId;
-        
-        await OnFilterChanged();
-    }
-    
-    public async Task OnFilterChanged()
-    {
-        CurrentPage = 1;
-        await SearchDataAsync();
     }
 }
