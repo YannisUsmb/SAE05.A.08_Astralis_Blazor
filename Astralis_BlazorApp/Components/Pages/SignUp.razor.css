@@ -2,7 +2,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 180px); /* Ajusté pour laisser de la place au header/footer */
+    min-height: calc(100vh - 180px);
     padding: 2rem 1rem;
 }
 
@@ -15,27 +15,24 @@
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 0 60px rgba(120, 80, 255, 0.15);
-    max-width: 1000px; /* Un peu plus large que le login */
+    max-width: 1000px;
     width: 100%;
-    /* Hauteur max pour forcer le scroll interne sur petits écrans */
     max-height: 85vh;
     animation: fadeUp 0.8s ease;
 }
 
 /* left part with scroll */
 .login-left {
-    flex: 1.2; /* Un peu plus d'espace pour le formulaire */
+    flex: 1.2;
     padding: 2.5rem;
     display: flex;
     flex-direction: column;
     text-align: left;
-    /* Gestion du scroll interne si le formulaire est trop grand */
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #5f3dc4 rgba(0,0,0,0.2);
 }
 
-    /* Custom Scrollbar Webkit */
     .login-left::-webkit-scrollbar {
         width: 6px;
     }
@@ -64,7 +61,7 @@
 
 /* form elements */
 .form-group {
-    margin-bottom: 1rem; /* Réduit un peu l'espace vertical */
+    margin-bottom: 1rem;
 }
 
 label {
@@ -93,7 +90,7 @@ label {
         background: rgba(20, 20, 45, 0.9);
     }
 
-/* Pour le Select */
+/* select */
 ::deep select.form-control-astralis option {
     background-color: #1a1b3d;
     color: white;
@@ -190,15 +187,55 @@ label {
         transform: translateY(-2px);
     }
 
+
+/* asteriscs */
+.required-label::after {
+    content: " *";
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+/* phone prefix */
+.input-group-astralis {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+::deep .prefix-select {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+::deep .phone-input {
+    flex-grow: 1;
+    min-width: 100px;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* responsive */
 @media (max-width: 850px) {
     .login-card.dual {
         flex-direction: column;
-        max-height: none; /* On laisse la hauteur libre sur mobile */
+        max-height: none;
     }
 
     .login-left {
-        overflow-y: visible; /* Pas de scroll interne sur mobile, on scroll toute la page */
+        overflow-y: visible;
     }
 
     .login-right {

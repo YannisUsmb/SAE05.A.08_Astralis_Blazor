@@ -17,74 +17,85 @@
 
                 @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
                 {
-                    <div class="alert alert-danger" role="alert">
+                    <div class="alert alert-danger mb-3" role="alert">
                         @ViewModel.ErrorMessage
                     </div>
                 }
 
                 <div class="row">
                     <div class="col-md-6 form-group">
-                        <label>Prénom</label>
+                        <label class="required-label">Prénom</label>
                         <InputText class="form-control-astralis" placeholder="Thomas" @bind-Value="ViewModel.RegisterData.FirstName" />
                         <ValidationMessage For="@(() => ViewModel.RegisterData.FirstName)" />
                     </div>
                     <div class="col-md-6 form-group">
-                        <label>Nom</label>
+                        <label class="required-label">Nom</label>
                         <InputText class="form-control-astralis" placeholder="Pesquet" @bind-Value="ViewModel.RegisterData.LastName" />
                         <ValidationMessage For="@(() => ViewModel.RegisterData.LastName)" />
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Nom d'utilisateur (Pseudo)</label>
+                    <label class="required-label">Nom d'utilisateur</label>
                     <InputText class="form-control-astralis" placeholder="AstroBoy" @bind-Value="ViewModel.RegisterData.Username" />
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Username)" />
                 </div>
 
                 <div class="form-group">
-                    <label>Email</label>
+                    <label class="required-label">Email</label>
                     <InputText type="email" class="form-control-astralis" placeholder="thomas@iss.space" @bind-Value="ViewModel.RegisterData.Email" />
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Email)" />
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label>Téléphone (Optionnel)</label>
-                        <InputText class="form-control-astralis" placeholder="+33 6..." @bind-Value="ViewModel.RegisterData.Phone" />
-                        <ValidationMessage For="@(() => ViewModel.RegisterData.Phone)" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Genre</label>
-                        <InputSelect class="form-control-astralis" @bind-Value="ViewModel.RegisterData.Gender">
-                            @foreach (var gender in Enum.GetValues(typeof(GenderType)))
+                <div class="form-group">
+                    <label>Téléphone</label>
+                    <div class="input-group-astralis">
+                        <InputSelect class="form-control-astralis prefix-select" @bind-Value="ViewModel.RegisterData.CountryId">
+                            <option value="">Choisir...</option>
+                            @foreach (var country in ViewModel.Countries)
                             {
-                                <option value="@gender">@gender</option>
+                                // Affichage: "France (+33)"
+                                <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
                             }
                         </InputSelect>
-                        <ValidationMessage For="@(() => ViewModel.RegisterData.Gender)" />
+
+                        <InputText class="form-control-astralis phone-input" placeholder="6 12 34..." @bind-Value="ViewModel.RegisterData.Phone" />
                     </div>
+                    <ValidationMessage For="@(() => ViewModel.RegisterData.CountryId)" />
+                    <ValidationMessage For="@(() => ViewModel.RegisterData.Phone)" />
                 </div>
 
                 <div class="form-group">
-                    <label>URL Avatar</label>
+                    <label class="required-label">Genre</label>
+                    <InputSelect class="form-control-astralis" @bind-Value="ViewModel.RegisterData.Gender">
+                        @foreach (GenderType gender in Enum.GetValues(typeof(GenderType)))
+                        {
+                            <option value="@gender">@GetFrenchGenderLabel(gender)</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => ViewModel.RegisterData.Gender)" />
+                </div>
+
+                <div class="form-group">
+                    <label class="required-label">Photo de profil (URL)</label>
                     <InputText class="form-control-astralis" placeholder="https://..." @bind-Value="ViewModel.RegisterData.UserAvatarUrl" />
                     <ValidationMessage For="@(() => ViewModel.RegisterData.UserAvatarUrl)" />
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 form-group">
-                        <label>Mot de passe</label>
+                        <label class="required-label">Mot de passe</label>
                         <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.RegisterData.Password" />
                         <ValidationMessage For="@(() => ViewModel.RegisterData.Password)" />
                     </div>
                     <div class="col-md-6 form-group">
-                        <label>Confirmation</label>
+                        <label class="required-label">Confirmation</label>
                         <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.RegisterData.ConfirmPassword" />
                         <ValidationMessage For="@(() => ViewModel.RegisterData.ConfirmPassword)" />
                     </div>
                 </div>
 
-                <div class="form-check mb-4">
+                <div class="form-check mb-4 mt-2">
                     <InputCheckbox id="mfa" class="form-check-input bg-dark border-secondary" @bind-Value="ViewModel.RegisterData.MultiFactorAuthentification" />
                     <label class="form-check-label text-muted small" for="mfa">
                         Activer l'authentification double facteur (A2F)
@@ -104,7 +115,7 @@
                 </button>
 
                 <div class="login-footer">
-                    <p>Déjà un compte ? <NavLink href="@AppRoutes.Connexion">Se connecter</NavLink></p>
+                    <p>Déjà un compte ? <NavLink href="/connexion">Se connecter</NavLink></p>
                 </div>
             </EditForm>
         </div>
@@ -116,22 +127,33 @@
                     <img src="/assets/google.svg" alt="Google" width="24" height="24" />
                     <span>Google</span>
                 </button>
-
                 <button type="button" class="btn-social">
                     <img src="/assets/facebook.svg" alt="Facebook" width="24" height="24" />
                     <span>Facebook</span>
                 </button>
-
                 <button type="button" class="btn-social">
                     <img src="/assets/microsoft.svg" alt="Microsoft" width="24" height="24" />
                     <span>Microsoft</span>
                 </button>
             </div>
-
-            <div class="mt-5 text-white-50 small">
-                <p>En vous inscrivant, vous acceptez nos <br /> <a href="#" class="text-white text-decoration-underline">Conditions Générales</a>.</p>
-            </div>
         </div>
-
     </div>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadCountriesAsync();
+    }
+
+    private string GetFrenchGenderLabel(GenderType gender)
+    {
+        return gender switch
+        {
+            GenderType.Male => "Homme",
+            GenderType.Female => "Femme",
+            GenderType.Other => "Autre",
+            _ => "Non précisé"
+        };
+    }
+}
