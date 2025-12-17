@@ -1,4 +1,5 @@
-@page "/celestial-bodies"
+@page "/corps-celestes"
+
 @inject CelestialBodyViewModel ViewModel
 
 <PageTitle>Corps Célestes – Astralis</PageTitle>
@@ -8,16 +9,16 @@
     @if (!ViewModel.Is3DVisible)
     {
         <div class="filters-container">
-    
-            <input type="text" 
+
+            <input type="text"
                    class="filter-input" 
                    placeholder="🔍 Rechercher un corps céleste..."
-                   @bind="ViewModel.Filter.SearchText" 
+                   @bind="ViewModel.Filter.SearchText"
                    @bind:event="oninput"
-                   @onkeyup="ViewModel.OnFilterChanged" /> 
+                   @onkeyup="ViewModel.OnFilterChanged" />
 
             <select class="filter-input" 
-                    @bind="ViewModel.SelectedTypeId" 
+                    @bind="ViewModel.SelectedTypeId"
                     @bind:after="ViewModel.OnTypeChanged">
                 <option value="0">Toutes les catégories</option>
                 @foreach (var type in ViewModel.CelestialBodyTypes)
@@ -29,13 +30,12 @@
             @{
                 var showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0;
             }
-            
+
             <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")" 
                     @bind="ViewModel.SelectedSubtypeId"
                     @bind:after="ViewModel.OnSubtypeChanged">
-        
+
                 <option value="0">Toutes les sous-catégories</option>
-        
                 @foreach (var sub in ViewModel.CelestialSubtypes)
                 {
                     <option value="@sub.Id">@sub.Label</option>
@@ -69,9 +69,7 @@
                 @foreach (var body in ViewModel.CelestialBodies)
                 {
                     <div class="body-card" @onclick="() => ViewModel.ShowDetails(body)">
-                        <img src="" alt="@body.Name" />
-                        
-                        <div class="body-info">
+                           <img src="" alt="@body.Name" />
                             <h3>@body.Name</h3>
                             <p>
                                 <span class="badge-type">@body.CelestialBodyTypeName</span>
@@ -80,7 +78,6 @@
                                     @(string.IsNullOrEmpty(body.Alias) ? "Pas d'alias" : body.Alias)
                                 </small>
                             </p>
-                        </div>
                     </div>
                 }
             }
@@ -89,21 +86,21 @@
         @if (!ViewModel.IsLoading && ViewModel.CelestialBodies.Count > 0)
         {
             <div class="pagination-container d-flex justify-content-center align-items-center mt-5 gap-3">
-                
-                <button class="btn btn-astralis-outline" 
-                        @onclick="ViewModel.PreviousPage" 
+
+                <button class="btn btn-astralis-outline"
+                        @onclick="ViewModel.PreviousPage"
                         disabled="@(ViewModel.CurrentPage == 1)">
                     <i class="bi bi-chevron-left"></i> Précédent
                 </button>
 
                 <span class="text-white fw-bold">Page @ViewModel.CurrentPage</span>
 
-                <button class="btn btn-astralis-outline" 
-                        @onclick="ViewModel.NextPage" 
+                <button class="btn btn-astralis-outline"
+                        @onclick="ViewModel.NextPage"
                         disabled="@(!ViewModel.HasNextPage)">
                     Suivant <i class="bi bi-chevron-right"></i>
                 </button>
-                
+
             </div>
         }
     }
@@ -113,7 +110,7 @@
         <div class="detail-container glass-effect">
             <h1 class="text-white mb-2">@ViewModel.SelectedBody.Name</h1>
             <h4 style="color: #a76dff;">@ViewModel.SelectedBody.CelestialBodyTypeName</h4>
-            
+
             <div class="mock-3d-view">
                 <i class="bi bi-box-seam fs-1 text-white-50"></i>
                 <p class="mt-3 text-white-50">Visualisation 3D</p>
@@ -134,7 +131,6 @@
         </div>
     }
 </div>
-
 @code {
     protected override async Task OnInitializedAsync()
     {

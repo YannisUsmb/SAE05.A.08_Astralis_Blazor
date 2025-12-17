@@ -26,28 +26,28 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-4">
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Accueil</NavLink>
+                        <NavLink class="nav-link" href="@AppRoutes.Home" Match="NavLinkMatch.All">Accueil</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="celestial-bodies">Corps Célestes</NavLink>
+                        <NavLink class="nav-link" href="@AppRoutes.CelestialBodies">Corps Célestes</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="evenements">Événements</NavLink>
+                        <NavLink class="nav-link" href="@AppRoutes.Events">Événements</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="articles">Articles</NavLink>
+                        <NavLink class="nav-link" href="@AppRoutes.Articles">Articles</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="audios">Audios</NavLink>
+                        <NavLink class="nav-link" href="@AppRoutes.Audios">Audios</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="boutique">Boutique</NavLink>
+                        <NavLink class="nav-link" href="@AppRoutes.Shop">Boutique</NavLink>
                     </li>
                 </ul>
                 
                 <AuthorizeView>
                     <Authorized>
-                        <NavLink href="profil" class="btn btn-astralis-outline btn-sm px-3">Profil</NavLink>
+                        <NavLink href="@AppRoutes.Profile" class="btn btn-astralis-outline btn-sm px-3">Profil</NavLink>
 
                         <button class="btn btn-astralis-premium btn-sm px-3" @onclick="ViewModel.LogoutAsync">
                             Déconnexion
@@ -55,14 +55,14 @@
 
                         <AuthorizeView Policy="MustBePremium" Context="premiumContext">
                             <NotAuthorized>
-                                <NavLink href="premium" class="btn btn-astralis-premium btn-sm px-3">Mettre à niveau</NavLink>
+                                <NavLink href="@AppRoutes.Premium" class="btn btn-astralis-premium btn-sm px-3">Mettre à niveau</NavLink>
                             </NotAuthorized>
                         </AuthorizeView>
 
                     </Authorized>
                     <NotAuthorized>
-                        <NavLink href="connexion" class="btn btn-astralis-outline btn-sm px-3">Connexion</NavLink>
-                        <NavLink href="inscription" class="btn btn-astralis-premium btn-sm px-3">Inscription</NavLink>
+                        <NavLink href="@AppRoutes.Connexion" class="btn btn-astralis-outline btn-sm px-3">Connexion</NavLink>
+                        <NavLink href="@AppRoutes.SignUp" class="btn btn-astralis-premium btn-sm px-3">Inscription</NavLink>
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
@@ -86,7 +86,7 @@
                 <div class="col-lg-2 col-md-6 offset-lg-1">
                     <h6 class="text-white text-uppercase small fw-bold mb-3">Plateforme</h6>
                     <ul class="list-unstyled d-flex flex-column gap-2">
-                        <li><NavLink href="corps-celestes" class="text-white-50 text-decoration-none hover-white">Base de données</NavLink></li>
+                        <li><NavLink href="@AppRoutes.CelestialBodies" class="text-white-50 text-decoration-none hover-white">Base de données</NavLink></li>
                         <li><a href="#" class="text-white-50 text-decoration-none hover-white">Accès API</a></li>
                     </ul>
                 </div>
@@ -94,7 +94,7 @@
                 <div class="col-lg-2 col-md-6">
                     <h6 class="text-white text-uppercase small fw-bold mb-3">Ressources</h6>
                     <ul class="list-unstyled d-flex flex-column gap-2">
-                        <li><NavLink href="articles" class="text-white-50 text-decoration-none hover-white">Articles</NavLink></li>
+                        <li><NavLink href="@AppRoutes.Articles" class="text-white-50 text-decoration-none hover-white">Articles</NavLink></li>
                         <li><a href="#" class="text-white-50 text-decoration-none hover-white">Support</a></li>
                     </ul>
                 </div>
