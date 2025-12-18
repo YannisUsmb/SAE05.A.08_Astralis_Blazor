@@ -8,4 +8,9 @@ public class HomeViewModel
     public string CountExoplanets { get; set; } = "5 300+";
     public string CountMissions { get; set; } = "120+";
     public string CountUpdateFrequency { get; set; } = "Temps réel";
+
+    public async Task InitializeAsync()
+    {
+        await Task.CompletedTask;
+    }
 }

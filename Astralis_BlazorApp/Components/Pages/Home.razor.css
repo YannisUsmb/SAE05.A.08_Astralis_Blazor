@@ -1,0 +1,51 @@
+.hero-title {
+    text-shadow: 0 0 30px rgba(157, 78, 221, 0.6);
+    letter-spacing: -1px;
+}
+
+.hero-description {
+    opacity: 0.85;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.25rem;
+}
+
+.stats-section {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+}
+
+.text-accent-purple { color: #c084fc; }
+.text-accent-blue   { color: #60a5fa; }
+.text-accent-green  { color: #4ade80; }
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.icon-wrapper {
+    transition: transform 0.3s ease;
+}
+
+.glass-card:hover .icon-wrapper {
+    transform: scale(1.1);
+}
+
+.pro-badge {
+    font-size: 0.7em;
+    vertical-align: middle;
+    font-weight: 700;
+    padding: 0.35em 0.6em;
+}

@@ -23,16 +23,6 @@
                 }
             </select>
 
-            @{ var showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0; }
-            <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")" 
-                    @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
-                <option value="0">Toutes les sous-catégories</option>
-                @foreach (var sub in ViewModel.CelestialSubtypes)
-                {
-                    <option value="@sub.Id">@sub.Label</option>
-                }
-            </select>
-
             <select class="filter-input" @bind="ViewModel.SortBy" @bind:after="ViewModel.OnSortChanged">
                 <option value="name">Nom (A–Z)</option>
                 <option value="distance">Distance</option>
@@ -47,6 +37,16 @@
             <div class="advanced-filters-bar d-flex justify-content-center flex-wrap gap-3 mb-4 animate-fade-in"
                  style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
 
+                @{ var showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0; }
+                <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")" 
+                        @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
+                    <option value="0">Toutes les sous-catégories</option>
+                    @foreach (var sub in ViewModel.CelestialSubtypes)
+                    {
+                        <option value="@sub.Id">@sub.Label</option>
+                    }
+                </select>
+                
                 @if (ViewModel.SelectedTypeId == 2 && ViewModel.Filter.PlanetFilter != null)
                 {
                     <RangeFilter Label="Masse (M⊕)" 
@@ -126,7 +126,16 @@
     
     @if (ViewModel.Is3DVisible && ViewModel.SelectedBody != null)
     {
-        }
+        <div class="details-view animate-fade-in">
+            <button class="btn btn-secondary mb-3" @onclick="ViewModel.BackToList">
+                ← Retour à la liste
+            </button>
+
+            <h2>@ViewModel.SelectedBody.Name</h2>
+        
+            <p>Description : @ViewModel.CelestialBodies</p>
+        </div>
+    }
 </div>
 
 @code {

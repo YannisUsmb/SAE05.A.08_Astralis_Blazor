@@ -3,13 +3,13 @@
 
 <PageTitle>Astralis – Accueil</PageTitle>
 
-<section class="container px-4 py-5 text-center mt-5">
+<section class="hero-section container px-4 py-5 text-center mt-5">
     <div class="py-4">
-        <h1 class="display-3 fw-bold text-white mb-3" style="text-shadow: 0 0 20px rgba(157, 78, 221, 0.5);">
+        <h1 class="display-3 fw-bold text-white mb-3 hero-title">
             @ViewModel.Title
         </h1>
         <div class="col-lg-8 mx-auto">
-            <p class="lead text-light mb-5" style="opacity: 0.9;">
+            <p class="lead text-light mb-5 hero-description">
                 La plateforme spatiale la plus avancée pour découvrir, écouter et visualiser les merveilles du cosmos.
                 Données issues de la NASA et de l'ESA.
             </p>
@@ -25,7 +25,7 @@
     </div>
 </section>
 
-<section class="py-5 border-top border-bottom border-secondary" style="background: rgba(0,0,0,0.3);">
+<section class="stats-section py-5 border-top border-bottom border-secondary">
     <div class="container">
         <div class="row text-center g-4">
             <div class="col-md-3 col-6">
@@ -33,15 +33,15 @@
                 <small class="text-uppercase text-white-50 ls-1">Corps célestes</small>
             </div>
             <div class="col-md-3 col-6">
-                <div class="display-6 fw-bold text-white mb-0" style="color: #c084fc;">@ViewModel.CountExoplanets</div>
+                <div class="display-6 fw-bold mb-0 text-accent-purple">@ViewModel.CountExoplanets</div>
                 <small class="text-uppercase text-white-50 ls-1">Exoplanètes</small>
             </div>
             <div class="col-md-3 col-6">
-                <div class="display-6 fw-bold text-white mb-0" style="color: #60a5fa;">@ViewModel.CountMissions</div>
+                <div class="display-6 fw-bold mb-0 text-accent-blue">@ViewModel.CountMissions</div>
                 <small class="text-uppercase text-white-50 ls-1">Missions</small>
             </div>
             <div class="col-md-3 col-6">
-                <div class="display-6 fw-bold text-white mb-0" style="color: #4ade80;">@ViewModel.CountUpdateFrequency</div>
+                <div class="display-6 fw-bold mb-0 text-accent-green">@ViewModel.CountUpdateFrequency</div>
                 <small class="text-uppercase text-white-50 ls-1">Mise à jour</small>
             </div>
         </div>
@@ -57,9 +57,9 @@
     <div class="row row-cols-1 row-cols-md-3 g-4">
         
         <div class="col">
-            <div class="card h-100 border-secondary text-white" style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(5px);">
+            <div class="card h-100 border-secondary text-white glass-card">
                 <div class="card-body p-4">
-                    <div class="mb-3 text-white">
+                    <div class="mb-3 text-white icon-wrapper">
                         <i class="bi bi-globe2 fs-1"></i> 
                     </div>
                     <h4 class="card-title fw-bold">Base de données</h4>
@@ -74,13 +74,14 @@
         </div>
 
         <div class="col">
-            <div class="card h-100 border-secondary text-white" style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(5px);">
+            <div class="card h-100 border-secondary text-white glass-card">
                 <div class="card-body p-4">
-                    <div class="mb-3" style="color: #c084fc;">
+                    <div class="mb-3 icon-wrapper text-accent-purple">
                         <i class="bi bi-soundwave fs-1"></i>
                     </div>
-                    <h4 class="card-title fw-bold">
-                        Audio Spatial <span class="badge bg-white text-dark ms-2 fs-6" style="font-size: 0.7em;">PRO</span>
+                    <h4 class="card-title fw-bold d-flex align-items-center gap-2">
+                        Audio Spatial 
+                        <span class="badge bg-white text-dark pro-badge">PRO</span>
                     </h4>
                     <p class="card-text text-white-50">
                         Écoutez la sonification des ondes radio captées par les télescopes converties en audio.
@@ -93,9 +94,9 @@
         </div>
 
         <div class="col">
-            <div class="card h-100 border-secondary text-white" style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(5px);">
+            <div class="card h-100 border-secondary text-white glass-card">
                 <div class="card-body p-4">
-                    <div class="mb-3" style="color: #60a5fa;">
+                    <div class="mb-3 icon-wrapper text-accent-blue">
                         <i class="bi bi-journal-text fs-1"></i>
                     </div>
                     <h4 class="card-title fw-bold">Articles</h4>
@@ -111,3 +112,10 @@
 
     </div>
 </section>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync(); 
+    }
+}
