@@ -64,5 +64,39 @@ namespace Astralis_BlazorApp.ViewModels
                 IsLoading = false;
             }
         }
+
+        public async Task LoginWithGoogleAsync(string idToken)
+        {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+            ErrorMessage = null;
+
+            try
+            {
+                var googleDto = new GoogleLoginDto { IdToken = idToken };
+
+                var result = await _authService.GoogleLogin(googleDto);
+
+                if (result != null)
+                {
+                    _navigation.NavigateTo("/");
+                }
+                else
+                {
+                    ErrorMessage = "Impossible de se connecter avec Google.";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur Google: {ex.Message}");
+                ErrorMessage = "Une erreur technique est survenue.";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿@page "/connexion"
 @using Astralis.Shared.DTOs
 @inject LoginViewModel ViewModel
+@inject IJSRuntime JS
 
 <PageTitle>Connexion – Astralis</PageTitle>
 
@@ -62,10 +63,8 @@
         <div class="login-right">
             <h2>Autres connexions</h2>
             <div class="social-login">
-                <button type="button" class="btn-social">
-                    <img src="/assets/google.svg" alt="Google" width="24" height="24" />
-                    <span>Continuer avec Google</span>
-                </button>
+                
+                <div id="google-btn-container" style="min-height: 40px;"></div>
 
                 <button type="button" class="btn-social">
                     <img src="/assets/facebook.svg" alt="Facebook" width="24" height="24" />
@@ -81,3 +80,37 @@
 
     </div>
 </div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Create a reference to this component so that JS can call us back
+                var dotNetReference = DotNetObjectReference.Create(this);
+
+                string clientId = "472091593732-pggcg9c8ohdnaqard33pi7rf10249b5d.apps.googleusercontent.com";
+
+                // 1. Initialize the library
+                await JS.InvokeVoidAsync("googleAuth.initialize", dotNetReference, clientId);
+
+                // 2. Render the button in the 'google-btn-container' div
+                await JS.InvokeVoidAsync("googleAuth.renderButton", "google-btn-container");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur init Google: {ex.Message}");
+            }
+        }
+    }
+
+    // This method is called by JavaScript when Google returns the token
+    [JSInvokable]
+    public async Task HandleGoogleLogin(string googleToken)
+    {
+        await ViewModel.LoginWithGoogleAsync(googleToken);
+        StateHasChanged();
+    }
+}

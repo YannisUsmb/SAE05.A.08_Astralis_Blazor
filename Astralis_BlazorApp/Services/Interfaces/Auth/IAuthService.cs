@@ -7,5 +7,6 @@ namespace Astralis_BlazorApp.Services.Interfaces
         Task<AuthResponseDto?> Login(UserLoginDto loginDto);
         Task Logout();
         Task<bool> CheckUserSession();
+        Task<AuthResponseDto?> GoogleLogin(GoogleLoginDto googleDto);
     }
 }

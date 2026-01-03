@@ -36,6 +36,25 @@ namespace Astralis_BlazorApp.Services.Implementations
             return null;
         }
 
+        public async Task<AuthResponseDto?> GoogleLogin(GoogleLoginDto googleDto)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"{Controller}/GoogleLogin", googleDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var userResult = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+
+                if (_authStateProvider is CustomAuthProvider customProvider)
+                {
+                    customProvider.MarkUserAsAuthenticated(userResult!);
+                }
+
+                return userResult;
+            }
+
+            return null;
+        }
+
         public async Task Logout()
         {
             await _httpClient.PostAsync($"{Controller}/Logout", null);
