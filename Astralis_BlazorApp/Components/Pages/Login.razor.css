@@ -6,7 +6,6 @@
     padding: 2rem 1rem;
 }
 
-/* double card */
 .login-card.dual {
     display: flex;
     background: rgba(255, 255, 255, 0.05);
@@ -20,7 +19,6 @@
     animation: fadeUp 0.8s ease;
 }
 
-/* left part */
 .login-left {
     flex: 1;
     padding: 3rem 2.5rem;
@@ -43,7 +41,6 @@
         font-size: 1rem;
     }
 
-/* form */
 .form-group {
     margin-bottom: 1.4rem;
 }
@@ -56,33 +53,6 @@ label {
     font-weight: 500;
 }
 
-::deep .form-control-astralis {
-    display: block;
-    width: 100%;
-    padding: 0.85rem 1rem;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(15, 15, 35, 0.7);
-    color: #fff;
-    font-size: 1rem;
-    transition: all 0.25s ease;
-    appearance: none;
-    -webkit-appearance: none;
-}
-
-    ::deep .form-control-astralis:focus {
-        outline: none;
-        border-color: #a76dff;
-        box-shadow: 0 0 12px rgba(157, 78, 221, 0.4);
-        background: rgba(20, 20, 45, 0.9);
-    }
-
-    ::deep .form-control-astralis.invalid {
-        border-color: #ff4d4d;
-        box-shadow: 0 0 10px rgba(255, 77, 77, 0.25);
-    }
-
-/* login button */
 .btn-login {
     width: 100%;
     background: linear-gradient(90deg, #9d4edd, #5f3dc4);
@@ -110,7 +80,6 @@ label {
         filter: grayscale(0.5);
     }
 
-/* footer login */
 .login-footer {
     margin-top: 1.8rem;
     color: #bcbcd3;
@@ -128,7 +97,6 @@ label {
             color: #c89cff;
         }
 
-/* right part */
 .login-right {
     flex: 0.8;
     background: rgba(30, 10, 60, 0.4);
@@ -147,7 +115,6 @@ label {
         margin-bottom: 1.5rem;
     }
 
-/* socials buttons */
 .social-login {
     display: flex;
     flex-direction: column;
@@ -181,20 +148,6 @@ label {
         object-fit: contain;
     }
 
-/* animation */
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* responsive */
 @media (max-width: 850px) {
     .login-card.dual {
         flex-direction: column;

@@ -1,5 +1,4 @@
 @page "/corps-celestes"
-
 @inject CelestialBodyViewModel ViewModel
 
 <PageTitle>Corps Célestes – Astralis</PageTitle>
@@ -8,12 +7,16 @@
 
     @if (!ViewModel.Is3DVisible)
     {
+        <div class="page-header">
+            <h1>Corps Célestes</h1>
+        </div>
+        <p class="page-description">Explorez notre base de données astronomique</p>
+
         <div class="filters-container">
-    
             <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
-                   @bind="ViewModel.Filter.SearchText" 
+                   @bind="ViewModel.Filter.SearchText"
                    @bind:event="oninput"
-                   @onkeyup="ViewModel.OnFilterChanged" /> 
+                   @onkeyup="ViewModel.OnFilterChanged" />
 
             <select class="filter-input" @bind="ViewModel.SelectedTypeId" @bind:after="ViewModel.OnTypeChanged">
                 <option value="0">Toutes les catégories</option>
@@ -37,8 +40,10 @@
             <div class="advanced-filters-bar d-flex justify-content-center flex-wrap gap-3 mb-4 animate-fade-in"
                  style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
 
-                @{ var showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0; }
-                <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")" 
+                @{
+                    var showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0;
+                }
+                <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")"
                         @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
                     <option value="0">Toutes les sous-catégories</option>
                     @foreach (var sub in ViewModel.CelestialSubtypes)
@@ -46,53 +51,53 @@
                         <option value="@sub.Id">@sub.Label</option>
                     }
                 </select>
-                
+
                 @if (ViewModel.SelectedTypeId == 2 && ViewModel.Filter.PlanetFilter != null)
                 {
-                    <RangeFilter Label="Masse (M⊕)" 
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinMass" 
+                    <RangeFilter Label="Masse (M⊕)"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinMass"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxMass"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
 
-                    <RangeFilter Label="Distance (AL)" 
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinDistance" 
+                    <RangeFilter Label="Distance (AL)"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinDistance"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxDistance"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
 
-                    <RangeFilter Label="Rayon (km)" 
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinRadius" 
+                    <RangeFilter Label="Rayon (km)"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinRadius"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxRadius"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
                 }
 
                 @if (ViewModel.SelectedTypeId == 1 && ViewModel.Filter.StarFilter != null)
                 {
-                    <RangeFilter Label="Température (K)" 
-                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinTemperature" 
+                    <RangeFilter Label="Température (K)"
+                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinTemperature"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxTemperature"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
-                                 
-                    <RangeFilter Label="Distance (AL)" 
-                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinDistance" 
+
+                    <RangeFilter Label="Distance (AL)"
+                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinDistance"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxDistance"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
                 }
 
                 @if (ViewModel.SelectedTypeId == 3 && ViewModel.Filter.AsteroidFilter != null)
                 {
-                    <RangeFilter Label="Diamètre (km)" 
-                                 @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinDiameter" 
+                    <RangeFilter Label="Diamètre (km)"
+                                 @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinDiameter"
                                  @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxDiameter"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
                 }
-                
-                </div>
+
+            </div>
         }
 
         <div class="bodies-grid">
             @if (ViewModel.IsLoading)
             {
-                <div class="text-center text-white w-100">
+                <div class="spinner-container">
                     <div class="spinner-border text-primary" role="status"></div>
                 </div>
             }
@@ -113,17 +118,17 @@
                 }
             }
         </div>
-        
+
         @if (!ViewModel.IsLoading && ViewModel.CelestialBodies.Count > 0)
         {
-             <div class="pagination-container d-flex justify-content-center align-items-center mt-5 gap-3">
+            <div class="pagination-container">
                 <button class="btn btn-astralis-outline" @onclick="ViewModel.PreviousPage" disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
                 <span class="text-white">Page @ViewModel.CurrentPage</span>
                 <button class="btn btn-astralis-outline" @onclick="ViewModel.NextPage" disabled="@(!ViewModel.HasNextPage)">Suivant</button>
             </div>
         }
     }
-    
+
     @if (ViewModel.Is3DVisible && ViewModel.SelectedBody != null)
     {
         <div class="details-view animate-fade-in">
@@ -132,7 +137,7 @@
             </button>
 
             <h2>@ViewModel.SelectedBody.Name</h2>
-        
+
             <p>Description : @ViewModel.CelestialBodies</p>
         </div>
     }

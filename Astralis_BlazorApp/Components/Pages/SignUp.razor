@@ -8,7 +8,7 @@
 <div class="login-wrapper">
     <div class="login-card dual">
 
-        <div class="login-left scrollable-content">
+        <div class="login-left">
             <h1>Rejoindre Astralis</h1>
             <p>Créez votre profil d'explorateur et accédez aux données.</p>
 
@@ -54,7 +54,6 @@
                             <option value="">Choisir...</option>
                             @foreach (var country in ViewModel.Countries)
                             {
-                                // Affichage: "France (+33)"
                                 <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
                             }
                         </InputSelect>
