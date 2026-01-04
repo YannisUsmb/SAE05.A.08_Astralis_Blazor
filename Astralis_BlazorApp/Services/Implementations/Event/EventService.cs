@@ -4,10 +4,10 @@ using Astralis.Shared.DTOs;
 
 namespace Astralis_BlazorApp.Services.Implementations;
 
-public class EventService(HttpClient httpClient) : IEventService 
+public class EventService(HttpClient httpClient) : IEventService
 {
     private const string Controller = "Events";
-    
+
     public async Task<EventDto?> GetByIdAsync(int id)
     {
         EventDto? eventDto = await httpClient.GetFromJsonAsync<EventDto>($"{Controller}/{id}");
@@ -29,34 +29,29 @@ public class EventService(HttpClient httpClient) : IEventService
         return createdEvent ?? throw new Exception("Error creating event");
     }
 
-    public async Task<EventDto?> UpdateAsync(int id, EventUpdateDto dto)
+    public async Task UpdateAsync(int id, EventUpdateDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
         response.EnsureSuccessStatusCode();
-
-        EventDto? updatedEvent = await response.Content.ReadFromJsonAsync<EventDto>();
-        return updatedEvent ?? throw new Exception("Error updating event");
     }
 
-    public async Task<EventDto?> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}");
         response.EnsureSuccessStatusCode();
-
-        EventDto? deletedEvent = await response.Content.ReadFromJsonAsync<EventDto>();
-        return deletedEvent ?? throw new Exception("Error deleting event");
     }
 
-    public async Task<List<EventDto>> GetByTitleAsync(string title)
-    {
-        List<EventDto>? events = await httpClient.GetFromJsonAsync<List<EventDto>>($"{Controller}/search/title/{title}");
-        return events ?? new List<EventDto>();
-    }
-
-    public async Task<List<EventDto>> SearchAsync(EventFilterDto filter)
+    public async Task<List<EventDto>> SearchAsync(EventFilterDto filter, int pageNumber, int pageSize, string sortBy)
     {
         string queryString = ToQueryString(filter);
-        string url = $"{Controller}/search?{queryString}";
+
+        string paginationParams = $"pageNumber={pageNumber}&pageSize={pageSize}&sortBy={Uri.EscapeDataString(sortBy)}";
+
+        string fullQuery = string.IsNullOrEmpty(queryString)
+            ? paginationParams
+            : $"{queryString}&{paginationParams}";
+
+        string url = $"{Controller}/search?{fullQuery}";
 
         List<EventDto>? events = await httpClient.GetFromJsonAsync<List<EventDto>>(url);
         return events ?? new List<EventDto>();
@@ -68,10 +63,10 @@ public class EventService(HttpClient httpClient) : IEventService
 
         if (!string.IsNullOrWhiteSpace(filter.SearchText))
             parameters.Add($"searchText={Uri.EscapeDataString(filter.SearchText)}");
-        
+
         if (filter.EventTypeIds is { Count: > 0 })
             parameters.AddRange(filter.EventTypeIds.Select(id => $"eventTypeIds={id}"));
-        
+
         if (filter.MinStartDate.HasValue)
             parameters.Add($"minStartDate={Uri.EscapeDataString(filter.MinStartDate.Value.ToString("O"))}");
 

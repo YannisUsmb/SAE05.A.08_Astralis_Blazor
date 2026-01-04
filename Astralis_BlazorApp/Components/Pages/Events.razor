@@ -1,0 +1,126 @@
+﻿@page "/evenements"
+@inject EventViewModel ViewModel
+@using Astralis.Shared.DTOs
+
+<PageTitle>Événements – Astralis</PageTitle>
+
+<div class="content">
+    <section class="header">
+        <h1>Prochains Événements Astronomiques</h1>
+        <p>Ne manquez aucun spectacle céleste, lancement ou conférence spatiale à venir.</p>
+
+        <div class="filters">
+            <input type="text" class="search-input" placeholder="Rechercher un événement..."
+                   @bind="ViewModel.SearchText"
+                   @bind:event="oninput"
+                   @onkeyup="ViewModel.OnFilterChanged" />
+
+            <label for="sort" class="sort-label">Trier par :</label>
+            <select id="sort" @bind="ViewModel.SortBy" @bind:after="ViewModel.OnFilterChanged">
+                <option value="date_asc">Date</option>
+                <option value="alpha_asc">Nom (A-Z)</option>
+                <option value="alpha_desc">Nom (Z-A)</option>
+                <option value="type">Type d’événement</option>
+            </select>
+        </div>
+
+        <p class="event-count">@ViewModel.EventCountMessage</p>
+    </section>
+
+    <section class="events-list">
+        @if (ViewModel.IsLoading)
+        {
+            <div class="spinner-container">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        }
+        else if (ViewModel.Events.Count == 0)
+        {
+            <p class="no-events">Aucun événement trouvé pour le moment.</p>
+        }
+        else
+        {
+            @foreach (var evt in ViewModel.Events)
+            {
+                <div class="event-card">
+                    <img class="event-image" src="@(evt.PictureUrl ?? "/assets/petit_logo.png")" alt="@evt.Title">
+
+                    <div class="event-overlay">
+                        <span class="badge" style="@GetBadgeStyle(evt.EventTypeLabel)">
+                            @evt.EventTypeLabel
+                        </span>
+                        <h3>@evt.Title</h3>
+                        <p>
+                            📅 @evt.StartDate.ToString("dd/MM/yyyy")
+                            — 📍 @(evt.Location ?? "En ligne / Inconnu")
+                        </p>
+                    </div>
+
+                    <div class="event-actions">
+                        <button class="btn-glow btn-interest" @onclick:stopPropagation="true">
+                            <i class="fa-solid fa-star"></i> M’intéresse
+                        </button>
+
+                        <button class="btn-glow btn-detail" @onclick="() => ViewModel.OpenDetails(evt)">
+                            <i class="fa-solid fa-circle-info"></i> Voir plus
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </section>
+
+    @if (!ViewModel.IsLoading && ViewModel.Events.Count > 0)
+    {
+        <div class="pagination-container">
+            <button class="btn-glow" @onclick="ViewModel.PreviousPage" disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
+            <span class="page-info">Page @ViewModel.CurrentPage</span>
+            <button class="btn-glow" @onclick="ViewModel.NextPage" disabled="@(!ViewModel.HasNextPage)">Suivant</button>
+        </div>
+    }
+</div>
+
+@if (ViewModel.IsModalVisible && ViewModel.SelectedEvent != null)
+{
+    <div class="modal show-modal" @onclick="ViewModel.CloseDetails">
+        <div class="modal-content glass" @onclick:stopPropagation="true">
+            <span class="close" @onclick="ViewModel.CloseDetails">&times;</span>
+
+            <img src="@(ViewModel.SelectedEvent.PictureUrl ?? "/assets/petit_logo.png")" alt="@ViewModel.SelectedEvent.Title">
+
+            <h2>@ViewModel.SelectedEvent.Title</h2>
+
+            <p class="modal-meta">
+                📅 @ViewModel.SelectedEvent.StartDate.ToString("dd MMMM yyyy") <br />
+                📍 @(ViewModel.SelectedEvent.Location ?? "Non spécifié")
+            </p>
+
+            <p class="modal-desc">@ViewModel.SelectedEvent.Description</p>
+
+            <div class="modal-actions">
+                <button class="btn-premium">
+                    <i class="fa-solid fa-calendar-plus"></i> Ajouter à mon calendrier
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+
+    private string GetBadgeStyle(string? typeLabel)
+    {
+        if (string.IsNullOrWhiteSpace(typeLabel))
+        {
+            return "background-color: #6c757d; color: white;";
+        }
+
+        int hash = Math.Abs(typeLabel.GetHashCode());
+        int hue = hash % 360;
+        return $"background-color: hsl({hue}, 70%, 40%); color: white;";
+    }
+}
