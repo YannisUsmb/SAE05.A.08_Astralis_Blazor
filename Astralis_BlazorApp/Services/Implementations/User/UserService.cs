@@ -44,7 +44,13 @@ namespace Astralis_BlazorApp.Services.Implementations
         public async Task<UserDetailDto?> UpdateAsync(int id, UserUpdateDto dto)
         {
             HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
+
             response.EnsureSuccessStatusCode();
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                return null;
+            }
 
             UserDetailDto? updatedUser = await response.Content.ReadFromJsonAsync<UserDetailDto>();
             return updatedUser;

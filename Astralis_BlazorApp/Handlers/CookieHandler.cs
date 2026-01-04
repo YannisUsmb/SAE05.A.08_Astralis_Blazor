@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
-namespace Astralis_BlazorApp.Services.Implementations
+namespace Astralis_BlazorApp.Handlers
 {
     public class CookieHandler : DelegatingHandler
     {

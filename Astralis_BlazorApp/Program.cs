@@ -1,7 +1,6 @@
 using Astralis_BlazorApp.Components;
 using Astralis_BlazorApp.Extensions;
-using Astralis_BlazorApp.Services.Implementations;
-using Astralis_BlazorApp.ViewModels;
+using Astralis_BlazorApp.Handlers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -15,37 +14,29 @@ namespace Astralis_BlazorApp
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            builder.Services.AddScoped(sp =>
+            // --- HTTP Configuration & Cookies ---
+            builder.Services.AddTransient<CookieHandler>();
+
+            builder.Services.AddHttpClient("AstralisAPI", client =>
             {
-                var handler = new CookieHandler();
-                handler.InnerHandler = new HttpClientHandler();
+                client.BaseAddress = new Uri("https://localhost:7064/api/");
+            })
+            .AddHttpMessageHandler<CookieHandler>();
 
-                var client = new HttpClient(handler)
-                {
-                    BaseAddress = new Uri("https://localhost:7064/api/")
-                };
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("AstralisAPI"));
 
-                return client;
-            });
-
+            // --- Services & ViewModels ---
             builder.Services.AddApplicationServices();
-            builder.Services.AddScoped<MainLayoutViewModel>();
-            builder.Services.AddScoped<HomeViewModel>();
-            builder.Services.AddScoped<CelestialBodyViewModel>();
-            builder.Services.AddScoped<LoginViewModel>();
-            builder.Services.AddScoped<SignUpViewModel>();
-            builder.Services.AddScoped<EventViewModel>();
-            builder.Services.AddScoped<AccountViewModel>();
+            builder.Services.AddViewModels();
 
-            builder.Services.AddBlazorBootstrap();
-
+            // --- Authorization & Auth ---
             builder.Services.AddAuthorizationCore(options =>
             {
                 options.AddPolicy("MustBePremium", policy =>
                     policy.RequireClaim("IsPremium", "true"));
             });
 
-            
+            builder.Services.AddBlazorBootstrap();
 
             await builder.Build().RunAsync();
         }

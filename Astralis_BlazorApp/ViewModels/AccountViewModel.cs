@@ -31,19 +31,29 @@ namespace Astralis_BlazorApp.ViewModels
             var authState = await _authStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
-            if (user.Identity != null && user.Identity.IsAuthenticated)
+            if (user.Identity == null || !user.Identity.IsAuthenticated)
             {
-                var userIdClaim = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                Console.WriteLine("Utilisateur non authentifié dans le ViewModel");
+                CurrentEmail = "Non connecté.";
+                return;
+            }
 
-                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+            var userIdClaim = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                Console.WriteLine("ERREUR CRITIQUE: Claim NameIdentifier introuvable !");
+                CurrentEmail = "Erreur: ID utilisateur manquant.";
+                return;
+            }
+
+            if (int.TryParse(userIdClaim.Value, out int userId))
+            {
+                var userDto = await _userService.GetByIdAsync(userId);
+                if (userDto != null)
                 {
-                    var userDto = await _userService.GetByIdAsync(userId);
-                    if (userDto != null)
-                    {
-                        CurrentEmail = userDto.Email;
-                        NewEmail = userDto.Email;
-                        return;
-                    }
+                    CurrentEmail = userDto.Email;
+                    NewEmail = userDto.Email;
+                    return;
                 }
             }
 
@@ -90,7 +100,9 @@ namespace Astralis_BlazorApp.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Erreur lors de la mise à jour de l'email : " + ex.Message;
+                Console.WriteLine($"[ERREUR UpdateEmail] : {ex.Message}");
+
+                ErrorMessage = "Une erreur est survenue lors de la mise à jour de votre email. Veuillez réessayer plus tard.";
             }
         }
 
@@ -113,7 +125,9 @@ namespace Astralis_BlazorApp.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Erreur lors du changement de mot de passe. Vérifiez votre mot de passe actuel.";
+                Console.WriteLine($"[ERREUR ChangePassword] : {ex.Message}");
+
+                ErrorMessage = "Impossible de modifier le mot de passe. Vérifiez votre mot de passe actuel ou réessayez plus tard.";
             }
         }
     }

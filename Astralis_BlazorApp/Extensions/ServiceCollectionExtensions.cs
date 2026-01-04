@@ -1,5 +1,6 @@
 using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
+using Astralis_BlazorApp.ViewModels;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Astralis_BlazorApp.Extensions;
@@ -54,9 +55,21 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAliasStatusService, AliasStatusService>();
         services.AddScoped<IAddressService, AddressService>();
 
-        services.AddScoped<CustomAuthProvider>();
-        services.AddScoped<AuthenticationStateProvider>(provider =>
-            provider.GetRequiredService<CustomAuthProvider>());
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<AuthenticationStateProvider, CustomAuthProvider>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddViewModels(this IServiceCollection services)
+    {
+        services.AddScoped<MainLayoutViewModel>();
+        services.AddScoped<HomeViewModel>();
+        services.AddScoped<CelestialBodyViewModel>();
+        services.AddScoped<LoginViewModel>();
+        services.AddScoped<SignUpViewModel>();
+        services.AddScoped<EventViewModel>();
+        services.AddScoped<AccountViewModel>();
 
         return services;
     }
