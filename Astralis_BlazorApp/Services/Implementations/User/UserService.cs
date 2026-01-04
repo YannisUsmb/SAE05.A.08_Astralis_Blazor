@@ -1,6 +1,6 @@
-using System.Net.Http.Json;
-using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
+using Astralis_BlazorApp.Services.Interfaces;
+using System.Net.Http.Json;
 
 namespace Astralis_BlazorApp.Services.Implementations
 {
@@ -10,10 +10,22 @@ namespace Astralis_BlazorApp.Services.Implementations
 
         public async Task<UserDetailDto?> GetByIdAsync(int id)
         {
-            UserDetailDto? user = await httpClient.GetFromJsonAsync<UserDetailDto>($"{Controller}/{id}");
-            return user;
+            try
+            {
+                return await httpClient.GetFromJsonAsync<UserDetailDto>($"{Controller}/{id}");
+            }
+            catch (HttpRequestException ex)
+            {
+                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+
+                Console.WriteLine($"ERREUR API GetById: {ex.StatusCode} - {ex.Message}");
+                throw;
+            }
         }
-        
+
         public async Task<List<UserDetailDto>> GetAllAsync()
         {
             List<UserDetailDto>? users = await httpClient.GetFromJsonAsync<List<UserDetailDto>>($"{Controller}");

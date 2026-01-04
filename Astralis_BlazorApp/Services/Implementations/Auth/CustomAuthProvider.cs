@@ -31,6 +31,7 @@ namespace Astralis_BlazorApp.Services.Implementations
                 {
                     var claims = new List<Claim>
                     {
+                        new Claim(ClaimTypes.NameIdentifier, userDto.Id.ToString()),
                         new Claim(ClaimTypes.Name, userDto.Username),
                         new Claim(ClaimTypes.Role, userDto.Role),
                         new Claim("AvatarPath", userDto.AvatarPath ?? string.Empty),

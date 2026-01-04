@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+@layout MainLayout
+
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="settings-sidebar glass-effect sticky-top" style="top: 100px; z-index: 1;">
+                <div class="p-3 border-bottom border-white-10">
+                    <h6 class="text-white text-uppercase small fw-bold mb-0 ls-1">Paramètres</h6>
+                </div>
+
+                <nav class="d-flex flex-column py-2">
+                    <NavLink href="/settings/account" class="settings-nav-link">
+                        <i class="bi bi-person-gear"></i> Compte
+                    </NavLink>
+
+                    <NavLink href="/settings/subscription" class="settings-nav-link">
+                        <i class="bi bi-star"></i> Abonnement
+                    </NavLink>
+
+                    <NavLink href="/settings/preferences" class="settings-nav-link">
+                        <i class="bi bi-sliders"></i> Préférences
+                    </NavLink>
+
+                    <NavLink href="/settings/content" class="settings-nav-link">
+                        <i class="bi bi-collection"></i> Ma Bibliothèque
+                    </NavLink>
+
+                    <NavLink href="/settings/security" class="settings-nav-link">
+                        <i class="bi bi-shield-lock"></i> Sécurité & Données
+                    </NavLink>
+                </nav>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="glass-effect p-4 p-md-5 rounded-3 border border-white-10">
+                @Body
+            </div>
+        </div>
+    </div>
+</div>

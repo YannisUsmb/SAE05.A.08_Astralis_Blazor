@@ -145,3 +145,118 @@ body {
     color: #fff !important;
     text-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
+
+/* --- User Dropdown & Avatar --- */
+.user-menu-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border: 2px solid rgba(157, 78, 221, 0.5); /* Bordure violette subtile */
+    transition: all 0.3s ease;
+}
+
+    .user-avatar:hover {
+        border-color: #c084fc;
+        box-shadow: 0 0 10px rgba(192, 132, 252, 0.4);
+    }
+
+.dropdown-menu-glass {
+    position: absolute;
+    top: 120%; /* Juste en dessous de l'avatar */
+    right: 0;
+    width: 220px;
+    padding: 0.5rem 0;
+    /* Effet Glass */
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    /* Animation d'apparition */
+    animation: fadeInDown 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+}
+
+.dropdown-item-glass {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    color: #e4e4e7;
+    text-decoration: none;
+    transition: background 0.2s;
+    font-size: 0.95rem;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+    .dropdown-item-glass:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+.dropdown-divider-glass {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
+}
+
+/* Animation simple */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Settings Layout --- */
+.settings-sidebar {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.settings-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #a1a1aa;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+    .settings-nav-link:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+    }
+
+    .settings-nav-link.active {
+        background: rgba(157, 78, 221, 0.15); /* Fond violet très léger */
+        color: #fff;
+        border-left-color: #9d4edd; /* Barre violette à gauche */
+    }
+
+.danger-zone {
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+    border-radius: 8px;
+}

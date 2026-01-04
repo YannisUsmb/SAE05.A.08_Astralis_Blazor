@@ -35,6 +35,7 @@ namespace Astralis_BlazorApp
             builder.Services.AddScoped<LoginViewModel>();
             builder.Services.AddScoped<SignUpViewModel>();
             builder.Services.AddScoped<EventViewModel>();
+            builder.Services.AddScoped<AccountViewModel>();
 
             builder.Services.AddBlazorBootstrap();
 
