@@ -12,16 +12,16 @@ public partial class CelestialBodyViewModel : ObservableObject
     private readonly ICelestialBodyService _bodyService;
     private readonly ICelestialBodyTypeService _typeService;
     private readonly NavigationManager _navigationManager;
-    
+
     [ObservableProperty] private ObservableCollection<CelestialBodyListDto> celestialBodies = new();
     [ObservableProperty] private ObservableCollection<CelestialBodyTypeDto> celestialBodyTypes = new();
     [ObservableProperty] private ObservableCollection<CelestialBodySubtypeDto> celestialSubtypes = new();
-    
+
     [ObservableProperty] private CelestialBodyFilterDto filter = new();
-    
+
     [ObservableProperty] private int selectedTypeId = 0;
     [ObservableProperty] private int selectedSubtypeId = 0;
-    
+
     [ObservableProperty] private string sortBy = "name_asc";
 
     [ObservableProperty] private int currentPage = 1;
@@ -31,16 +31,16 @@ public partial class CelestialBodyViewModel : ObservableObject
     [ObservableProperty] private bool isLoading;
     [ObservableProperty] private bool is3DVisible;
     [ObservableProperty] private CelestialBodyListDto? selectedBody;
-    
+
     [ObservableProperty] private CelestialBodyDetailDto? selectedBodyDetails;
-    
+
     public CelestialBodyViewModel(ICelestialBodyService bodyService, ICelestialBodyTypeService typeService, NavigationManager navigationManager)
     {
         _bodyService = bodyService;
         _typeService = typeService;
         _navigationManager = navigationManager;
     }
-    
+
     [RelayCommand]
     public async Task InitializeAsync()
     {
@@ -59,7 +59,7 @@ public partial class CelestialBodyViewModel : ObservableObject
             IsLoading = false;
         }
     }
-    
+
     [RelayCommand]
     public async Task SearchDataAsync()
     {
@@ -69,7 +69,7 @@ public partial class CelestialBodyViewModel : ObservableObject
             Filter.CelestialBodyTypeIds = SelectedTypeId != 0 ? new List<int> { SelectedTypeId } : null;
 
             var results = await _bodyService.SearchAsync(Filter, CurrentPage, PageSize);
-            
+
             HasNextPage = results.Count == PageSize;
 
             CelestialBodies = new ObservableCollection<CelestialBodyListDto>(results);
@@ -84,8 +84,8 @@ public partial class CelestialBodyViewModel : ObservableObject
             IsLoading = false;
         }
     }
-    
-    
+
+
     public async Task OnTypeChanged()
     {
         Filter.PlanetFilter = null;
@@ -107,7 +107,7 @@ public partial class CelestialBodyViewModel : ObservableObject
 
         SelectedSubtypeId = 0;
         Filter.SubtypeId = null;
-        
+
         if (SelectedTypeId == 0)
         {
             CelestialSubtypes.Clear();
@@ -120,13 +120,13 @@ public partial class CelestialBodyViewModel : ObservableObject
 
         await OnFilterChanged();
     }
-    
+
     public async Task OnSubtypeChanged()
     {
         Filter.SubtypeId = SelectedSubtypeId == 0 ? null : SelectedSubtypeId;
         await OnFilterChanged();
     }
-    
+
     public async Task OnSortChanged()
     {
         if (SortBy.EndsWith("_desc"))
@@ -144,26 +144,26 @@ public partial class CelestialBodyViewModel : ObservableObject
             Filter.SortBy = SortBy;
             Filter.SortAscending = true;
         }
-    
+
         await OnFilterChanged();
     }
-    
+
     public async Task OnFilterChanged()
     {
         CurrentPage = 1;
         await SearchDataAsync();
     }
-    
+
     [RelayCommand]
     public async Task ShowDetails(CelestialBodyListDto body)
     {
         SelectedBody = body;
         IsLoading = true;
         Is3DVisible = true;
-    
+
         string url = BuildUrlWithFilters(body.Id);
         _navigationManager.NavigateTo(url, forceLoad: false);
-        
+
         try
         {
             SelectedBodyDetails = await _bodyService.GetDetailsByIdAsync(body.Id);
@@ -177,7 +177,7 @@ public partial class CelestialBodyViewModel : ObservableObject
             IsLoading = false;
         }
     }
-    
+
     public async Task ShowDetailsById(int id)
     {
         IsLoading = true;
@@ -207,13 +207,13 @@ public partial class CelestialBodyViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(Filter.SearchText))
             queryParams.Add($"search={Uri.EscapeDataString(Filter.SearchText)}");
- 
+
         if (SelectedTypeId != 0)
             queryParams.Add($"type={SelectedTypeId}");
 
         if (SelectedSubtypeId != 0)
             queryParams.Add($"subtype={SelectedSubtypeId}");
-        
+
         if (!string.IsNullOrEmpty(SortBy))
             queryParams.Add($"sort={SortBy}");
 
@@ -223,21 +223,21 @@ public partial class CelestialBodyViewModel : ObservableObject
         string baseUrl = "/corps-celestes";
         if (queryParams.Any())
             baseUrl += "?" + string.Join("&", queryParams);
-    
+
         return baseUrl;
     }
-    
+
     [RelayCommand]
     public void BackToList()
     {
         Is3DVisible = false;
         SelectedBody = null;
         SelectedBodyDetails = null;
-        
+
         string url = BuildUrlWithFilters();
         _navigationManager.NavigateTo(url, forceLoad: false);
     }
-    
+
     [RelayCommand]
     public async Task NextPage()
     {
