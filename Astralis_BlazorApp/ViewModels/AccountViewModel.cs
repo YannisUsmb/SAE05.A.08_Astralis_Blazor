@@ -86,7 +86,7 @@ namespace Astralis_BlazorApp.ViewModels
                             FirstName = userDto.FirstName,
                             LastName = userDto.LastName,
                             Username = userDto.Username,
-                            UserAvatarUrl = userDto.UserAvatarUrl,
+                            AvatarUrl = userDto.AvatarUrl,
                             Gender = userDto.Gender,
                             MultiFactorAuthentification = userDto.MultiFactorAuthentification,
                             Phone = userDto.Phone

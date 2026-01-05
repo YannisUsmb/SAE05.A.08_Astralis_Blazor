@@ -76,9 +76,40 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="required-label">Photo de profil (URL)</label>
-                    <InputText class="form-control-astralis" placeholder="https://..." @bind-Value="ViewModel.RegisterData.UserAvatarUrl" />
-                    <ValidationMessage For="@(() => ViewModel.RegisterData.UserAvatarUrl)" />
+                    <label>Photo de profil</label>
+
+                    <div class="d-flex align-items-center gap-3">
+                        @if (!string.IsNullOrEmpty(ViewModel.RegisterData.AvatarUrl))
+                        {
+                            <img src="@ViewModel.RegisterData.AvatarUrl"
+                                 class="rounded-circle border border-secondary"
+                                 style="width: 50px; height: 50px; object-fit: cover;"
+                                 alt="Avatar" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center"
+                                 style="width: 50px; height: 50px;">
+                                <i class="bi bi-person text-white-50" style="font-size: 1.5rem;"></i>
+                            </div>
+                        }
+
+                        <div class="flex-grow-1">
+                            <InputFile OnChange="OnFileSelected"
+                                       class="form-control-astralis"
+                                       accept=".jpg,.jpeg,.png" />
+
+                            @if (ViewModel.IsUploading)
+                            {
+                                <div class="text-accent-purple small mt-1">
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                    Envoi en cours...
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <ValidationMessage For="@(() => ViewModel.RegisterData.AvatarUrl)" />
                 </div>
 
                 <div class="row">
@@ -140,9 +171,16 @@
 </div>
 
 @code {
+    private bool _isUploading = false;
+
     protected override async Task OnInitializedAsync()
     {
         await ViewModel.LoadCountriesAsync();
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        await ViewModel.UploadAvatarAsync(e.File);
     }
 
     private string GetFrenchGenderLabel(GenderType gender)

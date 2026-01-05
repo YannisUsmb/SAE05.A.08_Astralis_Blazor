@@ -171,7 +171,7 @@
 
     private string GetUserProfileImage(ClaimsPrincipal user)
     {
-        var pictureClaim = user.FindFirst("AvatarUrl");
+        var pictureClaim = user.FindFirst("AvatarPath");
         if (pictureClaim != null && !string.IsNullOrEmpty(pictureClaim.Value))
         {
             return pictureClaim.Value;

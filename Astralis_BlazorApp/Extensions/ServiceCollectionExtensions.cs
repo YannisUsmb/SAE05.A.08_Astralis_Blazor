@@ -58,6 +58,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<AuthenticationStateProvider, CustomAuthProvider>();
 
+        services.AddScoped<IUploadService, UploadService>();
+
         return services;
     }
 

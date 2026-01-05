@@ -34,7 +34,7 @@ namespace Astralis_BlazorApp.Services.Implementations
                         new Claim(ClaimTypes.NameIdentifier, userDto.Id.ToString()),
                         new Claim(ClaimTypes.Name, userDto.Username),
                         new Claim(ClaimTypes.Role, userDto.Role),
-                        new Claim("AvatarPath", userDto.AvatarPath ?? string.Empty),
+                        new Claim("AvatarPath", userDto.AvatarUrl ?? string.Empty),
                         new Claim("IsPremium", userDto.IsPremium ? "true" : "false")
                     };
 
@@ -61,7 +61,7 @@ namespace Astralis_BlazorApp.Services.Implementations
                 new Claim(ClaimTypes.NameIdentifier, userDto.Id.ToString()),
                 new Claim(ClaimTypes.Name, userDto.Username),
                 new Claim(ClaimTypes.Role, userDto.Role),
-                new Claim("AvatarPath", userDto.AvatarPath ?? string.Empty),
+                new Claim("AvatarPath", userDto.AvatarUrl ?? string.Empty),
                 new Claim("IsPremium", userDto.IsPremium ? "true" : "false")
             };
 
