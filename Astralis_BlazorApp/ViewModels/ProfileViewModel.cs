@@ -3,6 +3,7 @@ using Astralis.Shared.Enums;
 using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
@@ -32,12 +33,19 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private string? errorMessage;
 
+        private ValidationMessageStore? _messageStore;
         public EditContext? EditContext { get; set; }
         private ValidationMessageStore? _messageStore;
 
         private int _currentUserId;
         private UserUpdateDto _originalData = new();
         public bool IsDirty => !ProfileData.Equals(_originalData);
+
+        private string _originalUsername = "";
+        private string _originalEmail = "";
+        private string? _originalPhone;
+        private int? _originalCountryId;
+        private bool _originalMfa;
 
         public ProfileViewModel(
             IUserService userService,
@@ -93,7 +101,7 @@ namespace Astralis_BlazorApp.ViewModels
 
                         InitializeEditContext();
                     }
-                }
+                    }
                 else
                 {
                     ErrorMessage = "Session expirée. Veuillez vous reconnecter.";
@@ -173,7 +181,7 @@ namespace Astralis_BlazorApp.ViewModels
                 if (availability != null && availability.IsTaken)
                 {
                     _messageStore?.Add(field, availability.Message ?? "Ce pseudo est déjà pris.");
-                }
+        }
 
                 EditContext.NotifyValidationStateChanged();
             }
@@ -189,6 +197,12 @@ namespace Astralis_BlazorApp.ViewModels
             SuccessMessage = null;
             ErrorMessage = null;
             _messageStore?.Clear();
+
+            if (EditContext != null && !EditContext.Validate())
+            {
+                IsLoading = false;
+                return;
+            }
 
             try
             {
