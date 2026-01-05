@@ -99,10 +99,9 @@ public partial class CelestialBodyViewModel : ObservableObject
             case 1: Filter.StarFilter = new StarFilterDto(); break;
             case 2: Filter.PlanetFilter = new PlanetFilterDto(); break;
             case 3: Filter.AsteroidFilter = new AsteroidFilterDto(); break;
-            case 4: Filter.SatelliteFilter = new SatelliteFilterDto(); break;
+            case 4: Filter.CometFilter = new CometFilterDto(); break;
             case 5: Filter.GalaxyFilter = new GalaxyQuasarFilterDto(); break;
-            case 6: Filter.CometFilter = new CometFilterDto(); break;
-            
+            case 6: Filter.SatelliteFilter = new SatelliteFilterDto(); break;
         }
 
         SelectedSubtypeId = 0;
