@@ -20,7 +20,7 @@ public partial class CelestialBodyViewModel : ObservableObject
     [ObservableProperty] private int selectedTypeId = 0;
     [ObservableProperty] private int selectedSubtypeId = 0;
     
-    [ObservableProperty] private string sortBy = "name";
+    [ObservableProperty] private string sortBy = "name_asc";
 
     [ObservableProperty] private int currentPage = 1;
     [ObservableProperty] private int pageSize = 30;
@@ -99,10 +99,9 @@ public partial class CelestialBodyViewModel : ObservableObject
             case 1: Filter.StarFilter = new StarFilterDto(); break;
             case 2: Filter.PlanetFilter = new PlanetFilterDto(); break;
             case 3: Filter.AsteroidFilter = new AsteroidFilterDto(); break;
-            case 4: Filter.SatelliteFilter = new SatelliteFilterDto(); break;
+            case 4: Filter.CometFilter = new CometFilterDto(); break;
             case 5: Filter.GalaxyFilter = new GalaxyQuasarFilterDto(); break;
-            case 6: Filter.CometFilter = new CometFilterDto(); break;
-            
+            case 6: Filter.SatelliteFilter = new SatelliteFilterDto(); break;
         }
 
         SelectedSubtypeId = 0;
@@ -129,9 +128,22 @@ public partial class CelestialBodyViewModel : ObservableObject
     
     public async Task OnSortChanged()
     {
-        Filter.SortBy = SortBy;
-        Filter.SortAscending = true;
-        
+        if (SortBy.EndsWith("_desc"))
+        {
+            Filter.SortBy = SortBy.Replace("_desc", "");
+            Filter.SortAscending = false;
+        }
+        else if (SortBy.EndsWith("_asc"))
+        {
+            Filter.SortBy = SortBy.Replace("_asc", "");
+            Filter.SortAscending = true;
+        }
+        else
+        {
+            Filter.SortBy = SortBy;
+            Filter.SortAscending = true;
+        }
+    
         await OnFilterChanged();
     }
     
@@ -150,20 +162,14 @@ public partial class CelestialBodyViewModel : ObservableObject
     
         try
         {
-            Console.WriteLine($"[DEBUG] Fetching details for body ID: {body.Id}");
             SelectedBodyDetails = await _bodyService.GetDetailsByIdAsync(body.Id);
-            Console.WriteLine($"[DEBUG] Details loaded: {SelectedBodyDetails != null}");
-            Console.WriteLine($"[DEBUG] Asteroid: {SelectedBodyDetails?.Asteroid != null}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Error loading details: {ex.Message}");
-            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
             SelectedBodyDetails = null;
         }
         finally
         {
-            Console.WriteLine($"[DEBUG] Setting IsLoading to false");
             IsLoading = false;
         }
     }
