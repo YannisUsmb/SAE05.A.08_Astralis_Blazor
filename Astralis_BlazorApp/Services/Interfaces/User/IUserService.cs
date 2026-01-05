@@ -10,5 +10,13 @@ namespace Astralis_BlazorApp.Services.Interfaces
         Task<UserDetailDto?> UpdateAsync(int id, UserUpdateDto dto);
         Task<UserDetailDto?> DeleteAsync(int id);
         Task<bool> ChangePasswordAsync(int id, ChangePasswordDto dto);
+        Task<AvailabilityResult?> CheckAvailabilityAsync(string? email, string? username, string? phone);
+    }
+
+    public class AvailabilityResult
+    {
+        public bool IsTaken { get; set; }
+        public string? Field { get; set; }
+        public string? Message { get; set; }
     }
 }

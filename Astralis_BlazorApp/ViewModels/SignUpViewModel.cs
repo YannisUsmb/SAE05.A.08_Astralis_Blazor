@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels
@@ -14,8 +15,8 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly IUserService _userService;
         private readonly ICountryService _countryService;
         private readonly IUploadService _uploadService;
-
         private readonly NavigationManager _navigation;
+        private readonly IJSRuntime _jsRuntime;
 
         [ObservableProperty]
         private UserCreateDto registerData = new()
@@ -35,12 +36,29 @@ namespace Astralis_BlazorApp.ViewModels
 
         public bool IsUploading { get; private set; } = false;
 
-        public SignUpViewModel(IUserService userService, ICountryService countryService, IUploadService uploadService, NavigationManager navigation)
+        private ValidationMessageStore? _messageStore;
+        public EditContext? EditContext { get; set; }
+
+        public SignUpViewModel(
+            IUserService userService,
+            ICountryService countryService,
+            IUploadService uploadService,
+            NavigationManager navigation,
+            IJSRuntime jsRuntime)
         {
             _userService = userService;
             _countryService = countryService;
             _navigation = navigation;
             _uploadService = uploadService;
+            _jsRuntime = jsRuntime;
+        }
+
+        public void InitializeContext()
+        {
+            EditContext = new EditContext(RegisterData);
+            EditContext.OnValidationRequested += (s, e) => _messageStore?.Clear();
+            EditContext.OnFieldChanged += (s, e) => _messageStore?.Clear(e.FieldIdentifier);
+            _messageStore = new ValidationMessageStore(EditContext);
         }
 
         public async Task LoadCountriesAsync()
@@ -60,13 +78,10 @@ namespace Astralis_BlazorApp.ViewModels
         public async Task UploadAvatarAsync(IBrowserFile file)
         {
             if (file == null) return;
-
             IsUploading = true;
-
             try
             {
                 var url = await _uploadService.UploadImageAsync(file);
-
                 if (!string.IsNullOrEmpty(url))
                 {
                     RegisterData.AvatarUrl = url;
@@ -87,18 +102,103 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
+        public async Task FormatPhoneNumber()
+        {
+            if (!string.IsNullOrWhiteSpace(RegisterData.Phone) && RegisterData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
+
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    string formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", RegisterData.Phone, country.IsoCode);
+
+                    RegisterData.Phone = formatted;
+                }
+            }
+        }
+
         [RelayCommand]
         public async Task RegisterAsync()
         {
-            if (isLoading) return;
+            if (IsLoading) return;
             IsLoading = true;
             ErrorMessage = null;
+
+            _messageStore?.Clear();
+
+            if (EditContext != null && !EditContext.Validate())
+            {
+                IsLoading = false;
+                return;
+            }
 
             try
             {
                 if (RegisterData.Password != RegisterData.ConfirmPassword)
                 {
                     ErrorMessage = "Les mots de passe ne correspondent pas.";
+                    IsLoading = false;
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(RegisterData.Phone) && RegisterData.CountryId.HasValue)
+                {
+                    var selectedCountry = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
+
+                    if (selectedCountry != null && !string.IsNullOrEmpty(selectedCountry.IsoCode))
+                    {
+                        bool isValid = await _jsRuntime.InvokeAsync<bool>("window.phoneValidator.isValid", RegisterData.Phone, selectedCountry.IsoCode);
+
+                        if (!isValid)
+                        {
+                            if (EditContext != null)
+                            {
+                                _messageStore?.Add(EditContext.Field(nameof(RegisterData.Phone)), $"Numéro invalide pour ce pays ({selectedCountry.Name}).");
+                                EditContext.NotifyValidationStateChanged();
+                            }
+                            else
+                            {
+                                ErrorMessage = $"Numéro invalide pour ce pays ({selectedCountry.Name}).";
+                            }
+
+                            IsLoading = false;
+                            return;
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(RegisterData.Phone))
+                {
+                    RegisterData.Phone = RegisterData.Phone.Replace(" ", "");
+                }
+
+                var availability = await _userService.CheckAvailabilityAsync(
+                    RegisterData.Email,
+                    RegisterData.Username,
+                    RegisterData.Phone
+                );
+
+                if (availability != null && availability.IsTaken)
+                {
+                    var fieldName = availability.Field switch
+                    {
+                        "email" => nameof(RegisterData.Email),
+                        "username" => nameof(RegisterData.Username),
+                        "phone" => nameof(RegisterData.Phone),
+                        _ => string.Empty
+                    };
+
+                    if (!string.IsNullOrEmpty(fieldName) && EditContext != null)
+                    {
+                        _messageStore?.Add(EditContext.Field(fieldName), availability.Message ?? "Déjà utilisé.");
+                        EditContext.NotifyValidationStateChanged();
+                    }
+                    else
+                    {
+                        ErrorMessage = availability.Message;
+                    }
+
+                    IsLoading = false;
                     return;
                 }
 
@@ -110,12 +210,13 @@ namespace Astralis_BlazorApp.ViewModels
                 }
                 else
                 {
-                    ErrorMessage = "L'inscription a échoué.";
+                    ErrorMessage = "L'inscription a échoué. Veuillez vérifier vos informations.";
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Une erreur technique est survenue.";
+                Console.WriteLine(ex.Message);
+                ErrorMessage = "Une erreur technique est survenue lors de l'inscription.";
             }
             finally
             {

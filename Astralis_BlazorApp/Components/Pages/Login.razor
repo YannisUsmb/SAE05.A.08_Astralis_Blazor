@@ -1,5 +1,6 @@
 ﻿@page "/connexion"
 @using Astralis.Shared.DTOs
+@using Astralis.Shared.Enums
 @inject LoginViewModel ViewModel
 @inject IJSRuntime JS
 
@@ -23,13 +24,40 @@
                 }
 
                 <div class="form-group">
-                    <label for="login">Identifiant, mail ou téléphone</label>
-                    <InputText id="login"
-                               class="form-control-astralis"
-                               placeholder="Votre identifiant, mail ou téléphone"
-                               @bind-Value="ViewModel.LoginData.Identifier" />
-                    <ValidationMessage For="@(() => ViewModel.LoginData.Identifier)" />
+                    <label>Mode de connexion</label>
+                    <InputSelect class="form-control-astralis mb-3"
+                                 Value="ViewModel.SelectedLoginMode"
+                                 ValueChanged="@((LoginMode m) => ViewModel.SelectedLoginMode = m)"
+                                 ValueExpression="@(() => ViewModel.SelectedLoginMode)">
+                        <option value="@LoginMode.Standard">Identifiant ou Email</option>
+                        <option value="@LoginMode.Phone">Numéro de téléphone</option>
+                    </InputSelect>
                 </div>
+
+                @if (ViewModel.SelectedLoginMode == LoginMode.Standard)
+                {
+                    <div class="form-group">
+                        <label for="login">Identifiant ou Email</label>
+                        <InputText id="login" class="form-control-astralis" @bind-Value="ViewModel.LoginData.Identifier" />
+                        <small class="text-muted">Le caractère @@ est interdit dans les noms d'utilisateur.</small>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <div class="input-group-astralis">
+                            <InputSelect class="form-control-astralis prefix-select" @bind-Value="ViewModel.LoginData.CountryId">
+                                <option value="">Choisir...</option>
+                                @foreach (var country in ViewModel.Countries)
+                                {
+                                    <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
+                                }
+                            </InputSelect>
+                            <InputText class="form-control-astralis" placeholder="6 12 34..." @bind-Value="ViewModel.LoginData.Phone" />
+                        </div>
+                    </div>
+                }
 
                 <div class="form-group">
                     <label for="password">Mot de passe</label>
@@ -82,6 +110,11 @@
 </div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadCountriesAsync();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

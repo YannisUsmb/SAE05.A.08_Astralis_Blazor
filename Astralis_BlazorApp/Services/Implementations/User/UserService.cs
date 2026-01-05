@@ -76,5 +76,33 @@ namespace Astralis_BlazorApp.Services.Implementations
             bool success = response.IsSuccessStatusCode;
             return success;
         }
+
+        public async Task<AvailabilityResult?> CheckAvailabilityAsync(string? email, string? username, string? phone)
+        {
+            try
+            {
+                var query = new List<string>();
+
+                if (!string.IsNullOrWhiteSpace(email))
+                    query.Add($"email={Uri.EscapeDataString(email)}");
+
+                if (!string.IsNullOrWhiteSpace(username))
+                    query.Add($"username={Uri.EscapeDataString(username)}");
+
+                if (!string.IsNullOrWhiteSpace(phone))
+                    query.Add($"phone={Uri.EscapeDataString(phone)}");
+
+                if (query.Count == 0) return null;
+
+                string queryString = string.Join("&", query);
+
+                return await httpClient.GetFromJsonAsync<AvailabilityResult>($"{Controller}/Check-availability?{queryString}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur CheckAvailability: {ex.Message}");
+                return new AvailabilityResult { IsTaken = false };
+            }
+        }
     }
 }

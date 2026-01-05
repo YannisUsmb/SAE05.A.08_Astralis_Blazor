@@ -1,14 +1,17 @@
 ﻿using Astralis.Shared.DTOs;
+using Astralis.Shared.Enums;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
+using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
         private readonly IAuthService _authService;
+        private readonly ICountryService _countryService;
         private readonly NavigationManager _navigation;
 
         [ObservableProperty]
@@ -20,26 +23,65 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private string? errorMessage;
 
-        public LoginViewModel(IAuthService authService, NavigationManager navigation)
+        [ObservableProperty]
+        private LoginMode selectedLoginMode = LoginMode.Standard;
+
+        [ObservableProperty]
+        private ObservableCollection<CountryDto> countries = new();
+
+        public LoginViewModel(IAuthService authService, ICountryService countryService, NavigationManager navigation)
         {
             _authService = authService;
+            _countryService = countryService;
             _navigation = navigation;
+        }
+
+        public async Task LoadCountriesAsync()
+        {
+            var list = await _countryService.GetAllAsync();
+            Countries = new ObservableCollection<CountryDto>(list.OrderBy(c => c.Name));
         }
 
         [RelayCommand]
         public async Task LoginAsync()
         {
-            if (isLoading)
-                return;
+            if (IsLoading) return;
 
             IsLoading = true;
             ErrorMessage = null;
 
             try
             {
-                if (string.IsNullOrWhiteSpace(LoginData.Identifier) || string.IsNullOrWhiteSpace(LoginData.Password))
+                if (SelectedLoginMode == LoginMode.Standard)
                 {
-                    ErrorMessage = "Veuillez remplir tous les champs.";
+                    LoginData.Phone = null;
+                    LoginData.CountryId = null;
+
+                    if (string.IsNullOrWhiteSpace(LoginData.Identifier))
+                    {
+                        ErrorMessage = "Veuillez saisir un identifiant.";
+                        IsLoading = false;
+                        return;
+                    }
+                }
+                else
+                {
+                    LoginData.Identifier = null;
+
+                    if (string.IsNullOrWhiteSpace(LoginData.Phone) || !LoginData.CountryId.HasValue)
+                    {
+                        ErrorMessage = "Veuillez saisir un numéro et choisir un pays.";
+                        IsLoading = false;
+                        return;
+                    }
+
+                    LoginData.Phone = LoginData.Phone.Replace(" ", "");
+                }
+
+                if (string.IsNullOrWhiteSpace(LoginData.Password))
+                {
+                    ErrorMessage = "Le mot de passe est requis.";
+                    IsLoading = false;
                     return;
                 }
 
@@ -51,7 +93,7 @@ namespace Astralis_BlazorApp.ViewModels
                 }
                 else
                 {
-                    ErrorMessage = "Identifiant ou mot de passe incorrect.";
+                    ErrorMessage = "Identifiants incorrects.";
                 }
             }
             catch (Exception ex)
