@@ -55,12 +55,10 @@ public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
     
     public async Task<List<CelestialBodySubtypeDto>> GetSubtypesAsync(int mainTypeId)
     {
-        // Appel au nouvel endpoint du controller
         List<CelestialBodySubtypeDto>? subtypes = await httpClient.GetFromJsonAsync<List<CelestialBodySubtypeDto>>($"{Controller}/Subtypes/{mainTypeId}");
         return subtypes ?? new List<CelestialBodySubtypeDto>();
     }
-
-    // --- CORRECTION ICI ---
+    
     public async Task<List<CelestialBodyListDto>> SearchAsync(CelestialBodyFilterDto filter, int pageNumber, int pageSize)
     {
         string url = $"{Controller}/Search?pageNumber={pageNumber}&pageSize={pageSize}";
@@ -74,6 +72,20 @@ public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
         }
         
         return new List<CelestialBodyListDto>();
+    }
+    
+    public async Task<CelestialBodyDetailDto?> GetDetailsByIdAsync(int id)
+    {
+        try
+        {
+            CelestialBodyDetailDto? details = await httpClient.GetFromJsonAsync<CelestialBodyDetailDto>($"{Controller}/{id}/Details");
+            return details;
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error fetching celestial body details: {ex.Message}");
+            return null;
+        }
     }
     
 }

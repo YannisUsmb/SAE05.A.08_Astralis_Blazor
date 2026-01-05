@@ -30,6 +30,8 @@ public partial class CelestialBodyViewModel : ObservableObject
     [ObservableProperty] private bool is3DVisible;
     [ObservableProperty] private CelestialBodyListDto? selectedBody;
     
+    [ObservableProperty] private CelestialBodyDetailDto? selectedBodyDetails;
+    
     public CelestialBodyViewModel(ICelestialBodyService bodyService, ICelestialBodyTypeService typeService)
     {
         _bodyService = bodyService;
@@ -140,10 +142,30 @@ public partial class CelestialBodyViewModel : ObservableObject
     }
     
     [RelayCommand]
-    public void ShowDetails(CelestialBodyListDto body)
+    public async void ShowDetails(CelestialBodyListDto body)
     {
         SelectedBody = body;
+        IsLoading = true;
         Is3DVisible = true;
+    
+        try
+        {
+            Console.WriteLine($"[DEBUG] Fetching details for body ID: {body.Id}");
+            SelectedBodyDetails = await _bodyService.GetDetailsByIdAsync(body.Id);
+            Console.WriteLine($"[DEBUG] Details loaded: {SelectedBodyDetails != null}");
+            Console.WriteLine($"[DEBUG] Asteroid: {SelectedBodyDetails?.Asteroid != null}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Error loading details: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+            SelectedBodyDetails = null;
+        }
+        finally
+        {
+            Console.WriteLine($"[DEBUG] Setting IsLoading to false");
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
@@ -151,6 +173,7 @@ public partial class CelestialBodyViewModel : ObservableObject
     {
         Is3DVisible = false;
         SelectedBody = null;
+        SelectedBodyDetails = null;
     }
     
     [RelayCommand]
