@@ -14,25 +14,20 @@
     @if (_isOpen)
     {
         <div class="range-popup glass-effect animate-fade-in">
-            <div class="d-flex gap-2 align-items-center mb-2">
-                <div class="input-group">
+            <div class="range-inputs-container">
+                <div class="input-wrapper">
                     <span class="input-label">Min</span>
-                    <input type="number" class="range-input"
-                           value="@MinValue"
-                           @onchange="OnMinChanged"
-                           placeholder="-" />
+                    <input type="number" class="range-input" value="@MinValue" @oninput="OnMinInput" placeholder="0" step="any" />
                 </div>
-                <span class="separator text-white">-</span>
-                <div class="input-group">
+                <span class="separator">—</span>
+                <div class="input-wrapper">
                     <span class="input-label">Max</span>
-                    <input type="number" class="range-input"
-                           value="@MaxValue"
-                           @onchange="OnMaxChanged"
-                           placeholder="-" />
+                    <input type="number" class="range-input" value="@MaxValue" @oninput="OnMaxInput" placeholder="∞" step="any" />
                 </div>
             </div>
-            <div class="d-flex justify-content-end">
-                <button class="btn-xs-reset" @onclick="Reset">Effacer</button>
+            <div class="popup-actions">
+                <button class="btn-apply" @onclick="Apply">Appliquer</button>
+                <button class="btn-reset" @onclick="Reset">Effacer</button>
             </div>
         </div>
         <div class="click-overlay" @onclick="Close"></div>
@@ -43,47 +38,66 @@
     [Parameter] public string Label { get; set; } = "Filtre";
     [Parameter] public decimal? MinValue { get; set; }
     [Parameter] public EventCallback<decimal?> MinValueChanged { get; set; }
-
     [Parameter] public decimal? MaxValue { get; set; }
     [Parameter] public EventCallback<decimal?> MaxValueChanged { get; set; }
-
     [Parameter] public EventCallback OnSearchTriggered { get; set; }
 
     private bool _isOpen = false;
+    private decimal? _tempMin;
+    private decimal? _tempMax;
     private bool HasValue => MinValue.HasValue || MaxValue.HasValue;
 
-    private void ToggleOpen() => _isOpen = !_isOpen;
-    private void Close() => _isOpen = false;
-
-    private async Task OnMinChanged(ChangeEventArgs e)
+    private void ToggleOpen()
     {
-        if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
-            MinValue = val;
-        else
-            MinValue = null;
-
-        await MinValueChanged.InvokeAsync(MinValue);
-        await OnSearchTriggered.InvokeAsync();
+        _isOpen = !_isOpen;
+        if (_isOpen)
+        {
+            _tempMin = MinValue;
+            _tempMax = MaxValue;
+        }
     }
 
-    private async Task OnMaxChanged(ChangeEventArgs e)
-    {
-        if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
-            MaxValue = val;
-        else
-            MaxValue = null;
+    private void Close() => _isOpen = false;
 
+    private void OnMinInput(ChangeEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Value?.ToString()))
+            _tempMin = null;
+        else if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
+            _tempMin = val;
+    }
+
+    private void OnMaxInput(ChangeEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Value?.ToString()))
+            _tempMax = null;
+        else if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
+            _tempMax = val;
+    }
+
+    private async Task Apply()
+    {
+        MinValue = _tempMin;
+        MaxValue = _tempMax;
+        
+        await MinValueChanged.InvokeAsync(MinValue);
         await MaxValueChanged.InvokeAsync(MaxValue);
         await OnSearchTriggered.InvokeAsync();
+        
+        Close();
     }
 
     private async Task Reset()
     {
         MinValue = null;
         MaxValue = null;
+        _tempMin = null;
+        _tempMax = null;
+        
         await MinValueChanged.InvokeAsync(null);
         await MaxValueChanged.InvokeAsync(null);
         await OnSearchTriggered.InvokeAsync();
+        
         Close();
     }
 }
