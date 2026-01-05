@@ -50,7 +50,12 @@
                 <div class="form-group">
                     <label>Téléphone</label>
                     <div class="input-group-astralis">
-                        <InputSelect class="form-control-astralis prefix-select" @bind-Value="ViewModel.RegisterData.CountryId">
+
+                        <InputSelect TValue="int?"
+                                     class="form-control-astralis prefix-select"
+                                     Value="@ViewModel.RegisterData.CountryId"
+                                     ValueChanged="@(async (int? c) => await ViewModel.OnCountryChanged(c))"
+                                     ValueExpression="@(() => ViewModel.RegisterData.CountryId)">
                             <option value="">Choisir...</option>
                             @foreach (var country in ViewModel.Countries)
                             {
@@ -58,10 +63,12 @@
                             }
                         </InputSelect>
 
-                        <InputText class="form-control-astralis phone-input"
-                                   placeholder="06 12 34 56 78"
-                                   @bind-Value="ViewModel.RegisterData.Phone"
-                                   @onfocusout="ViewModel.FormatPhoneNumber" />
+                        <input type="tel"
+                               class="form-control-astralis phone-input"
+                               placeholder="@ViewModel.PhonePlaceholder"
+                               value="@ViewModel.RegisterData.Phone"
+                               @oninput="@(async (ChangeEventArgs e) => await ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))"
+                               @onblur="@ViewModel.ValidatePhoneOnBlurAsync" />
                     </div>
                     <ValidationMessage For="@(() => ViewModel.RegisterData.CountryId)" />
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Phone)" />
@@ -179,7 +186,6 @@
     protected override async Task OnInitializedAsync()
     {
         ViewModel.InitializeContext();
-
         await ViewModel.LoadCountriesAsync();
     }
 

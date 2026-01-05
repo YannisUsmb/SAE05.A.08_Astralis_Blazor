@@ -563,24 +563,30 @@ body {
 }
 
 .modal-content {
-    background: rgba(30, 30, 60, 0.95);
+    background: rgba(30, 30, 30, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1.2rem;
-    padding: 2rem;
-    width: 90%;
-    max-width: 620px;
+    padding: 3rem 2rem;
+    width: 96%;
+    max-width: 1400px;
+    height: 80vh;
+    overflow-y: auto;
     text-align: center;
     color: #fff;
     box-shadow: 0 0 50px rgba(145, 70, 255, 0.3);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
     .modal-content img {
-        width: 100%;
+        width: auto;
+        max-width: 100%;
         border-radius: 12px;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.5rem;
         object-fit: cover;
-        max-height: 320px;
+        max-height: 50vh;
     }
 
 .close {
@@ -606,10 +612,11 @@ body {
 }
 
 .modal-desc {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
     color: #ddd;
+    max-width: 900px;
 }
 
 .btn-premium {

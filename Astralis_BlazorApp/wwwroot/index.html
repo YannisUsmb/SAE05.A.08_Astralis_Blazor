@@ -47,20 +47,49 @@
 
     <script>
         window.phoneValidator = {
+            getExampleNumber: function (countryCode) {
+                try {
+                    // On vérifie si l'objet 'examples' existe dans libphonenumber
+                    const examples = libphonenumber.examples || {};
+                    const phoneNumber = libphonenumber.getExampleNumber(countryCode, examples);
+
+                    if (phoneNumber) {
+                        const fmt = phoneNumber.format('NATIONAL');
+                        console.log("Placeholder trouvé pour " + countryCode + ": " + fmt);
+                        return fmt;
+                    }
+                    console.log("Pas de placeholder trouvé pour " + countryCode);
+                    return "";
+                } catch (error) {
+                    console.error("Erreur placeholder:", error);
+                    return "";
+                }
+            },
+
+            formatAsYouType: function (phoneNumber, countryCode) {
+                try {
+                    let cleanInput = phoneNumber.replace(/[^\d+]/g, '');
+
+                    const lengthValidation = libphonenumber.validatePhoneNumberLength(cleanInput, countryCode);
+
+                    if (lengthValidation === 'TOO_LONG') {
+                        cleanInput = cleanInput.slice(0, -1);
+                    }
+
+                    const asYouType = new libphonenumber.AsYouType(countryCode);
+                    return asYouType.input(cleanInput);
+
+                } catch (error) {
+                    return phoneNumber;
+                }
+            },
+
             isValid: function (phoneNumber, countryCode) {
                 try {
                     const number = libphonenumber.parsePhoneNumber(phoneNumber, countryCode);
                     return number.isValid();
                 } catch (error) {
                     return false;
-                }
-            },
-            formatAsYouType: function (phoneNumber, countryCode) {
-                try {
-                    const asYouType = new libphonenumber.AsYouType(countryCode);
-                    return asYouType.input(phoneNumber);
-                } catch (error) {
-                    return phoneNumber;
                 }
             }
         };

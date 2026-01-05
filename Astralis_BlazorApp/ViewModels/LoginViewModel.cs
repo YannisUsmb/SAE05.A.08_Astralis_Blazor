@@ -4,6 +4,7 @@ using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels
@@ -13,6 +14,7 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly IAuthService _authService;
         private readonly ICountryService _countryService;
         private readonly NavigationManager _navigation;
+        private readonly IJSRuntime _jsRuntime;
 
         [ObservableProperty]
         private UserLoginDto loginData = new();
@@ -29,17 +31,36 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private ObservableCollection<CountryDto> countries = new();
 
-        public LoginViewModel(IAuthService authService, ICountryService countryService, NavigationManager navigation)
+        public LoginViewModel(
+            IAuthService authService,
+            ICountryService countryService,
+            NavigationManager navigation,
+            IJSRuntime jsRuntime)
         {
             _authService = authService;
             _countryService = countryService;
             _navigation = navigation;
+            _jsRuntime = jsRuntime;
         }
 
         public async Task LoadCountriesAsync()
         {
             var list = await _countryService.GetAllAsync();
             Countries = new ObservableCollection<CountryDto>(list.OrderBy(c => c.Name));
+        }
+
+        public async Task FormatPhoneNumber()
+        {
+            if (!string.IsNullOrWhiteSpace(LoginData.Phone) && LoginData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == LoginData.CountryId);
+
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    string formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", LoginData.Phone, country.IsoCode);
+                    LoginData.Phone = formatted;
+                }
+            }
         }
 
         [RelayCommand]
@@ -109,8 +130,7 @@ namespace Astralis_BlazorApp.ViewModels
 
         public async Task LoginWithGoogleAsync(string idToken)
         {
-            if (IsLoading)
-                return;
+            if (IsLoading) return;
 
             IsLoading = true;
             ErrorMessage = null;
@@ -118,7 +138,6 @@ namespace Astralis_BlazorApp.ViewModels
             try
             {
                 var googleDto = new GoogleLoginDto { IdToken = idToken };
-
                 var result = await _authService.GoogleLogin(googleDto);
 
                 if (result != null)
