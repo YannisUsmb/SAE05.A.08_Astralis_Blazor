@@ -1,4 +1,5 @@
 @page "/corps-celestes"
+@using Astralis.Shared.DTOs
 @inject CelestialBodyViewModel ViewModel
 
 <PageTitle>Corps Célestes – Astralis</PageTitle>
@@ -20,7 +21,7 @@
 
             <select class="filter-input" @bind="ViewModel.SelectedTypeId" @bind:after="ViewModel.OnTypeChanged">
                 <option value="0">Toutes les catégories</option>
-                @foreach (var type in ViewModel.CelestialBodyTypes)
+                @foreach (CelestialBodyTypeDto type in ViewModel.CelestialBodyTypes)
                 {
                     <option value="@type.Id">@type.Label</option>
                 }
@@ -37,16 +38,14 @@
 
         @if (ViewModel.SelectedTypeId != 0)
         {
-            <div class="advanced-filters-bar d-flex justify-content-center flex-wrap gap-3 mb-4 animate-fade-in"
-                 style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-
+            <div class="advanced-filters-bar">
                 @{
-                    var showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0;
+                    bool showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0;
                 }
                 <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")"
                         @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
                     <option value="0">Toutes les sous-catégories</option>
-                    @foreach (var sub in ViewModel.CelestialSubtypes)
+                    @foreach (CelestialBodySubtypeDto sub in ViewModel.CelestialSubtypes)
                     {
                         <option value="@sub.Id">@sub.Label</option>
                     }
@@ -90,7 +89,6 @@
                                  @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxDiameter"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
                 }
-
             </div>
         }
 
@@ -103,11 +101,13 @@
             }
             else if (ViewModel.CelestialBodies.Count == 0)
             {
-                <div class="text-center text-white w-100"><p>Aucun résultat trouvé.</p></div>
+                <div class="text-center text-white w-100">
+                    <p>Aucun résultat trouvé.</p>
+                </div>
             }
             else
             {
-                @foreach (var body in ViewModel.CelestialBodies)
+                @foreach (CelestialBodyListDto body in ViewModel.CelestialBodies)
                 {
                     <div class="body-card" @onclick="() => ViewModel.ShowDetails(body)">
                         <div class="body-info">
@@ -122,23 +122,499 @@
         @if (!ViewModel.IsLoading && ViewModel.CelestialBodies.Count > 0)
         {
             <div class="pagination-container">
-                <button class="btn btn-astralis-outline" @onclick="ViewModel.PreviousPage" disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
+                <button class="btn btn-astralis-outline" @onclick="ViewModel.PreviousPage" disabled="@(ViewModel.CurrentPage == 1)">
+                    Précédent
+                </button>
                 <span class="text-white">Page @ViewModel.CurrentPage</span>
-                <button class="btn btn-astralis-outline" @onclick="ViewModel.NextPage" disabled="@(!ViewModel.HasNextPage)">Suivant</button>
+                <button class="btn btn-astralis-outline" @onclick="ViewModel.NextPage" disabled="@(!ViewModel.HasNextPage)">
+                    Suivant
+                </button>
             </div>
         }
     }
 
-    @if (ViewModel.Is3DVisible && ViewModel.SelectedBody != null)
+    @if (ViewModel.Is3DVisible)
     {
         <div class="details-view animate-fade-in">
             <button class="btn btn-secondary mb-3" @onclick="ViewModel.BackToList">
                 ← Retour à la liste
             </button>
 
-            <h2>@ViewModel.SelectedBody.Name</h2>
+            @if (ViewModel.IsLoading)
+            {
+                <div class="spinner-container">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-white mt-3">Chargement des détails...</p>
+                </div>
+            }
+            else if (ViewModel.SelectedBodyDetails != null)
+            {
+                <div class="detail-container">
+                    <h2>@ViewModel.SelectedBodyDetails.Name</h2>
+                    @if (!string.IsNullOrEmpty(ViewModel.SelectedBodyDetails.Alias))
+                    {
+                        <p class="text-muted">(@ViewModel.SelectedBodyDetails.Alias)</p>
+                    }
+                    
+                    <span class="badge-type">@ViewModel.SelectedBodyDetails.CelestialBodyTypeName</span>
 
-            <p>Description : @ViewModel.CelestialBodies</p>
+                    @if (ViewModel.SelectedBodyDetails.Planet != null)
+                    {
+                        PlanetDto planet = ViewModel.SelectedBodyDetails.Planet;
+                        <div class="specific-details">
+                            <h3>Caractéristiques Planétaires</h3>
+                            
+                            <div class="details-grid">
+                                @if (planet.Mass.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Masse</span>
+                                        <span class="value">@planet.Mass.Value.ToString("N2") M⊕</span>
+                                    </div>
+                                }
+                                @if (planet.Radius.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Rayon</span>
+                                        <span class="value">@planet.Radius.Value.ToString("N2") R⊕</span>
+                                    </div>
+                                }
+                                @if (planet.Distance.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Distance</span>
+                                        <span class="value">@planet.Distance.Value.ToString("N2") AL</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(planet.Temperature))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Température</span>
+                                        <span class="value">@planet.Temperature</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(planet.OrbitalPeriod))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Période orbitale</span>
+                                        <span class="value">@planet.OrbitalPeriod</span>
+                                    </div>
+                                }
+                                @if (planet.Eccentricity.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Excentricité</span>
+                                        <span class="value">@planet.Eccentricity.Value.ToString("N4")</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(planet.PlanetTypeName))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Type de planète</span>
+                                        <span class="value">@planet.PlanetTypeName</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(planet.DetectionMethodName))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Méthode de détection</span>
+                                        <span class="value">@planet.DetectionMethodName</span>
+                                    </div>
+                                }
+                                @if (planet.DiscoveryYear.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Année de découverte</span>
+                                        <span class="value">@planet.DiscoveryYear</span>
+                                    </div>
+                                }
+                                @if (planet.SatelliteCount > 0)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Nombre de satellites</span>
+                                        <span class="value">@planet.SatelliteCount</span>
+                                    </div>
+                                }
+                                @if (planet.StellarMagnitude.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Magnitude stellaire</span>
+                                        <span class="value">@planet.StellarMagnitude.Value.ToString("N2")</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(planet.HostStarTemperature))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Température étoile hôte</span>
+                                        <span class="value">@planet.HostStarTemperature</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(planet.HostStarMass))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Masse étoile hôte</span>
+                                        <span class="value">@planet.HostStarMass</span>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(planet.Remark))
+                            {
+                                <div class="remark-section">
+                                    <h4>Remarques</h4>
+                                    <p>@planet.Remark</p>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (ViewModel.SelectedBodyDetails.Star != null)
+                    {
+                        StarDto star = ViewModel.SelectedBodyDetails.Star;
+                        <div class="specific-details">
+                            <h3>Caractéristiques Stellaires</h3>
+                            
+                            <div class="details-grid">
+                                @if (star.Temperature.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Température</span>
+                                        <span class="value">@star.Temperature.Value.ToString("N0") K</span>
+                                    </div>
+                                }
+                                @if (star.Distance.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Distance</span>
+                                        <span class="value">@star.Distance.Value.ToString("N2") AL</span>
+                                    </div>
+                                }
+                                @if (star.Radius.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Rayon</span>
+                                        <span class="value">@star.Radius.Value.ToString("N2") R☉</span>
+                                    </div>
+                                }
+                                @if (star.Luminosity.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Luminosité</span>
+                                        <span class="value">@star.Luminosity.Value.ToString("N2") L☉</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(star.SpectralClassName))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Classe spectrale</span>
+                                        <span class="value">@star.SpectralClassName</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(star.Constellation))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Constellation</span>
+                                        <span class="value">@star.Constellation</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(star.Designation))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Désignation</span>
+                                        <span class="value">@star.Designation</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(star.BayerDesignation))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Désignation de Bayer</span>
+                                        <span class="value">@star.BayerDesignation</span>
+                                    </div>
+                                }
+                                @if (star.ApprovalDate.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Date d'approbation</span>
+                                        <span class="value">@star.ApprovalDate.Value.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewModel.SelectedBodyDetails.Asteroid != null)
+                    {
+                        AsteroidDto asteroid = ViewModel.SelectedBodyDetails.Asteroid;
+                        <div class="specific-details">
+                            <h3>Caractéristiques de l'Astéroïde</h3>
+                            
+                            <div class="details-grid">
+                                @if (asteroid.DiameterMaxKm.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Diamètre maximal</span>
+                                        <span class="value">@asteroid.DiameterMaxKm.Value.ToString("N2") km</span>
+                                    </div>
+                                }
+                                @if (asteroid.DiameterMinKm.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Diamètre minimal</span>
+                                        <span class="value">@asteroid.DiameterMinKm.Value.ToString("N2") km</span>
+                                    </div>
+                                }
+                                @if (asteroid.AbsoluteMagnitude.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Magnitude absolue</span>
+                                        <span class="value">@asteroid.AbsoluteMagnitude.Value.ToString("N2")</span>
+                                    </div>
+                                }
+                                @if (asteroid.IsPotentiallyHazardous.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Statut de danger</span>
+                                        <span class="value status-@(asteroid.IsPotentiallyHazardous.Value ? "danger" : "safe")">
+                                            @(asteroid.IsPotentiallyHazardous.Value ? "Potentiellement dangereux" : "Non dangereux")
+                                        </span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(asteroid.OrbitalClassName))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Classe orbitale</span>
+                                        <span class="value">@asteroid.OrbitalClassName</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(asteroid.OrbitalClassDescription))
+                                {
+                                    <div class="detail-item detail-item-full">
+                                        <span class="label">Description orbitale</span>
+                                        <span class="value">@asteroid.OrbitalClassDescription</span>
+                                    </div>
+                                }
+                                @if (asteroid.SemiMajorAxis.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Demi-grand axe</span>
+                                        <span class="value">@asteroid.SemiMajorAxis.Value.ToString("N6") UA</span>
+                                    </div>
+                                }
+                                @if (asteroid.Inclination.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Inclinaison orbitale</span>
+                                        <span class="value">@asteroid.Inclination.Value.ToString("N2")°</span>
+                                    </div>
+                                }
+                                @if (asteroid.OrbitDeterminationDate.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Détermination d'orbite</span>
+                                        <span class="value">@asteroid.OrbitDeterminationDate.Value.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                }
+                                @if (asteroid.FirstObservationDate.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Première observation</span>
+                                        <span class="value">@asteroid.FirstObservationDate.Value.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                }
+                                @if (asteroid.LastObservationDate.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Dernière observation</span>
+                                        <span class="value">@asteroid.LastObservationDate.Value.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(asteroid.Reference))
+                            {
+                                <div class="reference-section">
+                                    <h4>Référence</h4>
+                                    <p>@asteroid.Reference</p>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (ViewModel.SelectedBodyDetails.Satellite != null)
+                    {
+                        SatelliteDto satellite = ViewModel.SelectedBodyDetails.Satellite;
+                        <div class="specific-details">
+                            <h3>Caractéristiques du Satellite</h3>
+                            
+                            <div class="details-grid">
+                                @if (!string.IsNullOrEmpty(satellite.PlanetName))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Planète hôte</span>
+                                        <span class="value">@satellite.PlanetName</span>
+                                    </div>
+                                }
+                                @if (satellite.Radius.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Rayon</span>
+                                        <span class="value">@satellite.Radius.Value.ToString("N2") km</span>
+                                    </div>
+                                }
+                                @if (satellite.Gravity.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Gravité</span>
+                                        <span class="value">@satellite.Gravity.Value.ToString("N2") m/s²</span>
+                                    </div>
+                                }
+                                @if (satellite.Density.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Densité</span>
+                                        <span class="value">@satellite.Density.Value.ToString("N2") g/cm³</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewModel.SelectedBodyDetails.GalaxyQuasar != null)
+                    {
+                        GalaxyQuasarDto galaxy = ViewModel.SelectedBodyDetails.GalaxyQuasar;
+                        <div class="specific-details">
+                            <h3>Caractéristiques Galaxie/Quasar</h3>
+                            
+                            <div class="details-grid">
+                                @if (!string.IsNullOrEmpty(galaxy.GalaxyQuasarClassName))
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Classe</span>
+                                        <span class="value">@galaxy.GalaxyQuasarClassName</span>
+                                    </div>
+                                }
+                                @if (galaxy.Redshift.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Redshift</span>
+                                        <span class="value">@galaxy.Redshift.Value.ToString("N4")</span>
+                                    </div>
+                                }
+                                @if (galaxy.RightAscension.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Ascension droite</span>
+                                        <span class="value">@galaxy.RightAscension.Value.ToString("N6")°</span>
+                                    </div>
+                                }
+                                @if (galaxy.Declination.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Déclinaison</span>
+                                        <span class="value">@galaxy.Declination.Value.ToString("N6")°</span>
+                                    </div>
+                                }
+                                @if (galaxy.RMagnitude.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Magnitude R</span>
+                                        <span class="value">@galaxy.RMagnitude.Value.ToString("N2")</span>
+                                    </div>
+                                }
+                                @if (galaxy.ModifiedJulianDateObservation.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Date julienne modifiée</span>
+                                        <span class="value">@galaxy.ModifiedJulianDateObservation</span>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(galaxy.Reference))
+                            {
+                                <div class="reference-section">
+                                    <h4>Référence</h4>
+                                    <p>@galaxy.Reference</p>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (ViewModel.SelectedBodyDetails.Comet != null)
+                    {
+                        CometDto comet = ViewModel.SelectedBodyDetails.Comet;
+                        <div class="specific-details">
+                            <h3>Caractéristiques de la Comète</h3>
+                            
+                            <div class="details-grid">
+                                @if (comet.OrbitalEccentricity.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Excentricité orbitale</span>
+                                        <span class="value">@comet.OrbitalEccentricity.Value.ToString("N4")</span>
+                                    </div>
+                                }
+                                @if (comet.OrbitalInclinationDegrees.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Inclinaison orbitale</span>
+                                        <span class="value">@comet.OrbitalInclinationDegrees.Value.ToString("N2")°</span>
+                                    </div>
+                                }
+                                @if (comet.AscendingNodeLongitudeDegrees.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Longitude nœud ascendant</span>
+                                        <span class="value">@comet.AscendingNodeLongitudeDegrees.Value.ToString("N2")°</span>
+                                    </div>
+                                }
+                                @if (comet.PerihelionDistanceAU.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Distance périhélie</span>
+                                        <span class="value">@comet.PerihelionDistanceAU.Value.ToString("N4") UA</span>
+                                    </div>
+                                }
+                                @if (comet.AphelionDistanceAU.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Distance aphélie</span>
+                                        <span class="value">@comet.AphelionDistanceAU.Value.ToString("N4") UA</span>
+                                    </div>
+                                }
+                                @if (comet.OrbitalPeriodYears.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">Période orbitale</span>
+                                        <span class="value">@comet.OrbitalPeriodYears.Value.ToString("N2") ans</span>
+                                    </div>
+                                }
+                                @if (comet.MinimumOrbitIntersectionDistanceAU.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="label">MOID</span>
+                                        <span class="value">@comet.MinimumOrbitIntersectionDistanceAU.Value.ToString("N6") UA</span>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(comet.Reference))
+                            {
+                                <div class="reference-section">
+                                    <h4>Référence</h4>
+                                    <p>@comet.Reference</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-white">
+                    <p>Erreur lors du chargement des détails</p>
+                </div>
+            }
         </div>
     }
 </div>
@@ -146,6 +622,7 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        ViewModel.PropertyChanged += (s, e) => InvokeAsync(StateHasChanged);
         await ViewModel.InitializeAsync();
     }
 }
