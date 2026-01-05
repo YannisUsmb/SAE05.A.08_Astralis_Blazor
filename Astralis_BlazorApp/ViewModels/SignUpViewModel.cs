@@ -69,6 +69,51 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
+
+        public async Task OnCountryChanged(int? countryId)
+        {
+            RegisterData.CountryId = countryId;
+
+            if (EditContext != null)
+            {
+                var field = EditContext.Field(nameof(RegisterData.Phone));
+                _messageStore?.Clear(field);
+                EditContext.NotifyValidationStateChanged();
+            }
+
+            await UpdatePhonePlaceholderAsync();
+
+            if (!string.IsNullOrWhiteSpace(RegisterData.Phone))
+            {
+                await OnPhoneInput(RegisterData.Phone);
+            }
+        }
+
+        private async Task UpdatePhonePlaceholderAsync()
+        {
+            if (RegisterData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    var example = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.getExampleNumber", country.IsoCode);
+                    if (!string.IsNullOrWhiteSpace(example))
+                    {
+                        PhonePlaceholder = example;
+                    }
+                }
+            }
+            else
+            {
+                PhonePlaceholder = "06 12 34 56 78";
+            }
+        }
+
+
+        public async Task OnPhoneInput(string input)
+        {
+            RegisterData.Phone = input;
+
         public void OnCountryChanged(int? countryId)
         {
             RegisterData.CountryId = countryId;
