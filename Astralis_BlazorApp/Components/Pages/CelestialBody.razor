@@ -43,51 +43,163 @@
                 @{
                     bool showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0;
                 }
-                <select class="filter-input expandable-filter @(showSubtypes ? "visible" : "")"
-                        @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
-                    <option value="0">Toutes les sous-catégories</option>
-                    @foreach (CelestialBodySubtypeDto sub in ViewModel.CelestialSubtypes)
-                    {
-                        <option value="@sub.Id">@sub.Label</option>
-                    }
-                </select>
-
-                @if (ViewModel.SelectedTypeId == 2 && ViewModel.Filter.PlanetFilter != null)
+                
+                @if (showSubtypes)
                 {
-                    <RangeFilter Label="Masse (M⊕)"
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinMass"
-                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxMass"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-
-                    <RangeFilter Label="Distance (AL)"
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinDistance"
-                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxDistance"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-
-                    <RangeFilter Label="Rayon (km)"
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinRadius"
-                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxRadius"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                    <select class="filter-pill-select" @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
+                        <option value="0">Toutes les sous-catégories</option>
+                        @foreach (CelestialBodySubtypeDto sub in ViewModel.CelestialSubtypes)
+                        {
+                            <option value="@sub.Id">@sub.Label</option>
+                        }
+                    </select>
                 }
-
+                
                 @if (ViewModel.SelectedTypeId == 1 && ViewModel.Filter.StarFilter != null)
                 {
                     <RangeFilter Label="Température (K)"
                                  @bind-MinValue="ViewModel.Filter.StarFilter.MinTemperature"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxTemperature"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
-
+        
                     <RangeFilter Label="Distance (AL)"
                                  @bind-MinValue="ViewModel.Filter.StarFilter.MinDistance"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxDistance"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Rayon (R☉)"
+                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinRadius"
+                                 @bind-MaxValue="ViewModel.Filter.StarFilter.MaxRadius"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Luminosité (L☉)"
+                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinLuminosity"
+                                 @bind-MaxValue="ViewModel.Filter.StarFilter.MaxLuminosity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
                 }
-
+                
+                @if (ViewModel.SelectedTypeId == 2 && ViewModel.Filter.PlanetFilter != null)
+                {
+                    <RangeFilter Label="Masse (M⊕)"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinMass"
+                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxMass"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Rayon (R⊕)"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinRadius"
+                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxRadius"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Distance (AL)"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinDistance"
+                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxDistance"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Excentricité"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinEccentricity"
+                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxEccentricity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Magnitude stellaire"
+                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinStellarMagnitude"
+                                 @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxStellarMagnitude"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                }
+                
                 @if (ViewModel.SelectedTypeId == 3 && ViewModel.Filter.AsteroidFilter != null)
                 {
                     <RangeFilter Label="Diamètre (km)"
                                  @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinDiameter"
                                  @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxDiameter"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Magnitude absolue"
+                                 @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinAbsoluteMagnitude"
+                                 @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxAbsoluteMagnitude"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Inclinaison (°)"
+                                 @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinInclination"
+                                 @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxInclination"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Demi-grand axe (UA)"
+                                 @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinSemiMajorAxis"
+                                 @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxSemiMajorAxis"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                }
+                
+                @if (ViewModel.SelectedTypeId == 4 && ViewModel.Filter.CometFilter != null)
+                {
+                    <RangeFilter Label="Excentricité"
+                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinEccentricity"
+                                 @bind-MaxValue="ViewModel.Filter.CometFilter.MaxEccentricity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Inclinaison (°)"
+                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinInclination"
+                                 @bind-MaxValue="ViewModel.Filter.CometFilter.MaxInclination"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Périhélie (UA)"
+                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinPerihelionAU"
+                                 @bind-MaxValue="ViewModel.Filter.CometFilter.MaxPerihelionAU"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Aphélie (UA)"
+                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinAphelionAU"
+                                 @bind-MaxValue="ViewModel.Filter.CometFilter.MaxAphelionAU"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Période orbitale (ans)"
+                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinOrbitalPeriod"
+                                 @bind-MaxValue="ViewModel.Filter.CometFilter.MaxOrbitalPeriod"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="MOID (UA)"
+                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinMOID"
+                                 @bind-MaxValue="ViewModel.Filter.CometFilter.MaxMOID"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                }
+                
+                @if (ViewModel.SelectedTypeId == 5 && ViewModel.Filter.GalaxyFilter != null)
+                {
+                    <RangeFilter Label="Ascension droite (°)"
+                                 @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRightAscension"
+                                 @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxRightAscension"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Déclinaison (°)"
+                                 @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinDeclination"
+                                 @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxDeclination"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Redshift"
+                                 @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRedshift"
+                                 @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxRedshift"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Magnitude R"
+                                 @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRMagnitude"
+                                 @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxRMagnitude"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                }
+                
+                @if (ViewModel.SelectedTypeId == 6 && ViewModel.Filter.SatelliteFilter != null)
+                {
+                    <RangeFilter Label="Rayon (km)"
+                                 @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinRadius"
+                                 @bind-MaxValue="ViewModel.Filter.SatelliteFilter.MaxRadius"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Gravité (m/s²)"
+                                 @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinGravity"
+                                 @bind-MaxValue="ViewModel.Filter.SatelliteFilter.MaxGravity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+        
+                    <RangeFilter Label="Densité (g/cm³)"
+                                 @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinDensity"
+                                 @bind-MaxValue="ViewModel.Filter.SatelliteFilter.MaxDensity"
                                  OnSearchTriggered="ViewModel.OnFilterChanged" />
                 }
             </div>
