@@ -10,7 +10,8 @@
         public const string CelestialBodies = "corps-celestes";
         public const string Events = "/evenements";
         public const string SignUp = "/inscription";
-        public const string Profile = "/profil";
+        public const string Profile = "/settings/profil";
+        public const string Account = "/settings/compte";
         public const string Premium = "/premium";
         public const string Shop = "/boutique";
     }

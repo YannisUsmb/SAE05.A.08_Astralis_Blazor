@@ -14,7 +14,6 @@ namespace Astralis_BlazorApp.ViewModels
     {
         private readonly IUserService _userService;
         private readonly ICountryService _countryService;
-        private readonly IUploadService _uploadService;
         private readonly NavigationManager _navigation;
         private readonly IJSRuntime _jsRuntime;
 
@@ -37,22 +36,18 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private string phonePlaceholder = "06 12 34 56 78";
 
-        public bool IsUploading { get; private set; } = false;
-
         private ValidationMessageStore? _messageStore;
         public EditContext? EditContext { get; set; }
 
         public SignUpViewModel(
             IUserService userService,
             ICountryService countryService,
-            IUploadService uploadService,
             NavigationManager navigation,
             IJSRuntime jsRuntime)
         {
             _userService = userService;
             _countryService = countryService;
             _navigation = navigation;
-            _uploadService = uploadService;
             _jsRuntime = jsRuntime;
         }
 
@@ -69,32 +64,35 @@ namespace Astralis_BlazorApp.ViewModels
             try
             {
                 var list = await _countryService.GetAllAsync();
-                var sortedList = list.OrderBy(c => c.Name).ToList();
-                Countries = new ObservableCollection<CountryDto>(sortedList);
+                Countries = new ObservableCollection<CountryDto>(list.OrderBy(c => c.Name));
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur chargement pays: {ex.Message}");
+                Console.WriteLine($"Erreur pays: {ex.Message}");
             }
         }
-
 
         public async Task OnCountryChanged(int? countryId)
         {
             RegisterData.CountryId = countryId;
-
-            if (EditContext != null)
-            {
-                var field = EditContext.Field(nameof(RegisterData.Phone));
-                _messageStore?.Clear(field);
-                EditContext.NotifyValidationStateChanged();
-            }
-
             await UpdatePhonePlaceholderAsync();
-
             if (!string.IsNullOrWhiteSpace(RegisterData.Phone))
             {
                 await OnPhoneInput(RegisterData.Phone);
+            }
+        }
+
+        public async Task OnPhoneInput(string input)
+        {
+            RegisterData.Phone = input;
+            if (RegisterData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
+                    if (RegisterData.Phone != formatted) RegisterData.Phone = formatted;
+                }
             }
         }
 
@@ -106,10 +104,7 @@ namespace Astralis_BlazorApp.ViewModels
                 if (country != null && !string.IsNullOrEmpty(country.IsoCode))
                 {
                     var example = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.getExampleNumber", country.IsoCode);
-                    if (!string.IsNullOrWhiteSpace(example))
-                    {
-                        PhonePlaceholder = example;
-                    }
+                    if (!string.IsNullOrWhiteSpace(example)) PhonePlaceholder = example;
                 }
             }
             else
@@ -118,32 +113,9 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
-
-        public async Task OnPhoneInput(string input)
-        {
-            RegisterData.Phone = input;
-
-            if (RegisterData.CountryId.HasValue)
-            {
-                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
-                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
-                {
-                    var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
-
-                    if (RegisterData.Phone != formatted)
-                    {
-                        RegisterData.Phone = formatted;
-                    }
-                }
-            }
-        }
-
         public async Task ValidatePhoneOnBlurAsync()
         {
-            if (string.IsNullOrWhiteSpace(RegisterData.Phone))
-            {
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(RegisterData.Phone)) return;
 
             if (!RegisterData.CountryId.HasValue)
             {
@@ -154,46 +126,13 @@ namespace Astralis_BlazorApp.ViewModels
             var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
             if (country != null && !string.IsNullOrEmpty(country.IsoCode))
             {
-                // Appel JS pour vérifier la validité
                 bool isValid = await _jsRuntime.InvokeAsync<bool>("window.phoneValidator.isValid", RegisterData.Phone, country.IsoCode);
-
-                if (!isValid)
+                if (!isValid && EditContext != null)
                 {
-                    if (EditContext != null)
-                    {
-                        var field = EditContext.Field(nameof(RegisterData.Phone));
-                        _messageStore?.Clear(field); // On nettoie avant d'ajouter
-                        _messageStore?.Add(field, $"Numéro invalide pour ce pays ({country.Name}).");
-                        EditContext.NotifyValidationStateChanged();
-                    }
+                    var field = EditContext.Field(nameof(RegisterData.Phone));
+                    _messageStore?.Add(field, $"Numéro invalide pour ce pays ({country.Name}).");
+                    EditContext.NotifyValidationStateChanged();
                 }
-            }
-        }
-
-        public async Task UploadAvatarAsync(IBrowserFile file)
-        {
-            if (file == null) return;
-            IsUploading = true;
-            try
-            {
-                var url = await _uploadService.UploadImageAsync(file);
-                if (!string.IsNullOrEmpty(url))
-                {
-                    RegisterData.AvatarUrl = url;
-                    ErrorMessage = string.Empty;
-                }
-                else
-                {
-                    ErrorMessage = "Échec de l'envoi de l'image.";
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = "Erreur technique lors de l'upload.";
-            }
-            finally
-            {
-                IsUploading = false;
             }
         }
 
@@ -203,7 +142,6 @@ namespace Astralis_BlazorApp.ViewModels
             if (IsLoading) return;
             IsLoading = true;
             ErrorMessage = null;
-
             _messageStore?.Clear();
 
             if (EditContext != null && !EditContext.Validate())
@@ -214,28 +152,18 @@ namespace Astralis_BlazorApp.ViewModels
 
             try
             {
-
                 if (RegisterData.Password != RegisterData.ConfirmPassword)
                 {
-                    ErrorMessage = "Les mots de passe ne correspondent pas.";
+                    if (EditContext != null)
+                    {
+                        _messageStore?.Add(EditContext.Field(nameof(RegisterData.ConfirmPassword)), "Les mots de passe ne correspondent pas.");
+                        EditContext.NotifyValidationStateChanged();
+                    }
                     IsLoading = false;
                     return;
                 }
 
-                if (!string.IsNullOrWhiteSpace(RegisterData.Phone) && RegisterData.CountryId.HasValue)
-                {
-                    await ValidatePhoneOnBlurAsync();
-                    if (EditContext!.GetValidationMessages(EditContext.Field(nameof(RegisterData.Phone))).Any())
-                    {
-                        IsLoading = false;
-                        return;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(RegisterData.Phone))
-                {
-                    RegisterData.Phone = RegisterData.Phone.Replace(" ", "");
-                }
+                if (!string.IsNullOrEmpty(RegisterData.Phone)) RegisterData.Phone = RegisterData.Phone.Replace(" ", "");
 
                 var availability = await _userService.CheckAvailabilityAsync(
                     RegisterData.Email,
@@ -245,7 +173,7 @@ namespace Astralis_BlazorApp.ViewModels
 
                 if (availability != null && availability.IsTaken)
                 {
-                    var fieldName = availability.Field switch
+                    var fieldName = availability.Field?.ToLower() switch
                     {
                         "email" => nameof(RegisterData.Email),
                         "username" => nameof(RegisterData.Username),
@@ -255,12 +183,12 @@ namespace Astralis_BlazorApp.ViewModels
 
                     if (!string.IsNullOrEmpty(fieldName) && EditContext != null)
                     {
-                        _messageStore?.Add(EditContext.Field(fieldName), availability.Message ?? "Déjà utilisé.");
+                        _messageStore?.Add(EditContext.Field(fieldName), availability.Message ?? "Ce champ est déjà utilisé.");
                         EditContext.NotifyValidationStateChanged();
                     }
                     else
                     {
-                        ErrorMessage = availability.Message;
+                        ErrorMessage = availability.Message ?? "Ces informations sont déjà utilisées.";
                     }
 
                     IsLoading = false;
@@ -275,13 +203,13 @@ namespace Astralis_BlazorApp.ViewModels
                 }
                 else
                 {
-                    ErrorMessage = "L'inscription a échoué. Veuillez vérifier vos informations.";
+                    ErrorMessage = "L'inscription a échoué.";
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                ErrorMessage = "Une erreur technique est survenue lors de l'inscription.";
+                ErrorMessage = "Une erreur technique est survenue.";
             }
             finally
             {

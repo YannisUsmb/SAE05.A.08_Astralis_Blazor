@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<SignUpViewModel>();
         services.AddScoped<EventViewModel>();
         services.AddScoped<AccountViewModel>();
+        services.AddScoped<ProfileViewModel>();
 
         return services;
     }
