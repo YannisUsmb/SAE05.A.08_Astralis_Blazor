@@ -1,4 +1,5 @@
 ﻿using Astralis.Shared.DTOs;
+using Astralis.Shared.Enums;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
