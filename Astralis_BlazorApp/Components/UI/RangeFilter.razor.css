@@ -7,69 +7,177 @@
     background: rgba(43, 18, 88, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #e0e0e0;
-    padding: 6px 16px;
+    padding: 8px 18px;
     border-radius: 50px;
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
+    gap: 8px;
+    white-space: nowrap;
 }
 
 .filter-pill:hover {
     border-color: #a76dff;
-    box-shadow: 0 0 8px rgba(167, 109, 255, 0.3);
+    box-shadow: 0 0 12px rgba(167, 109, 255, 0.4);
+    transform: translateY(-2px);
 }
 
 .filter-pill.active {
-    background: #a76dff;
+    background: linear-gradient(135deg, #a76dff 0%, #8b5cf6 100%);
     border-color: #a76dff;
     color: white;
     font-weight: 600;
+    box-shadow: 0 4px 12px rgba(167, 109, 255, 0.4);
 }
 
-/* Le Popup */
+.filter-pill i {
+    font-size: 0.85rem;
+}
+
 .range-popup {
     position: absolute;
-    top: 115%;
-    left: 0;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1000;
-    background: #1a1a2e;
+    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
     border: 1px solid rgba(167, 109, 255, 0.3);
-    padding: 1rem;
+    padding: 1.25rem;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    min-width: 260px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    min-width: 300px;
+    backdrop-filter: blur(10px);
 }
 
-.range-input {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: white;
-    border-radius: 6px;
-    padding: 6px;
-    width: 80px;
-    text-align: center;
+.range-inputs-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.input-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .input-label {
-    display: block;
     font-size: 0.75rem;
     color: #aaa;
-    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
-.btn-xs-reset {
-    background: none;
+.range-input {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    border-radius: 8px;
+    padding: 10px 12px;
+    width: 100%;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.range-input:focus {
+    outline: none;
+    border-color: #a76dff;
+    background: rgba(167, 109, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(167, 109, 255, 0.1);
+}
+
+.range-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.range-input::-webkit-outer-spin-button,
+.range-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.range-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.separator {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.2rem;
+    padding-bottom: 10px;
+    user-select: none;
+}
+
+.popup-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.btn-apply {
+    background: linear-gradient(135deg, #a76dff 0%, #8b5cf6 100%);
     border: none;
-    color: #ff6b6b;
-    font-size: 0.8rem;
-    text-decoration: underline;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-apply:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(167, 109, 255, 0.4);
+}
+
+.btn-apply:active {
+    transform: translateY(0);
+}
+
+.btn-reset {
+    background: transparent;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-reset:hover {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: #ff6b6b;
 }
 
 .click-overlay {
     position: fixed;
-    top:0; left:0; right:0; bottom:0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 999;
+    background: transparent;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
 }
