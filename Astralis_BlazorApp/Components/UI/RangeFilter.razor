@@ -7,7 +7,7 @@
         }
         else
         {
-            <i class="bi bi-chevron-down ms-2" style="font-size: 0.8em;"></i>
+            <i class="bi bi-chevron-down ms-2"></i>
         }
     </button>
 
@@ -17,33 +17,30 @@
             <div class="d-flex gap-2 align-items-center mb-2">
                 <div class="input-group">
                     <span class="input-label">Min</span>
-                    <input type="number" class="range-input" 
-                           value="@MinValue" 
-                           @onchange="OnMinChanged" 
+                    <input type="number" class="range-input"
+                           value="@MinValue"
+                           @onchange="OnMinChanged"
                            placeholder="-" />
                 </div>
                 <span class="separator text-white">-</span>
                 <div class="input-group">
                     <span class="input-label">Max</span>
-                    <input type="number" class="range-input" 
-                           value="@MaxValue" 
-                           @onchange="OnMaxChanged" 
+                    <input type="number" class="range-input"
+                           value="@MaxValue"
+                           @onchange="OnMaxChanged"
                            placeholder="-" />
                 </div>
             </div>
-            
             <div class="d-flex justify-content-end">
-                 <button class="btn-xs-reset" @onclick="Reset">Effacer</button>
+                <button class="btn-xs-reset" @onclick="Reset">Effacer</button>
             </div>
         </div>
-        
         <div class="click-overlay" @onclick="Close"></div>
     }
 </div>
 
 @code {
     [Parameter] public string Label { get; set; } = "Filtre";
-    
     [Parameter] public decimal? MinValue { get; set; }
     [Parameter] public EventCallback<decimal?> MinValueChanged { get; set; }
 
@@ -79,7 +76,7 @@
         await MaxValueChanged.InvokeAsync(MaxValue);
         await OnSearchTriggered.InvokeAsync();
     }
-    
+
     private async Task Reset()
     {
         MinValue = null;
