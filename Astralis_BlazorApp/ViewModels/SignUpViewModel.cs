@@ -34,6 +34,9 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private string? errorMessage;
 
+        [ObservableProperty]
+        private string phonePlaceholder = "06 12 34 56 78";
+
         public bool IsUploading { get; private set; } = false;
 
         private ValidationMessageStore? _messageStore;
@@ -75,6 +78,98 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
+
+        public async Task OnCountryChanged(int? countryId)
+        {
+            RegisterData.CountryId = countryId;
+
+            if (EditContext != null)
+            {
+                var field = EditContext.Field(nameof(RegisterData.Phone));
+                _messageStore?.Clear(field);
+                EditContext.NotifyValidationStateChanged();
+            }
+
+            await UpdatePhonePlaceholderAsync();
+
+            if (!string.IsNullOrWhiteSpace(RegisterData.Phone))
+            {
+                await OnPhoneInput(RegisterData.Phone);
+            }
+        }
+
+        private async Task UpdatePhonePlaceholderAsync()
+        {
+            if (RegisterData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    var example = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.getExampleNumber", country.IsoCode);
+                    if (!string.IsNullOrWhiteSpace(example))
+                    {
+                        PhonePlaceholder = example;
+                    }
+                }
+            }
+            else
+            {
+                PhonePlaceholder = "06 12 34 56 78";
+            }
+        }
+
+
+        public async Task OnPhoneInput(string input)
+        {
+            RegisterData.Phone = input;
+
+            if (RegisterData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
+
+                    if (RegisterData.Phone != formatted)
+                    {
+                        RegisterData.Phone = formatted;
+                    }
+                }
+            }
+        }
+
+        public async Task ValidatePhoneOnBlurAsync()
+        {
+            if (string.IsNullOrWhiteSpace(RegisterData.Phone))
+            {
+                return;
+            }
+
+            if (!RegisterData.CountryId.HasValue)
+            {
+                EditContext?.NotifyFieldChanged(EditContext.Field(nameof(RegisterData.CountryId)));
+                return;
+            }
+
+            var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
+            if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+            {
+                // Appel JS pour vérifier la validité
+                bool isValid = await _jsRuntime.InvokeAsync<bool>("window.phoneValidator.isValid", RegisterData.Phone, country.IsoCode);
+
+                if (!isValid)
+                {
+                    if (EditContext != null)
+                    {
+                        var field = EditContext.Field(nameof(RegisterData.Phone));
+                        _messageStore?.Clear(field); // On nettoie avant d'ajouter
+                        _messageStore?.Add(field, $"Numéro invalide pour ce pays ({country.Name}).");
+                        EditContext.NotifyValidationStateChanged();
+                    }
+                }
+            }
+        }
+
         public async Task UploadAvatarAsync(IBrowserFile file)
         {
             if (file == null) return;
@@ -102,21 +197,6 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
-        public async Task FormatPhoneNumber()
-        {
-            if (!string.IsNullOrWhiteSpace(RegisterData.Phone) && RegisterData.CountryId.HasValue)
-            {
-                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
-
-                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
-                {
-                    string formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", RegisterData.Phone, country.IsoCode);
-
-                    RegisterData.Phone = formatted;
-                }
-            }
-        }
-
         [RelayCommand]
         public async Task RegisterAsync()
         {
@@ -134,6 +214,7 @@ namespace Astralis_BlazorApp.ViewModels
 
             try
             {
+
                 if (RegisterData.Password != RegisterData.ConfirmPassword)
                 {
                     ErrorMessage = "Les mots de passe ne correspondent pas.";
@@ -143,27 +224,11 @@ namespace Astralis_BlazorApp.ViewModels
 
                 if (!string.IsNullOrWhiteSpace(RegisterData.Phone) && RegisterData.CountryId.HasValue)
                 {
-                    var selectedCountry = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
-
-                    if (selectedCountry != null && !string.IsNullOrEmpty(selectedCountry.IsoCode))
+                    await ValidatePhoneOnBlurAsync();
+                    if (EditContext!.GetValidationMessages(EditContext.Field(nameof(RegisterData.Phone))).Any())
                     {
-                        bool isValid = await _jsRuntime.InvokeAsync<bool>("window.phoneValidator.isValid", RegisterData.Phone, selectedCountry.IsoCode);
-
-                        if (!isValid)
-                        {
-                            if (EditContext != null)
-                            {
-                                _messageStore?.Add(EditContext.Field(nameof(RegisterData.Phone)), $"Numéro invalide pour ce pays ({selectedCountry.Name}).");
-                                EditContext.NotifyValidationStateChanged();
-                            }
-                            else
-                            {
-                                ErrorMessage = $"Numéro invalide pour ce pays ({selectedCountry.Name}).";
-                            }
-
-                            IsLoading = false;
-                            return;
-                        }
+                        IsLoading = false;
+                        return;
                     }
                 }
 

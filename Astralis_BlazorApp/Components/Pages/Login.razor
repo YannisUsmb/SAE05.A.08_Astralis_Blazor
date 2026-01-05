@@ -23,15 +23,17 @@
                     </div>
                 }
 
-                <div class="form-group">
-                    <label>Mode de connexion</label>
-                    <InputSelect class="form-control-astralis mb-3"
-                                 Value="ViewModel.SelectedLoginMode"
-                                 ValueChanged="@((LoginMode m) => ViewModel.SelectedLoginMode = m)"
-                                 ValueExpression="@(() => ViewModel.SelectedLoginMode)">
-                        <option value="@LoginMode.Standard">Identifiant ou Email</option>
-                        <option value="@LoginMode.Phone">Numéro de téléphone</option>
-                    </InputSelect>
+                <div class="login-mode-switch">
+                    <button type="button"
+                            class="btn-mode @(ViewModel.SelectedLoginMode == LoginMode.Standard ? "active" : "")"
+                            @onclick="() => ViewModel.SelectedLoginMode = LoginMode.Standard">
+                        Identifiant / Email
+                    </button>
+                    <button type="button"
+                            class="btn-mode @(ViewModel.SelectedLoginMode == LoginMode.Phone ? "active" : "")"
+                            @onclick="() => ViewModel.SelectedLoginMode = LoginMode.Phone">
+                        Téléphone
+                    </button>
                 </div>
 
                 @if (ViewModel.SelectedLoginMode == LoginMode.Standard)
@@ -39,7 +41,6 @@
                     <div class="form-group">
                         <label for="login">Identifiant ou Email</label>
                         <InputText id="login" class="form-control-astralis" @bind-Value="ViewModel.LoginData.Identifier" />
-                        <small class="text-muted">Le caractère @@ est interdit dans les noms d'utilisateur.</small>
                     </div>
                 }
                 else
@@ -54,7 +55,11 @@
                                     <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
                                 }
                             </InputSelect>
-                            <InputText class="form-control-astralis" placeholder="6 12 34..." @bind-Value="ViewModel.LoginData.Phone" />
+
+                            <InputText class="form-control-astralis phone-input"
+                                       placeholder="06 12 34..."
+                                       @bind-Value="ViewModel.LoginData.Phone"
+                                       @onfocusout="ViewModel.FormatPhoneNumber" />
                         </div>
                     </div>
                 }
