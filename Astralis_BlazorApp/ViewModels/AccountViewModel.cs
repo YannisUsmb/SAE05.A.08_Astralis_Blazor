@@ -1,111 +1,212 @@
 ﻿using Astralis.Shared.DTOs;
+using Astralis.Shared.Enums;
 using Astralis_BlazorApp.Services.Interfaces;
-using Microsoft.AspNetCore.Components;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
+using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels
 {
-    public class AccountViewModel
+    public partial class AccountViewModel : ObservableObject
     {
         private readonly IUserService _userService;
+        private readonly ICountryService _countryService;
         private readonly AuthenticationStateProvider _authStateProvider;
-        private readonly NavigationManager _navigation;
+        private readonly IJSRuntime _jsRuntime;
 
-        public string CurrentEmail { get; set; } = "Chargement...";
-        public string NewEmail { get; set; } = "";
+        [ObservableProperty]
+        private UserUpdateDto contactData = new();
 
-        public ChangePasswordDto PasswordModel { get; set; } = new();
+        [ObservableProperty]
+        private ObservableCollection<CountryDto> countries = new();
 
-        public string? SuccessMessage { get; set; }
-        public string? ErrorMessage { get; set; }
+        [ObservableProperty]
+        private string phonePlaceholder = "Numéro de téléphone";
 
-        public AccountViewModel(IUserService userService, AuthenticationStateProvider authStateProvider, NavigationManager navigation)
+        [ObservableProperty]
+        private ChangePasswordDto passwordModel = new();
+
+        [ObservableProperty]
+        private bool isLoading;
+        [ObservableProperty]
+        private string? successMessage;
+        [ObservableProperty]
+        private string? errorMessage;
+
+        private ValidationMessageStore? _messageStore;
+        public EditContext? EditContext { get; set; }
+
+        private int _currentUserId;
+        private UserUpdateDto? _originalData;
+
+        public AccountViewModel(IUserService userService, ICountryService countryService, AuthenticationStateProvider authStateProvider, IJSRuntime jsRuntime)
         {
             _userService = userService;
+            _countryService = countryService;
             _authStateProvider = authStateProvider;
-            _navigation = navigation;
+            _jsRuntime = jsRuntime;
         }
 
         public async Task LoadUserDataAsync()
         {
-            var authState = await _authStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (user.Identity == null || !user.Identity.IsAuthenticated)
-            {
-                Console.WriteLine("Utilisateur non authentifié dans le ViewModel");
-                CurrentEmail = "Non connecté.";
-                return;
-            }
-
-            var userIdClaim = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                Console.WriteLine("ERREUR CRITIQUE: Claim NameIdentifier introuvable !");
-                CurrentEmail = "Erreur: ID utilisateur manquant.";
-                return;
-            }
-
-            if (int.TryParse(userIdClaim.Value, out int userId))
-            {
-                var userDto = await _userService.GetByIdAsync(userId);
-                if (userDto != null)
-                {
-                    CurrentEmail = userDto.Email;
-                    NewEmail = userDto.Email;
-                    return;
-                }
-            }
-
-            CurrentEmail = "Impossible de charger les données.";
-        }
-
-        public async Task UpdateEmailAsync()
-        {
-            SuccessMessage = null;
-            ErrorMessage = null;
-
-            if (string.IsNullOrWhiteSpace(NewEmail) || NewEmail == CurrentEmail)
-            {
-                return;
-            }
-
+            IsLoading = true;
             try
             {
-                var authState = await _authStateProvider.GetAuthenticationStateAsync();
-                var userIdStr = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var countriesList = await _countryService.GetAllAsync();
+                Countries = new ObservableCollection<CountryDto>(countriesList.OrderBy(c => c.Name));
 
-                if (int.TryParse(userIdStr, out int userId))
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                var userClaim = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+
+                if (userClaim != null && int.TryParse(userClaim.Value, out int userId))
                 {
+                    _currentUserId = userId;
                     var userDto = await _userService.GetByIdAsync(userId);
+
                     if (userDto != null)
                     {
-                        var updateDto = new UserUpdateDto
+                        ContactData = new UserUpdateDto
                         {
-                            Email = NewEmail,
+                            Email = userDto.Email,
+                            Phone = userDto.Phone,
+                            CountryId = userDto.CountryId,
+
                             FirstName = userDto.FirstName,
                             LastName = userDto.LastName,
                             Username = userDto.Username,
                             AvatarUrl = userDto.AvatarUrl,
                             Gender = userDto.Gender,
-                            MultiFactorAuthentification = userDto.MultiFactorAuthentification,
+                            MultiFactorAuthentification = userDto.MultiFactorAuthentification
+                        };
+
+                        _originalData = new UserUpdateDto
+                        {
+                            Email = userDto.Email,
                             Phone = userDto.Phone
                         };
 
-                        await _userService.UpdateAsync(userId, updateDto);
-                        CurrentEmail = NewEmail;
-                        SuccessMessage = "Adresse email mise à jour avec succès.";
+                        EditContext = new EditContext(ContactData);
+                        _messageStore = new ValidationMessageStore(EditContext);
+                        EditContext.OnValidationRequested += (s, e) => _messageStore.Clear();
+                        EditContext.OnFieldChanged += (s, e) => _messageStore.Clear(e.FieldIdentifier);
+
+                        await UpdatePhonePlaceholderAsync();
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERREUR UpdateEmail] : {ex.Message}");
+                ErrorMessage = "Impossible de charger les données.";
+            }
+            finally { IsLoading = false; }
+        }
 
-                ErrorMessage = "Une erreur est survenue lors de la mise à jour de votre email. Veuillez réessayer plus tard.";
+        public async Task OnCountryChanged(int? newCountryId)
+        {
+            ContactData.CountryId = newCountryId;
+            await UpdatePhonePlaceholderAsync();
+            if (!string.IsNullOrWhiteSpace(ContactData.Phone)) await OnPhoneInput(ContactData.Phone);
+        }
+
+        public async Task OnPhoneInput(string input)
+        {
+            ContactData.Phone = input;
+            if (ContactData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == ContactData.CountryId);
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
+                    if (ContactData.Phone != formatted) ContactData.Phone = formatted;
+                }
             }
         }
 
+        private async Task UpdatePhonePlaceholderAsync()
+        {
+            if (ContactData.CountryId.HasValue)
+            {
+                var country = Countries.FirstOrDefault(c => c.Id == ContactData.CountryId);
+                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                {
+                    var example = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.getExampleNumber", country.IsoCode);
+                    if (!string.IsNullOrWhiteSpace(example)) PhonePlaceholder = example;
+                }
+            }
+        }
+
+        [RelayCommand]
+        public async Task SaveContactInfoAsync()
+        {
+            if (EditContext == null || !EditContext.Validate()) return;
+
+            IsLoading = true;
+            SuccessMessage = null;
+            ErrorMessage = null;
+            _messageStore?.Clear();
+
+            try
+            {
+                string? cleanPhone = !string.IsNullOrEmpty(ContactData.Phone) ? ContactData.Phone.Replace(" ", "") : null;
+
+                string? emailToCheck = (ContactData.Email != _originalData?.Email) ? ContactData.Email : null;
+                string? phoneToCheck = (ContactData.Phone != _originalData?.Phone) ? cleanPhone : null;
+
+                if (emailToCheck != null || phoneToCheck != null)
+                {
+                    var availability = await _userService.CheckAvailabilityAsync(emailToCheck, null, phoneToCheck);
+
+                    if (availability != null && availability.IsTaken)
+                    {
+                        var fieldName = availability.Field?.ToLower() switch
+                        {
+                            "email" => nameof(ContactData.Email),
+                            "phone" => nameof(ContactData.Phone),
+                            _ => string.Empty
+                        };
+
+                        if (!string.IsNullOrEmpty(fieldName))
+                        {
+                            _messageStore?.Add(EditContext.Field(fieldName), availability.Message ?? "Déjà utilisé.");
+                            EditContext.NotifyValidationStateChanged();
+                        }
+                        else
+                        {
+                            ErrorMessage = availability.Message;
+                        }
+                        IsLoading = false;
+                        return;
+                    }
+                }
+
+                ContactData.Phone = cleanPhone;
+                var result = await _userService.UpdateAsync(_currentUserId, ContactData);
+
+                if (result != null)
+                {
+                    _originalData.Email = ContactData.Email;
+                    _originalData.Phone = ContactData.Phone;
+                    
+                    ContactData.Phone = result.Phone;
+
+                    SuccessMessage = "Coordonnées mises à jour avec succès.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Erreur lors de la mise à jour.";
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
         public async Task ChangePasswordAsync()
         {
             SuccessMessage = null;
@@ -113,21 +214,14 @@ namespace Astralis_BlazorApp.ViewModels
 
             try
             {
-                var authState = await _authStateProvider.GetAuthenticationStateAsync();
-                var userIdStr = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                if (int.TryParse(userIdStr, out int userId))
-                {
-                    await _userService.ChangePasswordAsync(userId, PasswordModel);
-                    SuccessMessage = "Mot de passe modifié avec succès.";
-                    PasswordModel = new ChangePasswordDto();
-                }
+                await _userService.ChangePasswordAsync(_currentUserId, PasswordModel);
+                SuccessMessage = "Mot de passe modifié avec succès.";
+                PasswordModel = new ChangePasswordDto();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERREUR ChangePassword] : {ex.Message}");
-
-                ErrorMessage = "Impossible de modifier le mot de passe. Vérifiez votre mot de passe actuel ou réessayez plus tard.";
+                ErrorMessage = "Impossible de modifier le mot de passe.";
+                Console.WriteLine(ex.Message);
             }
         }
     }

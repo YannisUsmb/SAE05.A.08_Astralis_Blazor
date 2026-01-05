@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @layout MainLayout
+@using Astralis_BlazorApp.Constants
 
 <div class="container py-4">
     <div class="row g-4">
@@ -9,20 +10,22 @@
                     <h6 class="text-white text-uppercase small fw-bold mb-0 ls-1">Paramètres</h6>
                 </div>
                 <nav class="d-flex flex-column py-2">
-                    <NavLink href="/settings/account" class="settings-nav-link">
-                        <i class="bi bi-person-gear"></i> Compte
+                    <NavLink href="@AppRoutes.Profile" class="settings-nav-link">
+                        <i class="bi bi-person-circle"></i> Mon Profil
                     </NavLink>
-                    <NavLink href="/settings/subscription" class="settings-nav-link">
+
+                    <NavLink href="@AppRoutes.Account" class="settings-nav-link">
+                        <i class="bi bi-shield-lock"></i> Connexion & Sécurité
+                    </NavLink>
+
+                    <NavLink href="settings/subscription" class="settings-nav-link">
                         <i class="bi bi-star"></i> Abonnement
                     </NavLink>
-                    <NavLink href="/settings/preferences" class="settings-nav-link">
+                    <NavLink href="settings/preferences" class="settings-nav-link">
                         <i class="bi bi-sliders"></i> Préférences
                     </NavLink>
-                    <NavLink href="/settings/content" class="settings-nav-link">
+                    <NavLink href="settings/bibliotheque" class="settings-nav-link">
                         <i class="bi bi-collection"></i> Ma Bibliothèque
-                    </NavLink>
-                    <NavLink href="/settings/security" class="settings-nav-link">
-                        <i class="bi bi-shield-lock"></i> Sécurité & Données
                     </NavLink>
                 </nav>
             </div>

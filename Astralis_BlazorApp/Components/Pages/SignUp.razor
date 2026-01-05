@@ -15,7 +15,7 @@
             <EditForm EditContext="ViewModel.EditContext" OnSubmit="ViewModel.RegisterAsync">
                 <DataAnnotationsValidator />
 
-                @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+                @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage) && !ViewModel.EditContext!.GetValidationMessages().Any())
                 {
                     <div class="alert alert-danger mb-3" role="alert">
                         @ViewModel.ErrorMessage
@@ -50,9 +50,7 @@
                 <div class="form-group">
                     <label>Téléphone</label>
                     <div class="input-group-astralis">
-
-                        <InputSelect TValue="int?"
-                                     class="form-control-astralis prefix-select"
+                        <InputSelect TValue="int?" class="form-control-astralis prefix-select"
                                      Value="@ViewModel.RegisterData.CountryId"
                                      ValueChanged="@(async (int? c) => await ViewModel.OnCountryChanged(c))"
                                      ValueExpression="@(() => ViewModel.RegisterData.CountryId)">
@@ -63,8 +61,7 @@
                             }
                         </InputSelect>
 
-                        <input type="tel"
-                               class="form-control-astralis phone-input"
+                        <input type="tel" class="form-control-astralis phone-input"
                                placeholder="@ViewModel.PhonePlaceholder"
                                value="@ViewModel.RegisterData.Phone"
                                @oninput="@(async (ChangeEventArgs e) => await ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))"
@@ -79,47 +76,20 @@
                     <InputSelect class="form-control-astralis" @bind-Value="ViewModel.RegisterData.Gender">
                         @foreach (GenderType gender in Enum.GetValues(typeof(GenderType)))
                         {
-                            <option value="@gender">@GetFrenchGenderLabel(gender)</option>
+                            @if (gender != GenderType.Unknown)
+                            {
+                                <option value="@gender">@GetFrenchGenderLabel(gender)</option>
+                            }
                         }
                     </InputSelect>
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Gender)" />
                 </div>
 
-                <div class="form-group">
-                    <label>Photo de profil</label>
-
-                    <div class="d-flex align-items-center gap-3">
-                        @if (!string.IsNullOrEmpty(ViewModel.RegisterData.AvatarUrl))
-                        {
-                            <img src="@ViewModel.RegisterData.AvatarUrl"
-                                 class="rounded-circle border border-secondary"
-                                 style="width: 50px; height: 50px; object-fit: cover;"
-                                 alt="Avatar" />
-                        }
-                        else
-                        {
-                            <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center"
-                                 style="width: 50px; height: 50px;">
-                                <i class="bi bi-person text-white-50" style="font-size: 1.5rem;"></i>
-                            </div>
-                        }
-
-                        <div class="flex-grow-1">
-                            <InputFile OnChange="OnFileSelected"
-                                       class="form-control-astralis"
-                                       accept=".jpg,.jpeg,.png" />
-
-                            @if (ViewModel.IsUploading)
-                            {
-                                <div class="text-accent-purple small mt-1">
-                                    <span class="spinner-border spinner-border-sm me-1"></span>
-                                    Envoi en cours...
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <ValidationMessage For="@(() => ViewModel.RegisterData.AvatarUrl)" />
+                <div class="form-check mb-4 mt-2">
+                    <InputCheckbox id="mfa" class="form-check-input bg-dark border-secondary" @bind-Value="ViewModel.RegisterData.MultiFactorAuthentification" />
+                    <label class="form-check-label text-muted small" for="mfa">
+                        Activer l'authentification double facteur (A2F)
+                    </label>
                 </div>
 
                 <div class="row">
@@ -133,13 +103,6 @@
                         <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.RegisterData.ConfirmPassword" />
                         <ValidationMessage For="@(() => ViewModel.RegisterData.ConfirmPassword)" />
                     </div>
-                </div>
-
-                <div class="form-check mb-4 mt-2">
-                    <InputCheckbox id="mfa" class="form-check-input bg-dark border-secondary" @bind-Value="ViewModel.RegisterData.MultiFactorAuthentification" />
-                    <label class="form-check-label text-muted small" for="mfa">
-                        Activer l'authentification double facteur (A2F)
-                    </label>
                 </div>
 
                 <button type="submit" class="btn-login" disabled="@ViewModel.IsLoading">
@@ -181,17 +144,10 @@
 </div>
 
 @code {
-    private bool _isUploading = false;
-
     protected override async Task OnInitializedAsync()
     {
         ViewModel.InitializeContext();
         await ViewModel.LoadCountriesAsync();
-    }
-
-    private async Task OnFileSelected(InputFileChangeEventArgs e)
-    {
-        await ViewModel.UploadAvatarAsync(e.File);
     }
 
     private string GetFrenchGenderLabel(GenderType gender)
@@ -201,7 +157,7 @@
             GenderType.Male => "Homme",
             GenderType.Female => "Femme",
             GenderType.Other => "Autre",
-            _ => "Non précisé"
+            _ => gender.ToString()
         };
     }
 }
