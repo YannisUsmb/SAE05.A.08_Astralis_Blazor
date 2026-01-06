@@ -25,10 +25,7 @@ public partial class ShopViewModel : ObservableObject
     
     // --- Filtres et Tri ---
     [ObservableProperty] private ProductFilterDto filter = new();
-    
     [ObservableProperty] private int selectedTypeId = 0;
-    [ObservableProperty] private int selectedSubtypeId = 0;
-    
     [ObservableProperty] private string sortBy = "name";
 
     // --- Pagination ---
@@ -38,9 +35,8 @@ public partial class ShopViewModel : ObservableObject
 
     // --- États de l'interface ---
     [ObservableProperty] private bool isLoading;
-    [ObservableProperty] private bool is3DVisible;
+
     [ObservableProperty] private ProductListDto? selectedProduct;
-    
     [ObservableProperty] private ProductDetailDto? selectedProductDetails;
     
     // --- PROPRIÉTÉ DE RECHERCHE (Implémentation Manuelle pour Debounce) ---
@@ -202,7 +198,7 @@ public partial class ShopViewModel : ObservableObject
         SelectedProductDetails = null;
         SelectedProduct = null;
     }
-    
+
     [RelayCommand]
     public async Task NextPage()
     {

@@ -107,15 +107,11 @@
             <div class="pagination-container">
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.PreviousPageCommand.ExecuteAsync(null))"
-                        disabled="@(ViewModel.CurrentPage == 1)">
-                    Précédent
-                </button>
+                        disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
                 <span class="text-white">Page @ViewModel.CurrentPage</span>
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.NextPageCommand.ExecuteAsync(null))"
-                        disabled="@(!ViewModel.HasNextPage)">
-                    Suivant
-                </button>
+                        disabled="@(!ViewModel.HasNextPage)">Suivant</button>
             </div>
         }
     }
@@ -154,14 +150,12 @@
 
                     <div class="specific-details mt-4">
                         <h3>Informations Techniques</h3>
-
                         <div class="details-grid">
                             <div class="detail-item"><span class="label">Catégorie</span><span class="value">@ViewModel.SelectedProductDetails.CategoryLabel</span></div>
                             <div class="detail-item"><span class="label">Prix Unitaire</span><span class="value">@ViewModel.SelectedProductDetails.Price.ToString("N2") €</span></div>
                             <div class="detail-item"><span class="label">Disponibilité</span><span class="value text-success">En Stock</span></div>
                         </div>
                     </div>
-
                     <div class="mt-5 d-flex justify-content-end">
                         <button class="btn btn-primary btn-lg"
                                 @onclick="() => ViewModel.AddToCart(ViewModel.SelectedProduct!)">
