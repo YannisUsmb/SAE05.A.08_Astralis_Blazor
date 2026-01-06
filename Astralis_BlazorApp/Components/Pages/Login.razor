@@ -13,7 +13,7 @@
             <h1>Connexion</h1>
             <p>Accédez à votre espace Astralis pour explorer les données du cosmos.</p>
 
-            <EditForm Model="ViewModel.LoginData" OnValidSubmit="ViewModel.LoginAsync">
+            <EditForm EditContext="ViewModel.EditContext" OnSubmit="ViewModel.LoginAsync">
                 <DataAnnotationsValidator />
 
                 @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
@@ -23,62 +23,91 @@
                     </div>
                 }
 
-                <div class="login-mode-switch">
+                <div class="login-mode-switch @(ViewModel.SelectedLoginMode == LoginMode.Phone ? "phone-active" : "")">
+                    <div class="mode-slider-bg"></div>
                     <button type="button"
                             class="btn-mode @(ViewModel.SelectedLoginMode == LoginMode.Standard ? "active" : "")"
-                            @onclick="() => ViewModel.SelectedLoginMode = LoginMode.Standard">
+                            @onclick="() => ViewModel.ToggleLoginMode(LoginMode.Standard)">
                         Identifiant / Email
                     </button>
                     <button type="button"
                             class="btn-mode @(ViewModel.SelectedLoginMode == LoginMode.Phone ? "active" : "")"
-                            @onclick="() => ViewModel.SelectedLoginMode = LoginMode.Phone">
+                            @onclick="() => ViewModel.ToggleLoginMode(LoginMode.Phone)">
                         Téléphone
                     </button>
                 </div>
 
-                @if (ViewModel.SelectedLoginMode == LoginMode.Standard)
-                {
-                    <div class="form-group">
-                        <label for="login">Identifiant ou Email</label>
-                        <InputText id="login" class="form-control-astralis" @bind-Value="ViewModel.LoginData.Identifier" />
-                    </div>
-                }
-                else
-                {
-                    <div class="form-group">
-                        <label>Téléphone</label>
-                        <div class="input-group-astralis">
-                            <InputSelect class="form-control-astralis prefix-select" @bind-Value="ViewModel.LoginData.CountryId">
-                                <option value="">Choisir...</option>
-                                @foreach (var country in ViewModel.Countries)
-                                {
-                                    <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
-                                }
-                            </InputSelect>
+                <div class="input-slider-viewport @(ViewModel.SelectedLoginMode == LoginMode.Standard ? "mode-standard" : "mode-phone")">
 
-                            <InputText class="form-control-astralis phone-input"
-                                       placeholder="06 12 34..."
-                                       @bind-Value="ViewModel.LoginData.Phone"
-                                       @onfocusout="ViewModel.FormatPhoneNumber" />
+                    <div class="input-slide slide-standard">
+                        <div class="form-group">
+                            <label>Identifiant ou Email</label>
+                            <InputText class="form-control-astralis"
+                                       placeholder="AstroBoy ou thomas@iss.space"
+                                       @bind-Value="ViewModel.LoginData.Identifier" />
+
+                            @if (ViewModel.SelectedLoginMode == LoginMode.Standard)
+                            {
+                                <ValidationMessage For="@(() => ViewModel.LoginData.Identifier)" />
+                            }
                         </div>
                     </div>
-                }
 
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <InputText type="password"
-                               id="password"
-                               class="form-control-astralis"
-                               placeholder="Votre mot de passe"
-                               @bind-Value="ViewModel.LoginData.Password" />
+                    <div class="input-slide slide-phone">
+                        <div class="form-group">
+                            <label>Numéro de téléphone</label>
+                            <div class="input-group-astralis">
+                                <InputSelect TValue="int?" class="form-control-astralis prefix-select"
+                                             Value="@ViewModel.LoginData.CountryId"
+                                             ValueChanged="@( (int? c) => ViewModel.OnCountryChanged(c) )"
+                                             ValueExpression="@( () => ViewModel.LoginData.CountryId )">
+
+                                    @if (ViewModel.Countries == null || !ViewModel.Countries.Any())
+                                    {
+                                        <option value="" disabled selected>Chargement...</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="">Choisir...</option>
+                                        @foreach (var country in ViewModel.Countries)
+                                        {
+                                            <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
+                                        }
+                                    }
+                                </InputSelect>
+
+                                <input type="tel" class="form-control-astralis phone-input"
+                                       placeholder="@ViewModel.PhonePlaceholder"
+                                       value="@ViewModel.LoginData.Phone"
+                                       @oninput="@((ChangeEventArgs e) => ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))"
+                                       disabled="@(!ViewModel.LoginData.CountryId.HasValue)" />
+                            </div>
+
+                            @if (ViewModel.SelectedLoginMode == LoginMode.Phone)
+                            {
+                                <ValidationMessage For="@(() => ViewModel.LoginData.CountryId)" />
+                                <ValidationMessage For="@(() => ViewModel.LoginData.Phone)" />
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-group mt-3">
+                    <label>Mot de passe</label>
+                    <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.LoginData.Password" />
                     <ValidationMessage For="@(() => ViewModel.LoginData.Password)" />
+                </div>
+
+                <div class="form-actions">
+                    <NavLink href="/mot-de-passe-oublie" class="forgot-password">Mot de passe oublié ?</NavLink>
                 </div>
 
                 <button type="submit" class="btn-login" disabled="@ViewModel.IsLoading">
                     @if (ViewModel.IsLoading)
                     {
                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        <span>Connexion en cours...</span>
+                        <span>Connexion...</span>
                     }
                     else
                     {
@@ -87,18 +116,16 @@
                 </button>
 
                 <div class="login-footer">
-                    <p>Pas encore de compte ? <NavLink href="@AppRoutes.SignUp">S'inscrire</NavLink></p>
-                    <p><a href="#">Mot de passe oublié ?</a></p>
+                    <p>Pas encore de compte ? <NavLink href="/inscription">S'inscrire</NavLink></p>
                 </div>
             </EditForm>
         </div>
 
         <div class="login-right">
-            <h2>Autres connexions</h2>
+            <h2>Ou continuer avec</h2>
+            <div id="google-btn-container" class="social-login-wrapper"></div>
+
             <div class="social-login">
-
-                <div id="google-btn-container" style="min-height: 40px;"></div>
-
                 <button type="button" class="btn-social">
                     <img src="/assets/facebook.svg" alt="Facebook" width="24" height="24" />
                     <span>Continuer avec Facebook</span>
@@ -117,6 +144,7 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        ViewModel.InitializeContext();
         await ViewModel.LoadCountriesAsync();
     }
 
@@ -127,6 +155,7 @@
             try
             {
                 var dotNetReference = DotNetObjectReference.Create(this);
+                // À déplacer dans appsettings
                 string clientId = "472091593732-pggcg9c8ohdnaqard33pi7rf10249b5d.apps.googleusercontent.com";
 
                 await JS.InvokeVoidAsync("googleAuth.initialize", dotNetReference, clientId);
@@ -140,9 +169,8 @@
     }
 
     [JSInvokable]
-    public async Task HandleGoogleLogin(string googleToken)
+    public async Task HandleGoogleLogin(string idToken)
     {
-        await ViewModel.LoginWithGoogleAsync(googleToken);
-        StateHasChanged();
+        await ViewModel.LoginWithGoogleAsync(idToken);
     }
 }

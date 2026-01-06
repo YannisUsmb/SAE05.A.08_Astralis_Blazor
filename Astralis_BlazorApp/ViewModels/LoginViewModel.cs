@@ -4,6 +4,7 @@ using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
 
@@ -31,6 +32,12 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private ObservableCollection<CountryDto> countries = new();
 
+        [ObservableProperty]
+        private string phonePlaceholder = "Choisir un pays...";
+
+        private ValidationMessageStore? _messageStore;
+        public EditContext? EditContext { get; set; }
+
         public LoginViewModel(
             IAuthService authService,
             ICountryService countryService,
@@ -43,69 +50,139 @@ namespace Astralis_BlazorApp.ViewModels
             _jsRuntime = jsRuntime;
         }
 
-        public async Task LoadCountriesAsync()
+        public void InitializeContext()
         {
-            var list = await _countryService.GetAllAsync();
-            Countries = new ObservableCollection<CountryDto>(list.OrderBy(c => c.Name));
+            EditContext = new EditContext(LoginData);
+            EditContext.OnValidationRequested += (s, e) => _messageStore?.Clear();
+            EditContext.OnFieldChanged += (s, e) => _messageStore?.Clear(e.FieldIdentifier);
+            _messageStore = new ValidationMessageStore(EditContext);
         }
 
-        public async Task FormatPhoneNumber()
+        public async Task LoadCountriesAsync()
         {
-            if (!string.IsNullOrWhiteSpace(LoginData.Phone) && LoginData.CountryId.HasValue)
+            try
+            {
+                var list = await _countryService.GetAllAsync();
+                Countries = new ObservableCollection<CountryDto>(list.OrderBy(c => c.Name));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur pays: {ex.Message}");
+            }
+        }
+
+        public void ToggleLoginMode(LoginMode mode)
+        {
+            SelectedLoginMode = mode;
+            ErrorMessage = null;
+
+            if (_messageStore != null)
+            {
+                _messageStore.Clear();
+            }
+
+            if (mode == LoginMode.Standard)
+            {
+                LoginData.Phone = null;
+                LoginData.CountryId = null;
+                PhonePlaceholder = "Choisir un pays...";
+            }
+            else
+            {
+                LoginData.Identifier = null;
+            }
+
+            EditContext?.NotifyValidationStateChanged();
+        }
+
+        public void OnCountryChanged(int? countryId)
+        {
+            LoginData.CountryId = countryId;
+
+            if (!countryId.HasValue)
+            {
+                LoginData.Phone = string.Empty;
+                PhonePlaceholder = "Choisir un pays d'abord...";
+            }
+            else if (EditContext != null)
+            {
+                _messageStore?.Clear(EditContext.Field(nameof(LoginData.CountryId)));
+                _messageStore?.Clear(EditContext.Field(nameof(LoginData.Phone)));
+                EditContext.NotifyValidationStateChanged();
+            }
+
+            UpdatePhonePlaceholder();
+        }
+
+        private void UpdatePhonePlaceholder()
+        {
+            if (LoginData.CountryId.HasValue)
             {
                 var country = Countries.FirstOrDefault(c => c.Id == LoginData.CountryId);
-
-                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
-                {
-                    string formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", LoginData.Phone, country.IsoCode);
-                    LoginData.Phone = formatted;
-                }
+                PhonePlaceholder = country?.PhoneExample ?? "Numéro de téléphone";
             }
+            else
+            {
+                PhonePlaceholder = "Choisir un pays d'abord...";
+            }
+        }
+
+        public void OnPhoneInput(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input) && EditContext != null)
+            {
+                _messageStore?.Clear(EditContext.Field(nameof(LoginData.Phone)));
+            }
+
+            var sanitized = new string(input.Where(c => char.IsDigit(c) || c == ' ').ToArray());
+            LoginData.Phone = sanitized;
         }
 
         [RelayCommand]
         public async Task LoginAsync()
         {
             if (IsLoading) return;
-
             IsLoading = true;
             ErrorMessage = null;
 
+            _messageStore?.Clear();
+
+            if (SelectedLoginMode == LoginMode.Standard)
+            {
+                LoginData.CountryId = null;
+                LoginData.Phone = null;
+            }
+            else
+            {
+                LoginData.Identifier = null;
+                if (!string.IsNullOrEmpty(LoginData.Phone))
+                {
+                    string cleanPhone = new string(LoginData.Phone.Where(char.IsDigit).ToArray());
+                    var country = Countries.FirstOrDefault(c => c.Id == LoginData.CountryId);
+                    if (country != null && !string.IsNullOrEmpty(country.PhoneRegex))
+                    {
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(cleanPhone, country.PhoneRegex)
+                            && cleanPhone.StartsWith("0"))
+                        {
+                            var noZero = cleanPhone.Substring(1);
+                            if (System.Text.RegularExpressions.Regex.IsMatch(noZero, country.PhoneRegex))
+                            {
+                                cleanPhone = noZero;
+                            }
+                        }
+                    }
+                    LoginData.Phone = cleanPhone;
+                }
+            }
+
+            if (EditContext != null && !EditContext.Validate())
+            {
+                IsLoading = false;
+                return;
+            }
+
             try
             {
-                if (SelectedLoginMode == LoginMode.Standard)
-                {
-                    LoginData.Phone = null;
-                    LoginData.CountryId = null;
-
-                    if (string.IsNullOrWhiteSpace(LoginData.Identifier))
-                    {
-                        ErrorMessage = "Veuillez saisir un identifiant.";
-                        IsLoading = false;
-                        return;
-                    }
-                }
-                else
-                {
-                    LoginData.Identifier = null;
-
-                    if (string.IsNullOrWhiteSpace(LoginData.Phone) || !LoginData.CountryId.HasValue)
-                    {
-                        ErrorMessage = "Veuillez saisir un numéro et choisir un pays.";
-                        IsLoading = false;
-                        return;
-                    }
-
-                    LoginData.Phone = LoginData.Phone.Replace(" ", "");
-                }
-
-                if (string.IsNullOrWhiteSpace(LoginData.Password))
-                {
-                    ErrorMessage = "Le mot de passe est requis.";
-                    IsLoading = false;
-                    return;
-                }
-
                 var result = await _authService.Login(LoginData);
 
                 if (result != null)
@@ -131,7 +208,6 @@ namespace Astralis_BlazorApp.ViewModels
         public async Task LoginWithGoogleAsync(string idToken)
         {
             if (IsLoading) return;
-
             IsLoading = true;
             ErrorMessage = null;
 
