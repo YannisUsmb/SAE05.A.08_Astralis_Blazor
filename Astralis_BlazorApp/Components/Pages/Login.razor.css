@@ -1,4 +1,5 @@
-﻿.login-wrapper {
+﻿/* --- LAYOUT GLOBAL --- */
+.login-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -25,7 +26,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    text-align: left;
+    overflow: hidden;
 }
 
     .login-left h1 {
@@ -35,98 +36,157 @@
         margin-bottom: 1.2rem;
     }
 
-    .login-left p {
-        color: #b3b3c6;
-        margin-bottom: 2rem;
-        font-size: 1rem;
-    }
-
-.form-group {
-    margin-bottom: 1.4rem;
-}
-
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #d8d8e6;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.btn-login {
-    width: 100%;
-    background: linear-gradient(90deg, #9d4edd, #5f3dc4);
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    padding: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 0.8rem;
-    transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-    .btn-login:hover:not(:disabled) {
-        filter: brightness(1.15);
-        transform: translateY(-2px);
-    }
-
-    .btn-login:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        filter: grayscale(0.5);
-    }
-
-.login-footer {
-    margin-top: 1.8rem;
-    color: #bcbcd3;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-    .login-footer a {
-        color: #a76dff;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-        .login-footer a:hover {
-            color: #c89cff;
-        }
-
 .login-right {
     flex: 0.8;
-    background: rgba(30, 10, 60, 0.4);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 3rem 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 3rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     text-align: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-    .login-right h2 {
+/* --- SWITCH MODE (Slider Boutons) --- */
+.login-mode-switch {
+    display: flex;
+    position: relative;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 45px;
+}
+
+/* Le fond animé (Plus doux maintenant) */
+.mode-slider-bg {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: rgba(157, 78, 221, 0.4);
+    border-radius: 8px;
+    /* Courbe plus douce, sans effet de rebond agressif */
+    transition: transform 0.35s cubic-bezier(0.45, 0, 0.55, 1);
+    z-index: 0;
+    box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+}
+
+.login-mode-switch.phone-active .mode-slider-bg {
+    transform: translateX(100%);
+}
+
+.btn-mode {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #b3b3c6;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    z-index: 1;
+    transition: color 0.3s;
+}
+
+    .btn-mode.active {
         color: #fff;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 1.4rem;
-        margin-bottom: 1.5rem;
+        font-weight: 600;
     }
+
+/* --- SLIDER INPUTS (Nouvelle logique inversée) --- */
+/* On utilise une grille pour superposer les éléments au même endroit */
+.input-slider-viewport {
+    display: grid;
+    grid-template-areas: "stack";
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.input-slide {
+    grid-area: stack; /* Les deux sections sont l'une sur l'autre */
+    width: 100%;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+    /* Un peu de padding pour éviter que le focus outline soit coupé */
+    padding: 2px;
+}
+
+/* --- LOGIQUE D'ANIMATION --- */
+
+/* Cas 1 : Mode STANDARD (Email) Actif */
+.mode-standard .slide-standard {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 2; /* Au-dessus */
+    pointer-events: auto;
+}
+
+.mode-standard .slide-phone {
+    /* Le téléphone part vers la gauche (ou est caché à gauche) */
+    transform: translateX(-100%);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Cas 2 : Mode PHONE Actif */
+.mode-phone .slide-phone {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.mode-phone .slide-standard {
+    /* Le standard part vers la droite (ou est caché à droite) */
+    transform: translateX(100%);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+
+.input-group-astralis {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.prefix-select {
+    flex: 0 0 130px !important;
+    width: 100px;
+    min-width: 100px;
+    text-overflow: ellipsis;
+}
+
+.phone-input {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.login-right h2 {
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+}
 
 .social-login {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.8rem;
+    width: 100%;
 }
 
 .btn-social {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 0.9rem;
+    gap: 10px;
+    padding: 0.8rem;
     width: 100%;
     border-radius: 10px;
     font-weight: 500;
@@ -144,53 +204,63 @@ label {
         border-color: rgba(255, 255, 255, 0.2);
     }
 
-    .btn-social img {
-        object-fit: contain;
-    }
-
-.login-mode-switch {
+.form-actions {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 5px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn-mode {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: #b3b3c6;
-    padding: 10px;
-    border-radius: 8px;
     font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.forgot-password {
+    color: #b3b3c6;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    .forgot-password:hover {
+        color: #fff;
+    }
+
+.btn-login {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, #7f5af0, #2cb67d);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
     cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-    .btn-mode:hover:not(.active) {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.05);
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(127, 90, 240, 0.4);
     }
 
-    .btn-mode.active {
-        background: rgba(157, 78, 221, 0.2);
-        color: #fff;
-        border: 1px solid rgba(157, 78, 221, 0.5);
-        box-shadow: 0 0 15px rgba(157, 78, 221, 0.2);
+    .btn-login:disabled {
+        background: #444;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
     }
 
-@media (max-width: 850px) {
-    .login-card.dual {
-        flex-direction: column;
-    }
-
-    .login-right {
-        border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 2rem;
-    }
+.login-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #b3b3c6;
 }
+
+    .login-footer a {
+        color: #2cb67d;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
