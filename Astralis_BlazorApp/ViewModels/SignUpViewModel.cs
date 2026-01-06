@@ -71,31 +71,54 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
-        public async Task OnCountryChanged(int? countryId)
+        public void OnCountryChanged(int? countryId)
         {
             RegisterData.CountryId = countryId;
-            await UpdatePhonePlaceholderAsync();
-            if (!string.IsNullOrWhiteSpace(RegisterData.Phone))
+
+            if (!countryId.HasValue)
             {
-                await OnPhoneInput(RegisterData.Phone);
+                RegisterData.Phone = string.Empty;
+                PhonePlaceholder = "Choisir un pays d'abord...";
             }
+            else if (EditContext != null)
+            {
+                var countryField = EditContext.Field(nameof(RegisterData.CountryId));
+                var phoneField = EditContext.Field(nameof(RegisterData.Phone));
+                _messageStore?.Clear(countryField);
+                _messageStore?.Clear(phoneField);
+                EditContext.NotifyValidationStateChanged();
+            }
+
+            UpdatePhonePlaceholder();
         }
 
-        public async Task OnPhoneInput(string input)
+        private void UpdatePhonePlaceholder()
         {
-            RegisterData.Phone = input;
             if (RegisterData.CountryId.HasValue)
             {
                 var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
-                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
-                {
-                    var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
-                    if (RegisterData.Phone != formatted) RegisterData.Phone = formatted;
-                }
+                PhonePlaceholder = country?.PhoneExample ?? "Numéro de téléphone";
+            }
+            else
+            {
+                PhonePlaceholder = "Choisir un pays d'abord...";
             }
         }
 
-        private async Task UpdatePhonePlaceholderAsync()
+        public void OnPhoneInput(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input) && EditContext != null)
+            {
+                _messageStore?.Clear(EditContext.Field(nameof(RegisterData.Phone)));
+                EditContext.NotifyValidationStateChanged();
+            }
+
+            var sanitized = new string(input.Where(c => char.IsDigit(c) || c == ' ').ToArray());
+
+            RegisterData.Phone = sanitized;
+        }
+
+        public async Task ValidateAvailabilityOnBlur(string fieldName)
         {
             RegisterData.Phone = input;
 
