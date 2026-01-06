@@ -49,7 +49,7 @@
 .body-info {
     padding: 1.2rem;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     align-items: center;
     text-align: center;
     flex-grow: 1;
@@ -99,7 +99,6 @@
     }
 }
 
-/* ===== VUE DÃ‰TAILLÃ‰E ===== */
 .details-view {
     margin-top: -2rem;
     padding: 0;
@@ -283,12 +282,12 @@
    NOUVEAU : BOUTON RETOUR FIXE (STICKY)
    ======================================= */
 .btn-back-fixed {
-    position: fixed; /* C'est Ã§a qui fait que le bouton reste visible */
-    top: 100px; /* Distance du haut de l'Ã©cran (ajuste si besoin) */
+    position: fixed; /* C'est ça qui fait que le bouton reste visible */
+    top: 100px; /* Distance du haut de l'écran (ajuste si besoin) */
     left: 40px; /* Distance de la gauche */
-    z-index: 1000; /* Pour Ãªtre sÃ»r qu'il est au dessus des images */
-    margin: 0; /* On enlÃ¨ve les marges qui gÃªnent */
-    /* Effet verre pour qu'on puisse lire mÃªme si Ã§a passe sur du texte */
+    z-index: 1000; /* Pour être sûr qu'il est au dessus des images */
+    margin: 0; /* On enlève les marges qui gênent */
+    /* Effet verre pour qu'on puisse lire même si ça passe sur du texte */
     backdrop-filter: blur(8px);
     background: rgba(15, 15, 35, 0.85);
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);

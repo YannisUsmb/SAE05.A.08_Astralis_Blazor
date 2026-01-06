@@ -25,10 +25,7 @@ public partial class ShopViewModel : ObservableObject
     
     // --- Filtres et Tri ---
     [ObservableProperty] private ProductFilterDto filter = new();
-    
     [ObservableProperty] private int selectedTypeId = 0;
-    [ObservableProperty] private int selectedSubtypeId = 0;
-    
     [ObservableProperty] private string sortBy = "name";
 
     // --- Pagination ---
@@ -168,19 +165,8 @@ public partial class ShopViewModel : ObservableObject
         }
     }
 
-    public async Task OnTypeChanged()
-    {        
-    }
-    
-    public async Task OnSubtypeChanged()
-    {
-    }
-    
-    public async Task OnSortChanged()
-    {
-    }
-    
-    public async Task OnFilterChanged()
+    [RelayCommand]
+    public async Task ShowDetails(ProductListDto body)
     {
     }
     
@@ -214,7 +200,7 @@ public partial class ShopViewModel : ObservableObject
         SelectedProductDetails = null;
         SelectedProduct = null;
     }
-    
+
     [RelayCommand]
     public async Task NextPage()
     {
