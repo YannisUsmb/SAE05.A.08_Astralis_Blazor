@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.Services.Interfaces;
@@ -13,17 +15,20 @@ public partial class ShopViewModel : ObservableObject
     private readonly IProductService _productService;
     private readonly IProductCategoryService _typeService;
     private readonly ICartService _cartService;
-
+    
     // --- Gestion du Debounce (Recherche) ---
     private CancellationTokenSource? _searchCts;
 
     // --- Collections de données ---
     [ObservableProperty] private ObservableCollection<ProductListDto> products = new();
     [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
-
+    
     // --- Filtres et Tri ---
     [ObservableProperty] private ProductFilterDto filter = new();
+    
     [ObservableProperty] private int selectedTypeId = 0;
+    [ObservableProperty] private int selectedSubtypeId = 0;
+    
     [ObservableProperty] private string sortBy = "name";
 
     // --- Pagination ---
@@ -33,9 +38,11 @@ public partial class ShopViewModel : ObservableObject
 
     // --- États de l'interface ---
     [ObservableProperty] private bool isLoading;
+    [ObservableProperty] private bool is3DVisible;
     [ObservableProperty] private ProductListDto? selectedProduct;
+    
     [ObservableProperty] private ProductDetailDto? selectedProductDetails;
-
+    
     // --- PROPRIÉTÉ DE RECHERCHE (Implémentation Manuelle pour Debounce) ---
     private string _searchText = string.Empty;
 
@@ -61,7 +68,7 @@ public partial class ShopViewModel : ObservableObject
         _typeService = typeService;
         _cartService = cartService;
     }
-
+    
     // --- LOGIQUE DE RECHERCHE ---
 
     private async void TriggerDebounceSearch(string text)
@@ -93,7 +100,7 @@ public partial class ShopViewModel : ObservableObject
             // 1. Chargement des catégories
             var types = await _typeService.GetAllAsync();
             ProductCategories = new ObservableCollection<ProductCategoryDto>(types);
-
+            
             // 2. Chargement initial des produits
             await SearchDataAsync();
 
@@ -109,11 +116,12 @@ public partial class ShopViewModel : ObservableObject
 
     [RelayCommand]
     public async Task ApplyFilterAsync()
-    {
+        {
         CurrentPage = 1;
         await SearchDataAsync();
+        }
     }
-
+    
     [RelayCommand]
     public async Task SearchDataAsync()
     {
@@ -127,7 +135,7 @@ public partial class ShopViewModel : ObservableObject
             var results = await _productService.SearchAsync(Filter);
 
             HasNextPage = results.Count == PageSize;
-
+            
             // Tri côté client (si l'API ne le gère pas déjà)
             IEnumerable<ProductListDto> sortedList = results;
             switch (SortBy)
@@ -158,9 +166,12 @@ public partial class ShopViewModel : ObservableObject
         finally
         {
             IsLoading = false;
-        }
     }
-
+    
+    public async Task OnFilterChanged()
+    {
+    }
+    
     [RelayCommand]
     public async Task ShowDetails(ProductListDto body)
     {
@@ -168,7 +179,7 @@ public partial class ShopViewModel : ObservableObject
 
         IsLoading = true;
         SelectedProduct = body;
-
+    
         try
         {
             var details = await _productService.GetByIdAsync(body.Id);
@@ -191,7 +202,7 @@ public partial class ShopViewModel : ObservableObject
         SelectedProductDetails = null;
         SelectedProduct = null;
     }
-
+    
     [RelayCommand]
     public async Task NextPage()
     {
