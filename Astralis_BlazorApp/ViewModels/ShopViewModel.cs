@@ -21,10 +21,7 @@ public partial class ShopViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
 
     [ObservableProperty] private ProductFilterDto filter = new();
-    
     [ObservableProperty] private int selectedTypeId = 0;
-    [ObservableProperty] private int selectedSubtypeId = 0;
-    
     [ObservableProperty] private string sortBy = "name";
 
     [ObservableProperty] private int currentPage = 1;
@@ -187,7 +184,7 @@ public partial class ShopViewModel : ObservableObject
         SelectedProductDetails = null;
         SelectedProduct = null;
     }
-    
+
     [RelayCommand]
     public async Task NextPage()
     {
