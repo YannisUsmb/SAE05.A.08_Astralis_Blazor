@@ -1,0 +1,16 @@
+<span class="info-tooltip-wrapper">
+    <i class="bi bi-info-circle info-icon" @onmouseenter="Show" @onmouseleave="Hide"></i>
+    @if (_isVisible)
+    {
+        <div class="info-tooltip">@Text</div>
+    }
+</span>
+
+@code {
+    [Parameter] public string Text { get; set; } = "";
+    
+    private bool _isVisible = false;
+    
+    private void Show() => _isVisible = true;
+    private void Hide() => _isVisible = false;
+}
