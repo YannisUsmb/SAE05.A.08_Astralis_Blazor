@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.Services.Interfaces;
@@ -23,7 +25,10 @@ public partial class ShopViewModel : ObservableObject
     
     // --- Filtres et Tri ---
     [ObservableProperty] private ProductFilterDto filter = new();
+    
     [ObservableProperty] private int selectedTypeId = 0;
+    [ObservableProperty] private int selectedSubtypeId = 0;
+    
     [ObservableProperty] private string sortBy = "name";
 
     // --- Pagination ---
@@ -33,6 +38,7 @@ public partial class ShopViewModel : ObservableObject
 
     // --- États de l'interface ---
     [ObservableProperty] private bool isLoading;
+    [ObservableProperty] private bool is3DVisible;
     [ObservableProperty] private ProductListDto? selectedProduct;
     [ObservableProperty] private ProductDetailDto? selectedProductDetails;
     
@@ -50,7 +56,7 @@ public partial class ShopViewModel : ObservableObject
             }
         }
     }
-
+    
     // --- CONSTRUCTEUR ---
     public ShopViewModel(
         IProductService productService,
@@ -109,7 +115,7 @@ public partial class ShopViewModel : ObservableObject
 
     [RelayCommand]
     public async Task ApplyFilterAsync()
-    {
+        {
         CurrentPage = 1;
         await SearchDataAsync();
         
@@ -128,7 +134,7 @@ public partial class ShopViewModel : ObservableObject
             var results = await _productService.SearchAsync(Filter);
 
             HasNextPage = results.Count == PageSize;
-
+            
             // Tri côté client (si l'API ne le gère pas déjà)
             IEnumerable<ProductListDto> sortedList = results;
             switch (SortBy)
@@ -159,7 +165,19 @@ public partial class ShopViewModel : ObservableObject
         finally
         {
             IsLoading = false;
-        } 
+        }
+    }
+
+    public async Task OnTypeChanged()
+    {        
+    }
+    
+    public async Task OnSubtypeChanged()
+    {
+    }
+    
+    public async Task OnSortChanged()
+    {
     }
     
     public async Task OnFilterChanged()
@@ -196,7 +214,7 @@ public partial class ShopViewModel : ObservableObject
         SelectedProductDetails = null;
         SelectedProduct = null;
     }
-
+    
     [RelayCommand]
     public async Task NextPage()
     {
