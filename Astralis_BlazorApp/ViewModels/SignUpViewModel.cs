@@ -52,7 +52,6 @@ namespace Astralis_BlazorApp.ViewModels
             _countryService = countryService;
             _authService = authService;
             _navigation = navigation;
-            _jsRuntime = jsRuntime;
         }
 
         public void InitializeContext()
@@ -76,31 +75,28 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
-        public async Task OnCountryChanged(int? countryId)
+        public void OnCountryChanged(int? countryId)
         {
             RegisterData.CountryId = countryId;
-            await UpdatePhonePlaceholderAsync();
-            if (!string.IsNullOrWhiteSpace(RegisterData.Phone))
+
+            if (!countryId.HasValue)
             {
-                await OnPhoneInput(RegisterData.Phone);
+                RegisterData.Phone = string.Empty;
+                PhonePlaceholder = "Choisir un pays d'abord...";
             }
+            else if (EditContext != null)
+            {
+                var countryField = EditContext.Field(nameof(RegisterData.CountryId));
+                var phoneField = EditContext.Field(nameof(RegisterData.Phone));
+                _messageStore?.Clear(countryField);
+                _messageStore?.Clear(phoneField);
+                EditContext.NotifyValidationStateChanged();
+            }
+
+            UpdatePhonePlaceholder();
         }
 
-        public async Task OnPhoneInput(string input)
-        {
-            RegisterData.Phone = input;
-            if (RegisterData.CountryId.HasValue)
-            {
-                var country = Countries.FirstOrDefault(c => c.Id == RegisterData.CountryId);
-                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
-                {
-                    var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
-                    if (RegisterData.Phone != formatted) RegisterData.Phone = formatted;
-                }
-            }
-        }
-
-        private async Task UpdatePhonePlaceholderAsync()
+        private void UpdatePhonePlaceholder()
         {
             RegisterData.Phone = input;
 
