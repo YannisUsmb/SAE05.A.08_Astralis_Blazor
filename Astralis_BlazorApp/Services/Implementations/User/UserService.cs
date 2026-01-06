@@ -77,7 +77,7 @@ namespace Astralis_BlazorApp.Services.Implementations
             return success;
         }
 
-        public async Task<AvailabilityResult?> CheckAvailabilityAsync(string? email, string? username, string? phone)
+        public async Task<AvailabilityResult?> CheckAvailabilityAsync(string? email, string? username, string? phone, string? countryId)
         {
             try
             {
@@ -91,6 +91,9 @@ namespace Astralis_BlazorApp.Services.Implementations
 
                 if (!string.IsNullOrWhiteSpace(phone))
                     query.Add($"phone={Uri.EscapeDataString(phone)}");
+
+                if (!string.IsNullOrWhiteSpace(countryId))
+                    query.Add($"countryId={Uri.EscapeDataString(countryId)}");
 
                 if (query.Count == 0) return null;
 

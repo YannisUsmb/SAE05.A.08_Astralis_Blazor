@@ -146,7 +146,7 @@ namespace Astralis_BlazorApp.ViewModels
             {
                 if (ProfileData.Username != _originalUsername)
                 {
-                    var availability = await _userService.CheckAvailabilityAsync(null, ProfileData.Username, null);
+                    var availability = await _userService.CheckAvailabilityAsync(null, ProfileData.Username, null, null);
 
                     if (availability != null && availability.IsTaken)
                     {

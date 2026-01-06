@@ -37,13 +37,19 @@
 
                 <div class="form-group">
                     <label class="required-label">Nom d'utilisateur</label>
-                    <InputText class="form-control-astralis" placeholder="AstroBoy" @bind-Value="ViewModel.RegisterData.Username" />
+                    <InputText class="form-control-astralis"
+                               placeholder="AstroBoy"
+                               @bind-Value="ViewModel.RegisterData.Username"
+                               @onblur="@(() => ViewModel.ValidateAvailabilityOnBlur(nameof(ViewModel.RegisterData.Username)))" />
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Username)" />
                 </div>
 
                 <div class="form-group">
                     <label class="required-label">Email</label>
-                    <InputText type="email" class="form-control-astralis" placeholder="thomas@iss.space" @bind-Value="ViewModel.RegisterData.Email" />
+                    <InputText type="email" class="form-control-astralis"
+                               placeholder="thomas@iss.space"
+                               @bind-Value="ViewModel.RegisterData.Email"
+                               @onblur="@(() => ViewModel.ValidateAvailabilityOnBlur(nameof(ViewModel.RegisterData.Email)))" />
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Email)" />
                 </div>
 
@@ -52,21 +58,31 @@
                     <div class="input-group-astralis">
                         <InputSelect TValue="int?" class="form-control-astralis prefix-select"
                                      Value="@ViewModel.RegisterData.CountryId"
-                                     ValueChanged="@(async (int? c) => await ViewModel.OnCountryChanged(c))"
-                                     ValueExpression="@(() => ViewModel.RegisterData.CountryId)">
-                            <option value="">Choisir...</option>
-                            @foreach (var country in ViewModel.Countries)
+                                     ValueChanged="@( (int? c) => ViewModel.OnCountryChanged(c) )"
+                                     ValueExpression="@( () => ViewModel.RegisterData.CountryId )">
+
+                            @if (ViewModel.Countries == null || !ViewModel.Countries.Any())
                             {
-                                <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
+                                <option value="" disabled selected>Chargement...</option>
+                            }
+                            else
+                            {
+                                <option value="">Choisir...</option>
+                                @foreach (var country in ViewModel.Countries)
+                                {
+                                    <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
+                                }
                             }
                         </InputSelect>
 
                         <input type="tel" class="form-control-astralis phone-input"
                                placeholder="@ViewModel.PhonePlaceholder"
                                value="@ViewModel.RegisterData.Phone"
-                               @oninput="@(async (ChangeEventArgs e) => await ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))"
-                               @onblur="@ViewModel.ValidatePhoneOnBlurAsync" />
+                               @oninput="@((ChangeEventArgs e) => ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))"
+                               @onblur="@(() => ViewModel.ValidateAvailabilityOnBlur(nameof(ViewModel.RegisterData.Phone)))"
+                               disabled="@(!ViewModel.RegisterData.CountryId.HasValue)" />
                     </div>
+
                     <ValidationMessage For="@(() => ViewModel.RegisterData.CountryId)" />
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Phone)" />
                 </div>
