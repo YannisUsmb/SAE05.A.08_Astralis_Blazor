@@ -11,10 +11,10 @@
     transition: all 0.2s ease;
 }
 
-.info-icon:hover {
-    color: #a76dff;
-    transform: scale(1.1);
-}
+    .info-icon:hover {
+        color: #a76dff;
+        transform: scale(1.1);
+    }
 
 .info-tooltip {
     position: absolute;
@@ -35,15 +35,15 @@
     animation: tooltipFadeIn 0.2s ease-out;
 }
 
-.info-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 20%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: #1a1a2e;
-}
+    .info-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 20%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #1a1a2e;
+    }
 
 .detail-properties .info-tooltip {
     bottom: auto;
@@ -55,19 +55,20 @@
     z-index: 9999;
 }
 
-.detail-properties .info-tooltip::after {
-    top: auto;
-    bottom: 100%; /* ← Flèche EN HAUT */
-    left: 20%;
-    border-top-color: transparent;
-    border-bottom-color: #1a1a2e; /* ← Couleur inversée */
-}
+    .detail-properties .info-tooltip::after {
+        top: auto;
+        bottom: 100%; /* ← Flèche EN HAUT */
+        left: 20%;
+        border-top-color: transparent;
+        border-bottom-color: #1a1a2e; /* ← Couleur inversée */
+    }
 
 @keyframes tooltipFadeIn {
     from {
         opacity: 0;
         transform: translateX(-20%) translateY(-5px);
     }
+
     to {
         opacity: 1;
         transform: translateX(-20%) translateY(0);
@@ -83,6 +84,7 @@
         opacity: 0;
         transform: translateX(-20%) translateY(-5px);
     }
+
     to {
         opacity: 1;
         transform: translateX(-20%) translateY(0);
