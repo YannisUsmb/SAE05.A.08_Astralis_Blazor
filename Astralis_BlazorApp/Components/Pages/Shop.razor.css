@@ -1,6 +1,6 @@
 .bodies-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     padding: 0 1rem;
 }
@@ -13,6 +13,9 @@
     backdrop-filter: blur(15px);
     transition: transform 0.3s ease, border-color 0.3s ease;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .body-card:hover {
@@ -25,6 +28,15 @@
     object-fit: contain;
     margin-bottom: 1rem;
 }
+.detail-image {
+    display: block;
+    margin: 0 auto;
+    max-height: 300px;
+    max-width: 100%;
+    border-radius: 16px;
+    object-fit: contain;
+    margin-bottom: 2rem;
+}
 .body-price {
     margin-bottom: 10px;
     font-size: 1.1rem;
@@ -33,19 +45,27 @@
 .body-info {
     padding: 1.2rem;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     align-items: center;
-    text-align: center;
-    height: 100%;
+    text-align: center; 
+    flex-grow: 1;
 }
-
+.content-wrapper {
+    padding: 2rem 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    color: white;
+}
 .body-info h3 {
     font-family: "Orbitron", sans-serif;
     color: #fff;
     margin-bottom: 0.5rem;
     font-size: 1.2rem;
 }
-
+.body-info .btn {
+     margin-top: auto;
+     width: 100%;
+}
 .advanced-filters-bar {
     display: flex;
     justify-content: center;
@@ -70,17 +90,21 @@
     }
 }
 
-/* ===== VUE DÉTAILLÉE ===== */
 .details-view {
-    padding: 2rem;
+    margin-top: -2rem;
+    padding: 0;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
 }
 
 .detail-container {
     background: rgba(15, 15, 35, 0.90);
     border-radius: 20px;
     padding: 2.5rem;
-    margin: 2rem auto;
+    margin: 0 auto 2rem auto;
     max-width: 1200px;
     border: 1px solid rgba(255,255,255,0.15);
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
@@ -222,6 +246,8 @@
 }
 
 .btn-secondary {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     background: rgba(167, 109, 255, 0.15);
     border: 1px solid rgba(167, 109, 255, 0.4);
     color: #fff;
@@ -231,6 +257,7 @@
     font-weight: 600;
     transition: all 0.3s ease;
     cursor: pointer;
+    align-self: flex-start;
 }
 
 .btn-secondary:hover {
