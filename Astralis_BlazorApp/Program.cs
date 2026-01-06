@@ -1,6 +1,7 @@
 using Astralis_BlazorApp.Components;
 using Astralis_BlazorApp.Extensions;
 using Astralis_BlazorApp.Handlers;
+using Astralis_BlazorApp.ViewModels;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -28,7 +29,7 @@ namespace Astralis_BlazorApp
             // --- Services & ViewModels ---
             builder.Services.AddApplicationServices();
             builder.Services.AddViewModels();
-
+            builder.Services.AddScoped<ShopViewModel>();
             // --- Authorization & Auth ---
             builder.Services.AddAuthorizationCore(options =>
             {

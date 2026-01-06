@@ -1,0 +1,179 @@
+﻿@page "/boutique"
+@using Astralis.Shared.DTOs
+@using Astralis_BlazorApp.ViewModels
+@inject ShopViewModel ViewModel
+
+<PageTitle>Boutique – Astralis</PageTitle>
+
+<div class="content-wrapper">
+
+    @if (ViewModel.SelectedProductDetails == null)
+    {
+        <div class="page-header">
+            <h1>Boutique Astralis</h1>
+        </div>
+        <p class="page-description">Équipements, modules et ressources pour vos voyages interstellaires</p>
+
+        <div class="filters-container">
+            <input type="text" class="filter-input" placeholder="🔍 Rechercher un produit..."
+                   @bind="ViewModel.Filter.SearchText"
+                   @bind:event="oninput"
+                   @onkeyup="@(e => ViewModel.SearchDataCommand.ExecuteAsync(null))" />
+
+            <select class="filter-input"
+                    @bind="ViewModel.SelectedTypeId"
+                    @bind:after="@(() => ViewModel.SearchDataCommand.ExecuteAsync(null))">
+                <option value="0">Toutes les catégories</option>
+                @foreach (ProductCategoryDto cat in ViewModel.ProductCategories)
+                {
+                    <option value="@cat.Id">@cat.Label</option>
+                }
+            </select>
+
+            <select class="filter-input"
+                    @bind="ViewModel.SortBy"
+                    @bind:after="@(() => ViewModel.SearchDataCommand.ExecuteAsync(null))">
+                <option value="name">Nom (A–Z)</option>
+                <option value="price_asc">Prix (Croissant)</option>
+                <option value="price_desc">Prix (Décroissant)</option>
+            </select>
+            <div class="d-flex gap-3 align-items-center">
+                <span class="text-white small">Prix :</span>
+                <input type="number" class="filter-input filter-input-sm" placeholder="Min €"
+                       @bind="ViewModel.Filter.MinPrice" />
+                <span class="text-white">-</span>
+                <input type="number" class="filter-input filter-input-sm" placeholder="Max €"
+                       @bind="ViewModel.Filter.MaxPrice" />
+
+                <button class="btn btn-astralis-outline btn-sm"
+                        @onclick="@(() => ViewModel.SearchDataCommand.ExecuteAsync(null))">
+                    Appliquer
+                </button>
+            </div>
+        </div>
+
+        <div class="bodies-grid">
+            @if (ViewModel.IsLoading)
+            {
+                <div class="spinner-container">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            }
+            else if (ViewModel.Products.Count == 0)
+            {
+                <div class="text-center text-white w-100">
+                    <p>Aucun produit ne correspond à vos critères.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (ProductListDto product in ViewModel.Products)
+                {
+                    <div class="body-card" @onclick="() => ViewModel.ShowDetails(product)">
+                        <img src="@product.ProductPictureUrl" alt="@product.Label" class="body-image" />
+                        <div class="body-info">
+                            <h3>@product.Label</h3>
+                            <h4 class="body-price">@product.Price €</h4>
+                            <p><span class="badge-type">@product.CategoryLabel</span></p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (!ViewModel.IsLoading && ViewModel.Products.Count > 0)
+        {
+            <div class="pagination-container">
+                <button class="btn btn-astralis-outline"
+                        @onclick="@(() => ViewModel.PreviousPageCommand.ExecuteAsync(null))"
+                        disabled="@(ViewModel.CurrentPage == 1)">
+                    Précédent
+                </button>
+                <span class="text-white">Page @ViewModel.CurrentPage</span>
+                <button class="btn btn-astralis-outline"
+                        @onclick="@(() => ViewModel.NextPageCommand.ExecuteAsync(null))"
+                        disabled="@(!ViewModel.HasNextPage)">
+                    Suivant
+                </button>
+            </div>
+        }
+    }
+
+    @if (ViewModel.SelectedProductDetails != null)
+    {
+        <div class="details-view animate-fade-in">
+            <button class="btn btn-secondary mb-3" @onclick="@(() => ViewModel.BackToListCommand.Execute(null))">
+                ← Retour à la boutique
+            </button>
+
+            @if (ViewModel.IsLoading)
+            {
+                <div class="spinner-container">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-white mt-3">Chargement des détails...</p>
+                </div>
+            }
+            else
+            {
+                <div class="detail-container">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2>@ViewModel.SelectedProductDetails.Label</h2>
+                            <span class="badge-type">@ViewModel.SelectedProductDetails.CategoryLabel</span>
+                        </div>
+                        <h2 class="text-primary">@ViewModel.SelectedProductDetails.Price.ToString("C")</h2>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ViewModel.SelectedProductDetails.Description))
+                    {
+                        <div class="remark-section mt-4">
+                            <h4>Description</h4>
+                            <p>@ViewModel.SelectedProductDetails.Description</p>
+                        </div>
+                    }
+
+                    <div class="specific-details mt-4">
+                        <h3>Informations Techniques</h3>
+
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="label">Référence ID</span>
+                                <span class="value">#@ViewModel.SelectedProductDetails.Id</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="label">Catégorie ID</span>
+                                <span class="value">@ViewModel.SelectedProductDetails.CategoryId</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="label">Prix unitaire</span>
+                                <span class="value">@ViewModel.SelectedProductDetails.Price.ToString("N2")</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="label">Disponibilité</span>
+                                <span class="value text-success">En Stock</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex justify-content-end">
+                        <button class="btn btn-primary btn-lg">
+                            <i class="bi bi-cart-plus me-2"></i> Ajouter au panier
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.PropertyChanged += (sender, e) => StateHasChanged();
+
+        await ViewModel.InitializeCommand.ExecuteAsync(null);
+    }
+}
