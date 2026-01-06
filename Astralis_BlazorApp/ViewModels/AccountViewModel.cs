@@ -154,10 +154,11 @@ namespace Astralis_BlazorApp.ViewModels
 
                 string? emailToCheck = (ContactData.Email != _originalData?.Email) ? ContactData.Email : null;
                 string? phoneToCheck = (ContactData.Phone != _originalData?.Phone) ? cleanPhone : null;
+                string? countryIdToCheck = ContactData.CountryId.HasValue ? ContactData.CountryId.ToString() : null;
 
                 if (emailToCheck != null || phoneToCheck != null)
                 {
-                    var availability = await _userService.CheckAvailabilityAsync(emailToCheck, null, phoneToCheck);
+                    var availability = await _userService.CheckAvailabilityAsync(emailToCheck, null, phoneToCheck, countryIdToCheck);
 
                     if (availability != null && availability.IsTaken)
                     {
