@@ -135,8 +135,9 @@
             {
                 <div class="detail-container">
                     <div class="d-flex flex-column align-items-center mb-4">
-                        <h2>@ViewModel.SelectedProductDetails.Label</h2>
-                    </div>
+                            <h2>@ViewModel.SelectedProductDetails.Label</h2>
+                            <span class="badge-type">@ViewModel.SelectedProductDetails.CategoryLabel</span>
+                        </div>
 
                     <div class="detail-image-div">
                         <img class="detail-image" src="@ViewModel.SelectedProductDetails.ProductPictureUrl" alt="@ViewModel.SelectedProductDetails.Label image" />
@@ -153,12 +154,14 @@
 
                     <div class="specific-details mt-4">
                         <h3>Informations Techniques</h3>
+
                         <div class="details-grid">
                             <div class="detail-item"><span class="label">Catégorie</span><span class="value">@ViewModel.SelectedProductDetails.CategoryLabel</span></div>
                             <div class="detail-item"><span class="label">Prix Unitaire</span><span class="value">@ViewModel.SelectedProductDetails.Price.ToString("N2") €</span></div>
                             <div class="detail-item"><span class="label">Disponibilité</span><span class="value text-success">En Stock</span></div>
                         </div>
                     </div>
+
                     <div class="mt-5 d-flex justify-content-end">
                         <button class="btn btn-primary btn-lg"
                                 @onclick="() => ViewModel.AddToCart(ViewModel.SelectedProduct!)">
