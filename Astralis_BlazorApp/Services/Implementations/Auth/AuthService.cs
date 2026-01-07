@@ -102,5 +102,23 @@ namespace Astralis_BlazorApp.Services.Implementations
             var response = await _httpClient.PostAsJsonAsync("Auth/Verify-Email", token);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> ForgotPasswordAsync(string email)
+        {
+            var dto = new ForgotPasswordDto { Email = email };
+            var response = await _httpClient.PostAsJsonAsync($"{Controller}/Forgot-Password", dto);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> ResetPasswordAsync(ResetPasswordDto dto)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"{Controller}/Reset-Password", dto);
+            if (!response.IsSuccessStatusCode)
+            {
+                string error = await response.Content.ReadAsStringAsync();
+                throw new Exception(error.Trim('"'));
+            }
+            return true;
+        }
     }
 }
