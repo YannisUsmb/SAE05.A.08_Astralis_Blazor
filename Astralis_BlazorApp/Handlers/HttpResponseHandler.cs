@@ -19,9 +19,14 @@ namespace Astralis_BlazorApp.Handlers
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                if (!_navigationManager.Uri.Contains("/connexion"))
+                var requestPath = request.RequestUri?.AbsolutePath.ToLower();
+
+                if (requestPath != null && !requestPath.Contains("auth/me"))
                 {
-                    _navigationManager.NavigateToLogin();
+                    if (!_navigationManager.Uri.Contains("/connexion"))
+                    {
+                        _navigationManager.NavigateToLogin();
+                    }
                 }
             }
 
