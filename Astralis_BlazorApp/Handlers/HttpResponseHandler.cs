@@ -23,11 +23,11 @@ namespace Astralis_BlazorApp.Handlers
 
                 if (requestPath != null && !requestPath.Contains("auth/me"))
                 {
-                    if (!_navigationManager.Uri.Contains("/connexion"))
-                    {
-                        _navigationManager.NavigateToLogin();
-                    }
+                if (!_navigationManager.Uri.Contains("/connexion"))
+                {
+                    _navigationManager.NavigateToLogin();
                 }
+            }
             }
 
             return response;
