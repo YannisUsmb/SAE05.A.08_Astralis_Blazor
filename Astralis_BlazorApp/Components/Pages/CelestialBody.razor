@@ -1,6 +1,7 @@
 @page "/corps-celestes"
 @using Astralis.Shared.DTOs
 @inject CelestialBodyViewModel ViewModel
+@inject NavigationManager Navigation
 
 <PageTitle>Corps Célestes – Astralis</PageTitle>
 
@@ -713,9 +714,55 @@
 </div>
 
 @code {
+    [SupplyParameterFromQuery(Name = "id")]
+    public int? Id { get; set; }
+    
+    [SupplyParameterFromQuery(Name = "search")]
+    public string? SearchText { get; set; }
+    
+    [SupplyParameterFromQuery(Name = "type")]
+    public int? TypeId { get; set; }
+    
+    [SupplyParameterFromQuery(Name = "subtype")]
+    public int? SubtypeId { get; set; }
+    
+    [SupplyParameterFromQuery(Name = "sort")]
+    public string? Sort { get; set; }
+    
+    [SupplyParameterFromQuery(Name = "page")]
+    public int? Page { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         ViewModel.PropertyChanged += (s, e) => InvokeAsync(StateHasChanged);
+        
         await ViewModel.InitializeAsync();
+
+        if (!string.IsNullOrEmpty(SearchText))
+            ViewModel.Filter.SearchText = SearchText;
+        
+        if (TypeId.HasValue && TypeId.Value != 0)
+        {
+            ViewModel.SelectedTypeId = TypeId.Value;
+            await ViewModel.OnTypeChanged();
+        }
+        
+        if (SubtypeId.HasValue)
+            ViewModel.SelectedSubtypeId = SubtypeId.Value;
+        
+        if (!string.IsNullOrEmpty(Sort))
+            ViewModel.SortBy = Sort;
+        
+        if (Page.HasValue)
+            ViewModel.CurrentPage = Page.Value;
+        
+        if (Id.HasValue)
+        {
+            await ViewModel.ShowDetailsById(Id.Value);
+        }
+        else
+        {
+            await ViewModel.SearchDataAsync();
+        }
     }
 }
