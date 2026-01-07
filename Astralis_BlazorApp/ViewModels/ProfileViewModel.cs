@@ -98,12 +98,6 @@ namespace Astralis_BlazorApp.ViewModels
                 {
                     ErrorMessage = "Session expirée. Veuillez vous reconnecter.";
                 }
-                else
-                {
-                    // Redirection si session invalide (Bonus point 4)
-                    // _navigation.NavigateToLogin(); 
-                    ErrorMessage = "Session expirée. Veuillez vous reconnecter.";
-                }
             }
             catch (Exception ex)
             {
@@ -114,15 +108,6 @@ namespace Astralis_BlazorApp.ViewModels
             {
                 IsLoading = false;
             }
-        }
-
-        private void InitializeEditContext()
-        {
-            EditContext = new EditContext(ProfileData);
-            _messageStore = new ValidationMessageStore(EditContext);
-
-            EditContext.OnFieldChanged += (s, e) => OnPropertyChanged(nameof(IsDirty));
-            EditContext.OnValidationRequested += (s, e) => _messageStore.Clear();
         }
 
         private void InitializeEditContext()
