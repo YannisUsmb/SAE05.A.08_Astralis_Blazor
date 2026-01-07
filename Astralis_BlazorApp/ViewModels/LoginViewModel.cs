@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels
@@ -15,7 +16,6 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly IAuthService _authService;
         private readonly ICountryService _countryService;
         private readonly NavigationManager _navigation;
-        private readonly IJSRuntime _jsRuntime;
 
         [ObservableProperty]
         private UserLoginDto loginData = new();
@@ -36,18 +36,19 @@ namespace Astralis_BlazorApp.ViewModels
         private string phonePlaceholder = "Choisir un pays...";
 
         private ValidationMessageStore? _messageStore;
+
+        private string? _returnUrl;
+
         public EditContext? EditContext { get; set; }
 
         public LoginViewModel(
             IAuthService authService,
             ICountryService countryService,
-            NavigationManager navigation,
-            IJSRuntime jsRuntime)
+            NavigationManager navigation)
         {
             _authService = authService;
             _countryService = countryService;
             _navigation = navigation;
-            _jsRuntime = jsRuntime;
         }
 
         public void InitializeContext()
@@ -56,6 +57,12 @@ namespace Astralis_BlazorApp.ViewModels
             EditContext.OnValidationRequested += (s, e) => _messageStore?.Clear();
             EditContext.OnFieldChanged += (s, e) => _messageStore?.Clear(e.FieldIdentifier);
             _messageStore = new ValidationMessageStore(EditContext);
+
+            var uri = _navigation.ToAbsoluteUri(_navigation.Uri);
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var returnUrlFromQuery))
+            {
+                _returnUrl = returnUrlFromQuery;
+            }
         }
 
         public async Task LoadCountriesAsync()
@@ -187,7 +194,7 @@ namespace Astralis_BlazorApp.ViewModels
 
                 if (result != null)
                 {
-                    _navigation.NavigateTo("/");
+                    _navigation.NavigateTo(!string.IsNullOrEmpty(_returnUrl) ? _returnUrl : "/");
                 }
                 else
                 {
@@ -218,7 +225,7 @@ namespace Astralis_BlazorApp.ViewModels
 
                 if (result != null)
                 {
-                    _navigation.NavigateTo("/");
+                    _navigation.NavigateTo(!string.IsNullOrEmpty(_returnUrl) ? _returnUrl : "/");
                 }
                 else
                 {

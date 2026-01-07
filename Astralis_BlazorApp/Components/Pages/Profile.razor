@@ -1,5 +1,5 @@
-﻿@page "/settings"
-@page "/settings/profil"
+﻿@page "/parametres"
+@page "/parametres/profil"
 @layout SettingsLayout
 @using Astralis.Shared.DTOs
 @using Astralis.Shared.Enums
@@ -34,22 +34,25 @@ else if (ViewModel.EditContext != null)
     <div class="glass-panel p-4 rounded-3 border border-white-10">
 
         <div class="d-flex align-items-center gap-4 mb-5 pb-4 border-bottom border-white-10">
-            <div class="position-relative">
-                <div class="rounded-circle overflow-hidden border border-2 border-white-10" style="width: 100px; height: 100px;">
-                    <img src="@GetAvatarUrl()"
-                         class="w-100 h-100 object-fit-cover"
-                         alt="Avatar" />
+            <div class="position-relative avatar-container">
+                <div class="rounded-circle overflow-hidden border border-2 border-white-10 position-relative" style="width: 100px; height: 100px;">
+                    <img src="@GetAvatarUrl()" class="w-100 h-100 object-fit-cover" alt="Avatar" onerror="this.onerror=null;this.src='@GetDefaultAvatarUrl()';" />
+
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-50 d-flex align-items-center justify-content-center avatar-hover-overlay">
+                        <i class="bi bi-camera-fill text-white fs-3"></i>
+                    </div>
 
                     @if (ViewModel.IsUploading)
                     {
-                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-50 d-flex align-items-center justify-content-center">
+                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-75 d-flex align-items-center justify-content-center" style="z-index: 2;">
                             <div class="spinner-border spinner-border-sm text-white" role="status"></div>
                         </div>
                     }
                 </div>
 
                 <InputFile OnChange="@((e) => ViewModel.UploadAvatarAsync(e.File))"
-                           class="position-absolute top-0 start-0 w-100 h-100 opacity-0 pointer"
+                           class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                           style="cursor: pointer;"
                            accept=".jpg,.jpeg,.png" />
             </div>
 
@@ -59,24 +62,36 @@ else if (ViewModel.EditContext != null)
             </div>
         </div>
 
-        <EditForm EditContext="ViewModel.EditContext" OnSubmit="() => ViewModel.SaveChangesAsync(false)">
+        <EditForm EditContext="ViewModel.EditContext" OnSubmit="() => ViewModel.SaveChangesAsync(false, false)">
             <DataAnnotationsValidator />
 
             <div class="row g-4">
                 <div class="col-12 form-group">
                     <label class="required-label">Nom d'utilisateur</label>
-                    <InputText @bind-Value="ViewModel.ProfileData.Username" class="form-control-astralis" placeholder="Pseudo" />
+                    <input type="text"
+                           class="form-control-astralis"
+                           placeholder="Pseudo"
+                           @bind="ViewModel.ProfileData.Username"
+                           @bind:event="oninput" />
                     <ValidationMessage For="@(() => ViewModel.ProfileData.Username)" />
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label class="required-label">Prénom</label>
-                    <InputText @bind-Value="ViewModel.ProfileData.FirstName" class="form-control-astralis" />
+                    <input type="text"
+                           class="form-control-astralis"
+                           placeholder="Prénom"
+                           @bind="ViewModel.ProfileData.FirstName"
+                           @bind:event="oninput" />
                     <ValidationMessage For="@(() => ViewModel.ProfileData.FirstName)" />
                 </div>
                 <div class="col-md-6 form-group">
                     <label class="required-label">Nom</label>
-                    <InputText @bind-Value="ViewModel.ProfileData.LastName" class="form-control-astralis" />
+                    <input type="text"
+                           class="form-control-astralis"
+                           placeholder="Nom de famille"
+                           @bind="ViewModel.ProfileData.LastName"
+                           @bind:event="oninput" />
                     <ValidationMessage For="@(() => ViewModel.ProfileData.LastName)" />
                 </div>
 
@@ -95,7 +110,9 @@ else if (ViewModel.EditContext != null)
             </div>
 
             <div class="mt-5 text-end">
-                <button type="submit" class="btn btn-astralis-premium px-4" disabled="@ViewModel.IsLoading">
+                <button type="submit"
+                        class="btn btn-astralis-premium px-4"
+                        disabled="@(ViewModel.IsLoading || !ViewModel.IsDirty)">
                     @if (ViewModel.IsLoading)
                     {
                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -123,6 +140,11 @@ else if (ViewModel.EditContext != null)
         {
             return ViewModel.ProfileData.AvatarUrl;
         }
+        return GetDefaultAvatarUrl();
+    }
+
+    private string GetDefaultAvatarUrl()
+    {
         return $"https://ui-avatars.com/api/?name={ViewModel.ProfileData.Username}&background=9d4edd&color=fff&rounded=true";
     }
 

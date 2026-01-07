@@ -77,5 +77,21 @@ namespace Astralis_BlazorApp.Services.Implementations
             _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
+
+        public async Task RefreshUserSession()
+        {
+            try
+            {
+                var userDto = await _httpClient.GetFromJsonAsync<AuthResponseDto>("Auth/Me");
+                if (userDto != null)
+                {
+                    MarkUserAsAuthenticated(userDto);
+                }
+            }
+            catch
+            {
+                MarkUserAsLoggedOut();
+            }
+        }
     }
 }

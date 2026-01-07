@@ -1,3 +1,4 @@
+using Astralis_BlazorApp.Handlers;
 using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
 using Astralis_BlazorApp.ViewModels;
@@ -57,6 +58,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<AuthenticationStateProvider, CustomAuthProvider>();
+        services.AddTransient<HttpResponseHandler>();
 
         services.AddScoped<IUploadService, UploadService>();
 
