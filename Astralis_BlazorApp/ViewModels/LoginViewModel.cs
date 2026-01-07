@@ -16,7 +16,6 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly IAuthService _authService;
         private readonly ICountryService _countryService;
         private readonly NavigationManager _navigation;
-        private readonly IJSRuntime _jsRuntime;
 
         [ObservableProperty]
         private UserLoginDto loginData = new();
@@ -50,7 +49,6 @@ namespace Astralis_BlazorApp.ViewModels
             _authService = authService;
             _countryService = countryService;
             _navigation = navigation;
-            _jsRuntime = jsRuntime;
         }
 
         public void InitializeContext()
