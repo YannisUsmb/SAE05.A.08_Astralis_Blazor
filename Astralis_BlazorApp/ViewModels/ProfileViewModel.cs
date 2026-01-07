@@ -95,8 +95,6 @@ namespace Astralis_BlazorApp.ViewModels
                 }
                 else
                 {
-                    // Redirection si session invalide (Bonus point 4)
-                    // _navigation.NavigateToLogin(); 
                     ErrorMessage = "Session expirée. Veuillez vous reconnecter.";
                 }
             }
@@ -149,6 +147,35 @@ namespace Astralis_BlazorApp.ViewModels
             finally
             {
                 IsUploading = false;
+            }
+        }
+
+        public async Task ValidateUsernameAvailabilityAsync()
+        {
+            if (string.IsNullOrWhiteSpace(ProfileData.Username) ||
+                ProfileData.Username.Equals(_originalData.Username, StringComparison.OrdinalIgnoreCase))
+            {
+                if (EditContext != null)
+                {
+                    _messageStore?.Clear(EditContext.Field(nameof(ProfileData.Username)));
+                    EditContext.NotifyValidationStateChanged();
+                }
+                return;
+            }
+
+            var availability = await _userService.CheckAvailabilityAsync(null, ProfileData.Username, null, null);
+
+            if (EditContext != null)
+            {
+                var field = EditContext.Field(nameof(ProfileData.Username));
+                _messageStore?.Clear(field);
+
+                if (availability != null && availability.IsTaken)
+                {
+                    _messageStore?.Add(field, availability.Message ?? "Ce pseudo est déjà pris.");
+                }
+
+                EditContext.NotifyValidationStateChanged();
             }
         }
 

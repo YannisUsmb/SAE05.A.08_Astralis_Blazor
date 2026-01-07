@@ -72,7 +72,8 @@ else if (ViewModel.EditContext != null)
                            class="form-control-astralis"
                            placeholder="Pseudo"
                            @bind="ViewModel.ProfileData.Username"
-                           @bind:event="oninput" />
+                           @bind:event="oninput"
+                           @onfocusout="ViewModel.ValidateUsernameAvailabilityAsync" />
                     <ValidationMessage For="@(() => ViewModel.ProfileData.Username)" />
                 </div>
 
