@@ -1,0 +1,52 @@
+﻿@page "/verifier-email"
+@using Astralis_BlazorApp.Services.Interfaces
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager Navigation
+@inject IAuthService AuthService
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="glass-panel p-5 text-center" style="max-width: 500px;">
+
+        @if (isLoading)
+        {
+            <div class="spinner-border text-accent-purple mb-3" role="status"></div>
+            <h4 class="text-white">Vérification en cours...</h4>
+        }
+        else if (isSuccess)
+        {
+            <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i>
+            <h3 class="text-white mb-3">Email Vérifié !</h3>
+            <p class="text-white-50 mb-4">Votre compte est désormais actif. Vous pouvez vous connecter.</p>
+            <NavLink href="/connexion" class="btn btn-astralis-premium w-100">Aller à la connexion</NavLink>
+        }
+        else
+        {
+            <i class="bi bi-x-circle-fill text-danger display-1 mb-3"></i>
+            <h3 class="text-white mb-3">Échec de la validation</h3>
+            <p class="text-white-50 mb-4">Le lien est invalide ou a expiré.</p>
+            <NavLink href="/inscription" class="btn btn-astralis-outline w-100">Retour à l'accueil</NavLink>
+        }
+
+    </div>
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool isSuccess = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("token", out var token))
+        {
+            isSuccess = await AuthService.VerifyEmailAsync(token!);
+        }
+        else
+        {
+            isSuccess = false;
+        }
+
+        await Task.Delay(1000);
+        isLoading = false;
+    }
+}

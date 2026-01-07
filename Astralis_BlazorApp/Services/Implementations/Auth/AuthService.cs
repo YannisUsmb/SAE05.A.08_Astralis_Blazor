@@ -2,6 +2,7 @@
 using Astralis_BlazorApp.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Astralis_BlazorApp.Services.Implementations
 {
@@ -32,8 +33,14 @@ namespace Astralis_BlazorApp.Services.Implementations
 
                 return userResult;
             }
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized ||
+            response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                throw new Exception(errorResponse.Trim('"'));
+            }
 
-            return null;
+            throw new Exception("Une erreur technique est survenue sur le serveur.");
         }
 
         public async Task<AuthResponseDto?> GoogleLogin(GoogleLoginDto googleDto)
@@ -88,6 +95,12 @@ namespace Astralis_BlazorApp.Services.Implementations
             }
 
             return false;
+        }
+
+        public async Task<bool> VerifyEmailAsync(string token)
+        {
+            var response = await _httpClient.PostAsJsonAsync("Auth/Verify-Email", token);
+            return response.IsSuccessStatusCode;
         }
     }
 }

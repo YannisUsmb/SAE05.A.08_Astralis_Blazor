@@ -277,7 +277,7 @@ namespace Astralis_BlazorApp.ViewModels
 
                 if (result != null)
                 {
-                    _navigation.NavigateTo("/connexion");
+                    _navigation.NavigateTo("/inscription/confirmation");
                 }
                 else
                 {

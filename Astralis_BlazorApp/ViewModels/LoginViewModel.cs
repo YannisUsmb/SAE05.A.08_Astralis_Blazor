@@ -196,15 +196,11 @@ namespace Astralis_BlazorApp.ViewModels
                 {
                     _navigation.NavigateTo(!string.IsNullOrEmpty(_returnUrl) ? _returnUrl : "/");
                 }
-                else
-                {
-                    ErrorMessage = "Identifiants incorrects.";
-                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                ErrorMessage = "Une erreur technique est survenue.";
+                ErrorMessage = ex.Message;
             }
             finally
             {
