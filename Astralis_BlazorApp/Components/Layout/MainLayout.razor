@@ -47,7 +47,8 @@
                             <div class="user-menu-container" @onclick:stopPropagation="true" @onclick="ToggleUserMenu">
                                 <img src="@GetUserProfileImage(context.User)"
                                      class="rounded-circle user-avatar"
-                                     alt="Profil" />
+                                     alt="Profil"
+                                     onerror="this.onerror=null;this.src='@GetDefaultAvatarUrl(context.User)';" />
 
                                 @if (_isUserMenuOpen)
                                 {
@@ -65,7 +66,7 @@
                                             <i class="bi bi-gear-fill"></i> Paramètres
                                         </NavLink>
 
-                                        <NavLink href="/settings?section=favorites" class="dropdown-item-glass" @onclick="CloseMenu">
+                                        <NavLink href="/parametres?section=favorites" class="dropdown-item-glass" @onclick="CloseMenu">
                                             <i class="bi bi-heart-fill text-accent-purple"></i> Mes Favoris
                                         </NavLink>
 
@@ -177,6 +178,11 @@
             return pictureClaim.Value;
         }
 
+        return GetDefaultAvatarUrl(user);
+    }
+
+    private string GetDefaultAvatarUrl(ClaimsPrincipal user)
+    {
         return "https://ui-avatars.com/api/?name=" + user.Identity?.Name + "&background=9d4edd&color=fff&rounded=true";
     }
 

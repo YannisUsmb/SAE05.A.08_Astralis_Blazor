@@ -1,7 +1,7 @@
 ﻿using Astralis.Shared.DTOs;
+using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
@@ -16,6 +16,7 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly NavigationManager _navigation;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsDirty))]
         private UserUpdateDto profileData = new();
 
         [ObservableProperty]
@@ -30,16 +31,12 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private string? errorMessage;
 
-        private ValidationMessageStore? _messageStore;
         public EditContext? EditContext { get; set; }
+        private ValidationMessageStore? _messageStore;
 
         private int _currentUserId;
-
-        private string _originalUsername = "";
-        private string _originalEmail = "";
-        private string? _originalPhone;
-        private int? _originalCountryId;
-        private bool _originalMfa;
+        private UserUpdateDto _originalData = new();
+        public bool IsDirty => !ProfileData.Equals(_originalData);
 
         public ProfileViewModel(
             IUserService userService,
@@ -61,17 +58,24 @@ namespace Astralis_BlazorApp.ViewModels
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
                 var userIdStr = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-                if (int.TryParse(userIdStr, out int userId))
+                if (int.TryParse(userIdStr, out int userId) && userId > 0)
                 {
                     _currentUserId = userId;
                     var userDto = await _userService.GetByIdAsync(userId);
                     if (userDto != null)
                     {
-                        _originalUsername = userDto.Username;
-                        _originalEmail = userDto.Email;
-                        _originalPhone = userDto.Phone;
-                        _originalCountryId = userDto.CountryId;
-                        _originalMfa = userDto.MultiFactorAuthentification;
+                        _originalData = new UserUpdateDto
+                        {
+                            FirstName = userDto.FirstName,
+                            LastName = userDto.LastName,
+                            Username = userDto.Username,
+                            Gender = userDto.Gender,
+                            AvatarUrl = userDto.AvatarUrl,
+                            Email = userDto.Email,
+                            Phone = userDto.Phone,
+                            CountryId = userDto.CountryId,
+                            MultiFactorAuthentification = userDto.MultiFactorAuthentification
+                        };
 
                         ProfileData = new UserUpdateDto
                         {
@@ -82,9 +86,18 @@ namespace Astralis_BlazorApp.ViewModels
                             AvatarUrl = userDto.AvatarUrl,
                             Email = userDto.Email,
                             Phone = userDto.Phone,
-                            CountryId = userDto.CountryId
+                            CountryId = userDto.CountryId,
+                            MultiFactorAuthentification = userDto.MultiFactorAuthentification
                         };
+
+                        InitializeEditContext();
                     }
+                }
+                else
+                {
+                    // Redirection si session invalide (Bonus point 4)
+                    // _navigation.NavigateToLogin(); 
+                    ErrorMessage = "Session expirée. Veuillez vous reconnecter.";
                 }
             }
             catch (Exception ex)
@@ -96,6 +109,15 @@ namespace Astralis_BlazorApp.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        private void InitializeEditContext()
+        {
+            EditContext = new EditContext(ProfileData);
+            _messageStore = new ValidationMessageStore(EditContext);
+
+            EditContext.OnFieldChanged += (s, e) => OnPropertyChanged(nameof(IsDirty));
+            EditContext.OnValidationRequested += (s, e) => _messageStore.Clear();
         }
 
         public async Task UploadAvatarAsync(IBrowserFile file)
@@ -112,10 +134,12 @@ namespace Astralis_BlazorApp.ViewModels
                 }
 
                 var url = await _uploadService.UploadImageAsync(file);
+
                 if (!string.IsNullOrEmpty(url))
                 {
                     ProfileData.AvatarUrl = url;
-                    await SaveChangesAsync(silent: true, forceRefresh: true);
+
+                    OnPropertyChanged(nameof(IsDirty));
                 }
             }
             catch
@@ -128,50 +152,61 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
-        public async Task SaveChangesAsync(bool silent = false, bool forceRefresh = false)
+        public async Task SaveChangesAsync(bool silent = false, bool forceReload = false)
         {
             if (IsLoading) return;
+
+            if (!silent && (EditContext == null || !EditContext.Validate())) return;
+
             IsLoading = true;
             SuccessMessage = null;
             ErrorMessage = null;
             _messageStore?.Clear();
 
-            if (EditContext != null && !EditContext.Validate())
-            {
-                IsLoading = false;
-                return;
-            }
-
             try
             {
-                if (ProfileData.Username != _originalUsername)
+                if (ProfileData.Username != _originalData.Username)
                 {
                     var availability = await _userService.CheckAvailabilityAsync(null, ProfileData.Username, null, null);
-
                     if (availability != null && availability.IsTaken)
                     {
-                        if (EditContext != null)
-                        {
-                            _messageStore?.Add(EditContext.Field(nameof(ProfileData.Username)), availability.Message ?? "Ce pseudo est déjà pris.");
-                            EditContext.NotifyValidationStateChanged();
-                        }
+                        _messageStore?.Add(EditContext!.Field(nameof(ProfileData.Username)), availability.Message ?? "Pris.");
+                        EditContext!.NotifyValidationStateChanged();
                         IsLoading = false;
                         return;
                     }
                 }
 
-                ProfileData.Email = _originalEmail;
-                ProfileData.Phone = _originalPhone;
-                ProfileData.CountryId = _originalCountryId;
-                ProfileData.MultiFactorAuthentification = _originalMfa;
+                ProfileData.Email = _originalData.Email;
+                ProfileData.Phone = _originalData.Phone;
+                ProfileData.CountryId = _originalData.CountryId;
+                ProfileData.MultiFactorAuthentification = _originalData.MultiFactorAuthentification;
 
                 await _userService.UpdateAsync(_currentUserId, ProfileData);
 
-                _originalUsername = ProfileData.Username;
+                _originalData = new UserUpdateDto
+                {
+                    FirstName = ProfileData.FirstName,
+                    LastName = ProfileData.LastName,
+                    Username = ProfileData.Username,
+                    Gender = ProfileData.Gender,
+                    AvatarUrl = ProfileData.AvatarUrl,
+                    Email = ProfileData.Email,
+                    Phone = ProfileData.Phone,
+                    CountryId = ProfileData.CountryId,
+                    MultiFactorAuthentification = ProfileData.MultiFactorAuthentification
+                };
+
+                OnPropertyChanged(nameof(IsDirty));
 
                 if (!silent) SuccessMessage = "Profil mis à jour avec succès.";
 
-                if (forceRefresh) _navigation.NavigateTo(_navigation.Uri, forceLoad: true);
+                if (_authStateProvider is CustomAuthProvider customAuth)
+                {
+                    await customAuth.RefreshUserSession();
+                }
+
+                if (forceReload) _navigation.NavigateTo(_navigation.Uri, forceLoad: true);
             }
             catch (Exception ex)
             {

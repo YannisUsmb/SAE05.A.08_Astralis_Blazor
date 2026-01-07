@@ -1,5 +1,4 @@
 ﻿using Astralis.Shared.DTOs;
-using Astralis.Shared.Enums;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,6 +17,7 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly IJSRuntime _jsRuntime;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsContactDirty))]
         private UserUpdateDto contactData = new();
 
         [ObservableProperty]
@@ -36,11 +36,16 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty]
         private string? errorMessage;
 
-        private ValidationMessageStore? _messageStore;
         public EditContext? EditContext { get; set; }
+        private ValidationMessageStore? _messageStore;
 
         private int _currentUserId;
-        private UserUpdateDto? _originalData;
+        private UserUpdateDto _originalContactData = new();
+
+        public bool IsContactDirty =>
+            ContactData.Email != _originalContactData.Email ||
+            ContactData.Phone != _originalContactData.Phone ||
+            ContactData.CountryId != _originalContactData.CountryId;
 
         public AccountViewModel(IUserService userService, ICountryService countryService, AuthenticationStateProvider authStateProvider, IJSRuntime jsRuntime)
         {
@@ -61,7 +66,7 @@ namespace Astralis_BlazorApp.ViewModels
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
                 var userClaim = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
 
-                if (userClaim != null && int.TryParse(userClaim.Value, out int userId))
+                if (userClaim != null && int.TryParse(userClaim.Value, out int userId) && userId > 0)
                 {
                     _currentUserId = userId;
                     var userDto = await _userService.GetByIdAsync(userId);
@@ -73,7 +78,6 @@ namespace Astralis_BlazorApp.ViewModels
                             Email = userDto.Email,
                             Phone = userDto.Phone,
                             CountryId = userDto.CountryId,
-
                             FirstName = userDto.FirstName,
                             LastName = userDto.LastName,
                             Username = userDto.Username,
@@ -82,17 +86,14 @@ namespace Astralis_BlazorApp.ViewModels
                             MultiFactorAuthentification = userDto.MultiFactorAuthentification
                         };
 
-                        _originalData = new UserUpdateDto
+                        _originalContactData = new UserUpdateDto
                         {
                             Email = userDto.Email,
-                            Phone = userDto.Phone
+                            Phone = userDto.Phone,
+                            CountryId = userDto.CountryId
                         };
 
-                        EditContext = new EditContext(ContactData);
-                        _messageStore = new ValidationMessageStore(EditContext);
-                        EditContext.OnValidationRequested += (s, e) => _messageStore.Clear();
-                        EditContext.OnFieldChanged += (s, e) => _messageStore.Clear(e.FieldIdentifier);
-
+                        InitializeEditContext();
                         await UpdatePhonePlaceholderAsync();
                     }
                 }
@@ -104,11 +105,25 @@ namespace Astralis_BlazorApp.ViewModels
             finally { IsLoading = false; }
         }
 
+        private void InitializeEditContext()
+        {
+            EditContext = new EditContext(ContactData);
+            _messageStore = new ValidationMessageStore(EditContext);
+
+            EditContext.OnFieldChanged += (s, e) => OnPropertyChanged(nameof(IsContactDirty));
+            EditContext.OnValidationRequested += (s, e) => _messageStore.Clear();
+        }
+
         public async Task OnCountryChanged(int? newCountryId)
         {
             ContactData.CountryId = newCountryId;
+            OnPropertyChanged(nameof(ContactData));
+            OnPropertyChanged(nameof(IsContactDirty));
+
             await UpdatePhonePlaceholderAsync();
-            if (!string.IsNullOrWhiteSpace(ContactData.Phone)) await OnPhoneInput(ContactData.Phone);
+
+            if (!string.IsNullOrWhiteSpace(ContactData.Phone))
+                await OnPhoneInput(ContactData.Phone);
         }
 
         public async Task OnPhoneInput(string input)
@@ -119,8 +134,12 @@ namespace Astralis_BlazorApp.ViewModels
                 var country = Countries.FirstOrDefault(c => c.Id == ContactData.CountryId);
                 if (country != null && !string.IsNullOrEmpty(country.IsoCode))
                 {
-                    var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
-                    if (ContactData.Phone != formatted) ContactData.Phone = formatted;
+                    try
+                    {
+                        var formatted = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.formatAsYouType", input, country.IsoCode);
+                        if (ContactData.Phone != formatted) ContactData.Phone = formatted;
+                    }
+                    catch { }
                 }
             }
         }
@@ -130,11 +149,14 @@ namespace Astralis_BlazorApp.ViewModels
             if (ContactData.CountryId.HasValue)
             {
                 var country = Countries.FirstOrDefault(c => c.Id == ContactData.CountryId);
-                if (country != null && !string.IsNullOrEmpty(country.IsoCode))
+                if (country != null)
                 {
-                    var example = await _jsRuntime.InvokeAsync<string>("window.phoneValidator.getExampleNumber", country.IsoCode);
-                    if (!string.IsNullOrWhiteSpace(example)) PhonePlaceholder = example;
+                    PhonePlaceholder = country.PhoneExample ?? "06 12 34 56 78";
                 }
+            }
+            else
+            {
+                PhonePlaceholder = "Choisir un pays...";
             }
         }
 
@@ -151,9 +173,8 @@ namespace Astralis_BlazorApp.ViewModels
             try
             {
                 string? cleanPhone = !string.IsNullOrEmpty(ContactData.Phone) ? ContactData.Phone.Replace(" ", "") : null;
-
-                string? emailToCheck = (ContactData.Email != _originalData?.Email) ? ContactData.Email : null;
-                string? phoneToCheck = (ContactData.Phone != _originalData?.Phone) ? cleanPhone : null;
+                string? emailToCheck = (ContactData.Email != _originalContactData.Email) ? ContactData.Email : null;
+                string? phoneToCheck = (ContactData.Phone != _originalContactData.Phone) ? cleanPhone : null;
                 string? countryIdToCheck = ContactData.CountryId.HasValue ? ContactData.CountryId.ToString() : null;
 
                 if (emailToCheck != null || phoneToCheck != null)
@@ -184,22 +205,24 @@ namespace Astralis_BlazorApp.ViewModels
                 }
 
                 ContactData.Phone = cleanPhone;
+
                 var result = await _userService.UpdateAsync(_currentUserId, ContactData);
 
                 if (result != null)
                 {
-                    _originalData.Email = ContactData.Email;
-                    _originalData.Phone = ContactData.Phone;
-                    
-                    ContactData.Phone = result.Phone;
+                    _originalContactData.Email = ContactData.Email;
+                    _originalContactData.Phone = ContactData.Phone;
+                    _originalContactData.CountryId = ContactData.CountryId;
+
+                    await OnPhoneInput(ContactData.Phone ?? "");
 
                     SuccessMessage = "Coordonnées mises à jour avec succès.";
+                    OnPropertyChanged(nameof(IsContactDirty));
                 }
             }
             catch (Exception ex)
             {
                 ErrorMessage = "Erreur lors de la mise à jour.";
-                Console.WriteLine(ex.Message);
             }
             finally
             {
@@ -222,7 +245,6 @@ namespace Astralis_BlazorApp.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = "Impossible de modifier le mot de passe.";
-                Console.WriteLine(ex.Message);
             }
         }
     }

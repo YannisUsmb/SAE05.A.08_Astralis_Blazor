@@ -21,7 +21,8 @@ namespace Astralis_BlazorApp
             {
                 client.BaseAddress = new Uri("https://localhost:7064/api/");
             })
-            .AddHttpMessageHandler<CookieHandler>();
+            .AddHttpMessageHandler<CookieHandler>()
+            .AddHttpMessageHandler<HttpResponseHandler>();
 
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("AstralisAPI"));
 

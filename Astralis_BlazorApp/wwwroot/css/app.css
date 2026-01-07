@@ -691,3 +691,43 @@ body {
 .ls-1 {
     letter-spacing: 0.1em;
 }
+
+
+/* ============================================
+   FORMS & INPUTS
+   ============================================ */
+.required-label::after {
+    content: " *";
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+.input-group-astralis {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.prefix-select {
+    width: 140px;
+    min-width: 140px;
+    flex-shrink: 0;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.phone-input {
+    flex-grow: 1;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.avatar-hover-overlay {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.avatar-container:hover .avatar-hover-overlay {
+    opacity: 1;
+}

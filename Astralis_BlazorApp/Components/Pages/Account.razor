@@ -1,4 +1,4 @@
-﻿@page "/settings/compte"
+﻿@page "/parametres/compte"
 @layout SettingsLayout
 @using Astralis.Shared.DTOs
 @using Astralis_BlazorApp.Components.Layout
@@ -38,29 +38,44 @@ else if (ViewModel.EditContext != null)
                 <div class="row g-4">
                     <div class="col-12 form-group">
                         <label class="required-label">Adresse Email</label>
-                        <InputText class="form-control-astralis" @bind-Value="ViewModel.ContactData.Email" placeholder="nouvel-email@exemple.com" />
+                        <input type="text"
+                               class="form-control-astralis"
+                               placeholder="email@exemple.com"
+                               @bind="ViewModel.ContactData.Email"
+                               @bind:event="oninput" />
                         <ValidationMessage For="@(() => ViewModel.ContactData.Email)" />
                     </div>
 
                     <div class="col-12 form-group">
                         <label>Téléphone</label>
                         <div class="input-group-astralis">
-                            <InputSelect Value="ViewModel.ContactData.CountryId"
+                            <InputSelect TValue="int?"
+                                         Value="ViewModel.ContactData.CountryId"
                                          ValueChanged="@((int? c) => ViewModel.OnCountryChanged(c))"
                                          ValueExpression="@(() => ViewModel.ContactData.CountryId)"
-                                         class="form-control-astralis prefix-select">
-                                <option value="">Choisir...</option>
-                                @foreach (var country in ViewModel.Countries)
+                                         class="form-control-astralis prefix-select"
+                                         style="max-width: 150px;">
+
+                                @if (ViewModel.Countries == null || !ViewModel.Countries.Any())
                                 {
-                                    <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
+                                    <option value="" disabled selected>Chargement...</option>
+                                }
+                                else
+                                {
+                                    <option value="">Choisir...</option>
+                                    @foreach (var country in ViewModel.Countries)
+                                    {
+                                        <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
+                                    }
                                 }
                             </InputSelect>
 
                             <input type="tel"
-                                   class="form-control-astralis phone-input"
+                                   class="form-control-astralis phone-input flex-grow-1"
                                    placeholder="@ViewModel.PhonePlaceholder"
                                    value="@ViewModel.ContactData.Phone"
-                                   @oninput="@(async (ChangeEventArgs e) => await ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))" />
+                                   @oninput="@(async (ChangeEventArgs e) => await ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))"
+                                   disabled="@(!ViewModel.ContactData.CountryId.HasValue)" />
                         </div>
                         <ValidationMessage For="@(() => ViewModel.ContactData.CountryId)" />
                         <ValidationMessage For="@(() => ViewModel.ContactData.Phone)" />
@@ -68,12 +83,12 @@ else if (ViewModel.EditContext != null)
                 </div>
 
                 <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-astralis-outline btn-sm" disabled="@ViewModel.IsLoading">
+                    <button type="submit" class="btn btn-astralis-premium btn-sm px-3" disabled="@(ViewModel.IsLoading || !ViewModel.IsContactDirty)">
                         @if (ViewModel.IsLoading)
                         {
                             <span class="spinner-border spinner-border-sm me-2"></span>
                             <span>Sauvegarde...</span>
-     }
+                        }
                         else
                         {
                             <span>Enregistrer les coordonnées</span>
@@ -91,19 +106,31 @@ else if (ViewModel.EditContext != null)
         <div class="glass-panel p-4 rounded-3 border border-white-10">
             <EditForm Model="@ViewModel.PasswordModel" OnValidSubmit="ViewModel.ChangePasswordAsync">
                 <DataAnnotationsValidator />
-                <ValidationSummary class="text-danger small mb-3" />
+
                 <div class="row g-3">
                     <div class="col-12 form-group">
                         <label class="required-label">Mot de passe actuel</label>
-                        <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.PasswordModel.CurrentPassword" />
+                        <input type="password"
+                               class="form-control-astralis"
+                               @bind="ViewModel.PasswordModel.CurrentPassword"
+                               @bind:event="oninput" />
+                        <ValidationMessage For="@(() => ViewModel.PasswordModel.CurrentPassword)" />
                     </div>
                     <div class="col-md-6 form-group">
                         <label class="required-label">Nouveau mot de passe</label>
-                        <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.PasswordModel.NewPassword" />
+                        <input type="password"
+                               class="form-control-astralis"
+                               @bind="ViewModel.PasswordModel.NewPassword"
+                               @bind:event="oninput" />
+                        <ValidationMessage For="@(() => ViewModel.PasswordModel.NewPassword)" />
                     </div>
                     <div class="col-md-6 form-group">
                         <label class="required-label">Confirmer le nouveau mot de passe</label>
-                        <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.PasswordModel.ConfirmNewPassword" />
+                        <input type="password"
+                               class="form-control-astralis"
+                               @bind="ViewModel.PasswordModel.ConfirmNewPassword"
+                               @bind:event="oninput" />
+                        <ValidationMessage For="@(() => ViewModel.PasswordModel.ConfirmNewPassword)" />
                     </div>
                 </div>
                 <div class="mt-4 text-end">
@@ -113,8 +140,21 @@ else if (ViewModel.EditContext != null)
         </div>
     </div>
 
-    <div class="danger-zone p-4 rounded-3">
+    <div class="danger-zone p-4">
         <h5 class="text-danger mb-2">Zone de danger</h5>
+        <p class="text-white-50 small mb-4">
+            Gérez la fin de vie de votre compte Astralis. Ces actions sont irréversibles.
+        </p>
+
+        <div class="d-flex justify-content-end gap-3">
+            <button class="btn btn-outline-warning btn-sm text-warning-emphasis">
+                <i class="bi bi-incognito me-1"></i> Anonymiser mes données
+            </button>
+
+            <button class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash me-1"></i> Supprimer mon compte
+            </button>
+        </div>
     </div>
 }
 
