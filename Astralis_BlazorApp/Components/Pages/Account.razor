@@ -49,12 +49,10 @@ else if (ViewModel.EditContext != null)
                     <div class="col-12 form-group">
                         <label>Téléphone</label>
                         <div class="input-group-astralis">
-                            <InputSelect TValue="int?"
-                                         Value="ViewModel.ContactData.CountryId"
-                                         ValueChanged="@((int? c) => ViewModel.OnCountryChanged(c))"
-                                         ValueExpression="@(() => ViewModel.ContactData.CountryId)"
-                                         class="form-control-astralis prefix-select"
-                                         style="max-width: 150px;">
+                            <select class="form-control-astralis prefix-select"
+                                    style="max-width: 150px;"
+                                    value="@ViewModel.ContactData.CountryId"
+                                    @onchange="@(async (e) => await ViewModel.OnCountryChanged(string.IsNullOrEmpty(e.Value?.ToString()) ? null : int.Parse(e.Value.ToString()!)))">
 
                                 @if (ViewModel.Countries == null || !ViewModel.Countries.Any())
                                 {
@@ -65,20 +63,21 @@ else if (ViewModel.EditContext != null)
                                     <option value="">Choisir...</option>
                                     @foreach (var country in ViewModel.Countries)
                                     {
-                                        <option value="@country.Id">@country.Name (@country.PhonePrefix)</option>
+                                        <option value="@country.Id" selected="@(country.Id == ViewModel.ContactData.CountryId)">
+                                            @country.Name (@country.PhonePrefix)
+                                        </option>
                                     }
                                 }
-                            </InputSelect>
+                            </select>
 
                             <input type="tel"
                                    class="form-control-astralis phone-input flex-grow-1"
                                    placeholder="@ViewModel.PhonePlaceholder"
                                    value="@ViewModel.ContactData.Phone"
                                    @oninput="@(async (ChangeEventArgs e) => await ViewModel.OnPhoneInput(e.Value?.ToString() ?? ""))"
+                                   @onfocusout="ViewModel.ValidatePhoneAvailabilityAsync"
                                    disabled="@(!ViewModel.ContactData.CountryId.HasValue)" />
                         </div>
-                        <ValidationMessage For="@(() => ViewModel.ContactData.CountryId)" />
-                        <ValidationMessage For="@(() => ViewModel.ContactData.Phone)" />
                     </div>
                 </div>
 

@@ -160,6 +160,101 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
+        public async Task ValidateEmailAvailabilityAsync()
+        {
+            if (string.IsNullOrWhiteSpace(ContactData.Email) ||
+                ContactData.Email.Equals(_originalContactData.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                if (EditContext != null)
+                {
+                    _messageStore?.Clear(EditContext.Field(nameof(ContactData.Email)));
+                    EditContext.NotifyValidationStateChanged();
+                }
+                return;
+            }
+
+            var availability = await _userService.CheckAvailabilityAsync(ContactData.Email, null, null, null);
+
+            if (EditContext != null)
+            {
+                var field = EditContext.Field(nameof(ContactData.Email));
+                _messageStore?.Clear(field);
+
+                if (availability != null && availability.IsTaken)
+                {
+                    _messageStore?.Add(field, availability.Message ?? "Cet email est déjà utilisé.");
+                }
+                EditContext.NotifyValidationStateChanged();
+            }
+        }
+
+        public async Task ValidatePhoneAvailabilityAsync()
+        {
+            string? currentClean = ContactData.Phone?.Replace(" ", "");
+            string? originalClean = _originalContactData.Phone?.Replace(" ", "");
+
+            if (string.IsNullOrWhiteSpace(currentClean) ||
+                (currentClean == originalClean && ContactData.CountryId == _originalContactData.CountryId) ||
+                !ContactData.CountryId.HasValue)
+            {
+                if (EditContext != null)
+                {
+                    _messageStore?.Clear(EditContext.Field(nameof(ContactData.Phone)));
+                    EditContext.NotifyValidationStateChanged();
+                }
+                return;
+            }
+
+            if (!ValidatePhoneFormat()) return;
+
+            var availability = await _userService.CheckAvailabilityAsync(null, null, currentClean, ContactData.CountryId.ToString());
+
+            if (EditContext != null)
+            {
+                var field = EditContext.Field(nameof(ContactData.Phone));
+
+                if (availability != null && availability.IsTaken)
+                {
+                    _messageStore?.Clear(field);
+                    _messageStore?.Add(field, availability.Message ?? "Ce numéro est déjà lié à un compte.");
+                }
+                EditContext.NotifyValidationStateChanged();
+            }
+        }
+
+        private bool ValidatePhoneFormat()
+        {
+            if (!ContactData.CountryId.HasValue || string.IsNullOrWhiteSpace(ContactData.Phone)) return true;
+
+            var country = Countries.FirstOrDefault(c => c.Id == ContactData.CountryId);
+            if (country != null && !string.IsNullOrEmpty(country.PhoneRegex))
+            {
+                try
+                {
+                    string phoneClean = new string(ContactData.Phone.Where(char.IsDigit).ToArray());
+                    bool isValid = System.Text.RegularExpressions.Regex.IsMatch(phoneClean, country.PhoneRegex);
+
+                    if (!isValid && phoneClean.StartsWith("0") && phoneClean.Length > 1)
+                    {
+                        string phoneWithoutZero = phoneClean.Substring(1);
+                        if (System.Text.RegularExpressions.Regex.IsMatch(phoneWithoutZero, country.PhoneRegex))
+                            isValid = true;
+                    }
+
+                    if (!isValid && EditContext != null)
+                    {
+                        var field = EditContext.Field(nameof(ContactData.Phone));
+                        _messageStore?.Clear(field);
+                        _messageStore?.Add(field, "Format invalide pour ce pays.");
+                        EditContext.NotifyValidationStateChanged();
+                        return false;
+                    }
+                }
+                catch { }
+            }
+            return true;
+        }
+
         [RelayCommand]
         public async Task SaveContactInfoAsync()
         {
