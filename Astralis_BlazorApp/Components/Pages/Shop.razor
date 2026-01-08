@@ -107,11 +107,15 @@
             <div class="pagination-container">
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.PreviousPageCommand.ExecuteAsync(null))"
-                        disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
+                        disabled="@(ViewModel.CurrentPage == 1)">
+                    Précédent
+                </button>
                 <span class="text-white">Page @ViewModel.CurrentPage</span>
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.NextPageCommand.ExecuteAsync(null))"
-                        disabled="@(!ViewModel.HasNextPage)">Suivant</button>
+                        disabled="@(!ViewModel.HasNextPage)">
+                    Suivant
+                </button>
             </div>
         }
     }
