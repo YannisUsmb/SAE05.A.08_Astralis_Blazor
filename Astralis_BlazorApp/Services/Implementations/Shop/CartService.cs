@@ -200,7 +200,7 @@ public class CartService : ICartService
             }
         }
         await LoadCartAsync();
-    }
+    }    
 
     public async Task<string?> CheckoutAsync()
     {
