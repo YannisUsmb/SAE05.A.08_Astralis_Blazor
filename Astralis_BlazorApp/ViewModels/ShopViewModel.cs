@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Astralis_BlazorApp.Services.Interfaces;
-using Astralis.Shared.DTOs;
+﻿using Astralis.Shared.DTOs;
 using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -29,7 +27,6 @@ public partial class ShopViewModel : ObservableObject
     [ObservableProperty] private bool hasNextPage = true;
 
     [ObservableProperty] private bool isLoading;
-
     [ObservableProperty] private ProductListDto? selectedProduct;
     [ObservableProperty] private ProductDetailDto? selectedProductDetails;
 
@@ -98,7 +95,7 @@ public partial class ShopViewModel : ObservableObject
 
     [RelayCommand]
     public async Task ApplyFilterAsync()
-        {
+    {
         CurrentPage = 1;
         await SearchDataAsync();
 
@@ -153,7 +150,7 @@ public partial class ShopViewModel : ObservableObject
     public async Task OnFilterChanged()
     {
     }
-    
+
     [RelayCommand]
     public async Task ShowDetails(ProductListDto body)
     {
@@ -161,7 +158,7 @@ public partial class ShopViewModel : ObservableObject
 
         IsLoading = true;
         SelectedProduct = body;
-    
+
         try
         {
             var details = await _productService.GetByIdAsync(body.Id);
