@@ -1,4 +1,5 @@
 ﻿using Astralis.Shared.DTOs;
+using Astralis.Shared.Enums;
 using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -131,12 +132,11 @@ namespace Astralis_BlazorApp.ViewModels
                     return;
                 }
 
-                var url = await _uploadService.UploadImageAsync(file);
+                var url = await _uploadService.UploadImageAsync(file, UploadCategory.Avatars);
 
                 if (!string.IsNullOrEmpty(url))
                 {
                     ProfileData.AvatarUrl = url;
-
                     OnPropertyChanged(nameof(IsDirty));
                 }
             }

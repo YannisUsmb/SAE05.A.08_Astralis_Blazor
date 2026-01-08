@@ -99,7 +99,7 @@ namespace Astralis_BlazorApp.Services.Implementations
 
                 string queryString = string.Join("&", query);
 
-                return await httpClient.GetFromJsonAsync<AvailabilityResult>($"{Controller}/Check-availability?{queryString}");
+                return await httpClient.GetFromJsonAsync<AvailabilityResult>($"{Controller}/CheckAvailability?{queryString}");
             }
             catch (Exception ex)
             {
