@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels
@@ -34,6 +33,9 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty]
         private string phonePlaceholder = "Choisir un pays...";
+
+        [ObservableProperty]
+        private bool isTermsAccepted;
 
         private ValidationMessageStore? _messageStore;
         public EditContext? EditContext { get; set; }
@@ -200,6 +202,13 @@ namespace Astralis_BlazorApp.ViewModels
             IsLoading = true;
             ErrorMessage = null;
             _messageStore?.Clear();
+
+            if (!IsTermsAccepted)
+            {
+                ErrorMessage = "Vous devez accepter les Conditions Générales d'Utilisation et la Politique de Confidentialité pour créer un compte.";
+                IsLoading = false;
+                return;
+            }
 
             if (EditContext != null && !EditContext.Validate())
             {
