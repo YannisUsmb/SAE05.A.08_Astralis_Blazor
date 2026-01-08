@@ -87,6 +87,13 @@
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Phone)" />
                 </div>
 
+                <div class="form-check mb-2 mt-2">
+                    <InputCheckbox id="mfa" class="form-check-input bg-dark border-secondary" @bind-Value="ViewModel.RegisterData.MultiFactorAuthentification" />
+                    <label class="form-check-label text-muted small" for="mfa">
+                        Activer l'authentification double facteur (A2F)
+                    </label>
+                </div>
+
                 <div class="form-group">
                     <label class="required-label">Genre</label>
                     <InputSelect class="form-control-astralis" @bind-Value="ViewModel.RegisterData.Gender">
@@ -101,13 +108,6 @@
                     <ValidationMessage For="@(() => ViewModel.RegisterData.Gender)" />
                 </div>
 
-                <div class="form-check mb-4 mt-2">
-                    <InputCheckbox id="mfa" class="form-check-input bg-dark border-secondary" @bind-Value="ViewModel.RegisterData.MultiFactorAuthentification" />
-                    <label class="form-check-label text-muted small" for="mfa">
-                        Activer l'authentification double facteur (A2F)
-                    </label>
-                </div>
-
                 <div class="row">
                     <div class="col-md-6 form-group">
                         <label class="required-label">Mot de passe</label>
@@ -119,6 +119,15 @@
                         <InputText type="password" class="form-control-astralis" @bind-Value="ViewModel.RegisterData.ConfirmPassword" />
                         <ValidationMessage For="@(() => ViewModel.RegisterData.ConfirmPassword)" />
                     </div>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input type="checkbox" id="terms" class="form-check-input bg-dark border-secondary"
+                           @bind="ViewModel.IsTermsAccepted" />
+                    <label class="form-check-label text-muted small" for="terms">
+                        Je confirme avoir lu et j'accepte les <a href="/cgu" target="_blank" class="text-accent">Conditions Générales d'Utilisation</a>
+                        ainsi que la <a href="/politique-confidentialite" target="_blank" class="text-accent">Politique de Confidentialité</a>.
+                    </label>
                 </div>
 
                 <button type="submit" class="btn-login" disabled="@ViewModel.IsLoading">

@@ -172,6 +172,17 @@ label {
     width: 100%;
 }
 
+.text-accent {
+    color: #a76dff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    .text-accent:hover {
+        color: #d0aaff;
+        text-decoration: underline;
+    }
+
 ::deep .prefix-select {
     width: 140px;
     min-width: 140px;
