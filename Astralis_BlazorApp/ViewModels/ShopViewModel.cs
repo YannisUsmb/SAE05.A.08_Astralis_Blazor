@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
 using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.Services.Interfaces;
@@ -16,6 +14,10 @@ public partial class ShopViewModel : ObservableObject
     private readonly IProductCategoryService _typeService;
     private readonly ICartService _cartService;
     
+    // --- Gestion du Debounce (Recherche) ---
+    private CancellationTokenSource? _searchCts;
+
+    // --- Collections de données ---
     // --- Gestion du Debounce (Recherche) ---
     private CancellationTokenSource? _searchCts;
 
@@ -199,6 +201,16 @@ public partial class ShopViewModel : ObservableObject
     {
         SelectedProductDetails = null;
         SelectedProduct = null;
+    }
+
+    [RelayCommand]
+    public async Task NextPage()
+    {
+        if (HasNextPage)
+        {
+            CurrentPage++;
+            await SearchDataAsync();
+        }
     }
 
     [RelayCommand]

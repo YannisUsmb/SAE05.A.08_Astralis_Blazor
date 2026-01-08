@@ -48,7 +48,7 @@
                 <option value="price_asc">Prix (Croissant)</option>
                 <option value="price_desc">Prix (Décroissant)</option>
             </select>
-            
+
             <div class="d-flex gap-3 align-items-center">
                 <span class="text-white small">Prix :</span>
                 <input type="number" class="filter-input filter-input-sm" placeholder="Min"
@@ -97,11 +97,15 @@
             <div class="pagination-container">
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.PreviousPageCommand.ExecuteAsync(null))"
-                        disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
+                        disabled="@(ViewModel.CurrentPage == 1)">
+                    Précédent
+                </button>
                 <span class="text-white">Page @ViewModel.CurrentPage</span>
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.NextPageCommand.ExecuteAsync(null))"
-                        disabled="@(!ViewModel.HasNextPage)">Suivant</button>
+                        disabled="@(!ViewModel.HasNextPage)">
+                    Suivant
+                </button>
             </div>
         }
     }
@@ -206,6 +210,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // On s'abonne aux events pour mettre à jour le compteur en temps réel
         ViewModel.PropertyChanged += (sender, e) => StateHasChanged();
         CartService.OnChange += StateHasChanged;
 
