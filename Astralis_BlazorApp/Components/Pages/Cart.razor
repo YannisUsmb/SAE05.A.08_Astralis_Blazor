@@ -1,0 +1,115 @@
+﻿@page "/panier"
+@using Astralis_BlazorApp.Services
+@using Astralis.Shared.DTOs
+@inject ICartService CartService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<PageTitle>Mon Panier – Astralis</PageTitle>
+
+<div class="cart-wrapper">
+
+    <div class="page-header mb-4">
+        <h1><i class="bi bi-cart3 me-3"></i>Votre Panier</h1>
+        <p class="text-white-50">Gérez vos équipements avant le départ.</p>
+    </div>
+
+    @if (CartService.Cart.Items.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-basket2 display-1 mb-4" style="color: #9d4edd;"></i>
+            <h3>Votre soute est vide</h3>
+            <p class="text-white-50 mb-4">Aucun module ou équipement n'a été sélectionné.</p>
+            <button class="btn btn-primary btn-lg" @onclick="GoToShop">
+                Accéder à la boutique
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="cart-layout">
+
+            <div class="cart-list">
+                @foreach (var item in CartService.Cart.Items)
+                {
+                    <div class="cart-card">
+                        <div class="cart-img-container">
+                            @if (!string.IsNullOrEmpty(item.ProductPictureUrl))
+                            {
+                                <img src="@item.ProductPictureUrl" alt="@item.ProductLabel" class="cart-img" />
+                            }
+                            else
+                            {
+                                <div class="cart-img-placeholder">
+                                    <i class="bi bi-box-seam"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="cart-info">
+                            <h4>@item.ProductLabel</h4>
+                            <span class="unit-price">@item.UnitPrice.ToString("N2") € / unité</span>
+                        </div>
+
+                        <div class="cart-controls">
+                            <div class="qty-group">
+                                <button class="btn-qty" @onclick="() => CartService.DecreaseQuantityAsync(item)">-</button>
+                                <span class="qty-value">@item.Quantity</span>
+                                <button class="btn-qty" @onclick="() => CartService.IncreaseQuantityAsync(item)">+</button>
+                            </div>
+                        </div>
+
+                        <div class="cart-total-col">
+                            @item.TotalPrice.ToString("N2") €
+                        </div>
+
+                        <button class="btn-delete" @onclick="() => CartService.RemoveFromCartAsync(item)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                }
+
+                <button class="btn btn-secondary mt-3" @onclick="GoToShop">
+                    ← Continuer mes achats
+                </button>
+            </div>
+
+            <div class="cart-summary-wrapper">
+                <div class="cart-summary">
+                    <h3>Récapitulatif</h3>
+
+                    <div class="summary-row">
+                        <span>Nombre d'articles</span>
+                        <span>@CartService.Cart.TotalItemsCount</span>
+                    </div>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span class="highlight">@CartService.Cart.GrandTotal.ToString("N2") €</span>
+                    </div>
+
+                    <button class="btn btn-primary w-100 btn-lg mt-4">
+                        <i class="bi bi-credit-card me-2"></i> Payer
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        CartService.OnChange += StateHasChanged;
+        await CartService.LoadCartAsync();
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+    }
+
+    private void GoToShop() => Navigation.NavigateTo("/boutique");
+}

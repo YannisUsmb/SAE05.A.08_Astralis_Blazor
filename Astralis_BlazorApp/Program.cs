@@ -1,6 +1,7 @@
 using Astralis_BlazorApp.Components;
 using Astralis_BlazorApp.Extensions;
 using Astralis_BlazorApp.Handlers;
+using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.ViewModels;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -25,7 +26,7 @@ namespace Astralis_BlazorApp
             .AddHttpMessageHandler<CookieHandler>();
 
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("AstralisAPI"));
-
+            builder.Services.AddScoped<ICartService, CartService>();
             // --- Services & ViewModels ---
             builder.Services.AddApplicationServices();
             builder.Services.AddViewModels();

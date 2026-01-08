@@ -1,24 +1,39 @@
 ﻿@page "/boutique"
 @using Astralis.Shared.DTOs
 @using Astralis_BlazorApp.ViewModels
+@using Astralis_BlazorApp.Services
 @inject ShopViewModel ViewModel
-@inject IJSRuntime JSRuntime  
+@inject ICartService CartService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@implements IDisposable
+
 <PageTitle>Boutique – Astralis</PageTitle>
 
 <div class="content-wrapper">
 
     @if (ViewModel.SelectedProductDetails == null)
     {
-        <div class="page-header">
+        <div class="page-header d-flex justify-content-between align-items-center mb-4">
             <h1>Boutique Astralis</h1>
+
+            <button class="btn btn-primary position-relative" @onclick='() => Navigation.NavigateTo("/panier")'>
+                <i class="bi bi-cart3 me-2"></i> Mon Panier
+                @if (CartService.Cart.TotalItemsCount > 0)
+                {
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        @CartService.Cart.TotalItemsCount
+                    </span>
+                }
+            </button>
         </div>
+
         <p class="page-description">Équipements, modules et ressources pour vos voyages interstellaires</p>
 
         <div class="filters-container">
             <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
-                   @bind="ViewModel.Filter.SearchText"
-                   @bind:event="oninput"
-                   @onkeyup="@(e => ViewModel.ApplyFilterCommand.ExecuteAsync(null))" />
+                   @bind="ViewModel.SearchText"
+                   @bind:event="oninput" />
 
             <select class="filter-input"
                     @bind="ViewModel.SelectedTypeId"
@@ -38,7 +53,7 @@
                 <option value="price_asc">Prix (Croissant)</option>
                 <option value="price_desc">Prix (Décroissant)</option>
             </select>
-            
+
             <div class="d-flex gap-3 align-items-center">
                 <span class="text-white small">Prix :</span>
                 <input type="number" class="filter-input filter-input-sm" placeholder="Min"
@@ -75,7 +90,12 @@
                             <h3>@product.Label</h3>
                             <h4 class="body-price">@product.Price €</h4>
                             <p><span class="badge-type">@product.CategoryLabel</span></p>
-                            <button class="btn btn-primary btn-lg" @onclick:stopPropagation="true"><i class="bi bi-cart-plus me-2"></i> Ajouter</button>
+
+                            <button class="btn btn-primary btn-lg"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => ViewModel.AddToCart(product)">
+                                <i class="bi bi-cart-plus me-2"></i> Ajouter
+                            </button>
                         </div>
                     </div>
                 }
@@ -87,11 +107,15 @@
             <div class="pagination-container">
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.PreviousPageCommand.ExecuteAsync(null))"
-                        disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
+                        disabled="@(ViewModel.CurrentPage == 1)">
+                    Précédent
+                </button>
                 <span class="text-white">Page @ViewModel.CurrentPage</span>
                 <button class="btn btn-astralis-outline"
                         @onclick="@(() => ViewModel.NextPageCommand.ExecuteAsync(null))"
-                        disabled="@(!ViewModel.HasNextPage)">Suivant</button>
+                        disabled="@(!ViewModel.HasNextPage)">
+                    Suivant
+                </button>
             </div>
         }
     }
@@ -136,7 +160,10 @@
                         </div>
                     </div>
                     <div class="mt-5 d-flex justify-content-end">
-                        <button class="btn btn-primary btn-lg"><i class="bi bi-cart-plus me-2"></i> Ajouter</button>
+                        <button class="btn btn-primary btn-lg"
+                                @onclick="() => ViewModel.AddToCart(ViewModel.SelectedProduct!)">
+                            <i class="bi bi-cart-plus me-2"></i> Ajouter
+                        </button>
                     </div>
                 </div>
             }
@@ -147,14 +174,23 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        // On s'abonne aux events pour mettre à jour le compteur en temps réel
         ViewModel.PropertyChanged += (sender, e) => StateHasChanged();
+        CartService.OnChange += StateHasChanged;
+
+        // On charge les produits et le panier
         await ViewModel.InitializeCommand.ExecuteAsync(null);
+        await CartService.LoadCartAsync();
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
     }
 
     private async Task OpenDetails(ProductListDto product)
     {
         await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
-        
         ViewModel.ShowDetailsCommand.Execute(product);
     }
 }
