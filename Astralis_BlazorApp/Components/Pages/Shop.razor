@@ -6,6 +6,7 @@
 @inject ICartService CartService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
+@inject HttpClient HttpClient
 @implements IDisposable
 
 <PageTitle>Boutique – Astralis</PageTitle>
@@ -15,9 +16,7 @@
     @if (ViewModel.SelectedProductDetails == null)
     {
         <div class="page-header position-relative d-flex justify-content-center align-items-center mb-4">
-
             <h1 class="m-0">Boutique Astralis</h1>
-
             <button class="btn btn-primary position-absolute end-0" @onclick='() => Navigation.NavigateTo("/panier")'>
                 <i class="bi bi-cart3 me-2"></i> Mon Panier
                 @if (CartService.Cart.TotalItemsCount > 0)
@@ -33,12 +32,9 @@
 
         <div class="filters-container">
             <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
-                   @bind="ViewModel.SearchText"
-                   @bind:event="oninput" />
+                   @bind="ViewModel.SearchText" @bind:event="oninput" />
 
-            <select class="filter-input"
-                    @bind="ViewModel.SelectedTypeId"
-                    @bind:after="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
+            <select class="filter-input" @bind="ViewModel.SelectedTypeId" @bind:after="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
                 <option value="0">Toutes les catégories</option>
                 @foreach (ProductCategoryDto cat in ViewModel.ProductCategories)
                 {
@@ -46,9 +42,7 @@
                 }
             </select>
 
-            <select class="filter-input"
-                    @bind="ViewModel.SortBy"
-                    @bind:after="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
+            <select class="filter-input" @bind="ViewModel.SortBy" @bind:after="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
                 <option value="name">Nom (A–Z)</option>
                 <option value="category">Catégorie (A–Z)</option>
                 <option value="price_asc">Prix (Croissant)</option>
@@ -56,16 +50,8 @@
             </select>
 
             <div class="d-flex gap-3 align-items-center">
-                <span class="text-white small">Prix :</span>
-                <input type="number" class="filter-input filter-input-sm" placeholder="Min"
-                       @bind="ViewModel.Filter.MinPrice" />
-                <span class="text-white">-</span>
-                <input type="number" class="filter-input filter-input-sm" placeholder="Max"
-                       @bind="ViewModel.Filter.MaxPrice" />
-
-                <button class="btn btn-astralis-outline btn-sm"
-                        @onclick="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
-                    Appliquer
+                <button class="btn btn-astralis-outline btn-sm" @onclick="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
+                    Appliquer les filtres
                 </button>
             </div>
         </div>
@@ -73,9 +59,7 @@
         <div class="bodies-grid">
             @if (ViewModel.IsLoading)
             {
-                <div class="spinner-container">
-                    <div class="spinner-border text-primary" role="status"></div>
-                </div>
+                <div class="spinner-container"><div class="spinner-border text-primary"></div></div>
             }
             else if (ViewModel.Products.Count == 0)
             {
@@ -91,10 +75,7 @@
                             <h3>@product.Label</h3>
                             <h4 class="body-price">@product.Price €</h4>
                             <p><span class="badge-type">@product.CategoryLabel</span></p>
-
-                            <button class="btn btn-primary btn-lg"
-                                    @onclick:stopPropagation="true"
-                                    @onclick="() => ViewModel.AddToCart(product)">
+                            <button class="btn btn-primary btn-lg" @onclick:stopPropagation="true" @onclick="() => ViewModel.AddToCart(product)">
                                 <i class="bi bi-cart-plus me-2"></i> Ajouter
                             </button>
                         </div>
@@ -103,29 +84,14 @@
             }
         </div>
 
-        @if (!ViewModel.IsLoading && ViewModel.Products.Count > 0)
-        {
-            <div class="pagination-container">
-                <button class="btn btn-astralis-outline"
-                        @onclick="@(() => ViewModel.PreviousPageCommand.ExecuteAsync(null))"
-                        disabled="@(ViewModel.CurrentPage == 1)">
-                    Précédent
-                </button>
-                <span class="text-white">Page @ViewModel.CurrentPage</span>
-                <button class="btn btn-astralis-outline"
-                        @onclick="@(() => ViewModel.NextPageCommand.ExecuteAsync(null))"
-                        disabled="@(!ViewModel.HasNextPage)">
-                    Suivant
-                </button>
-            </div>
-        }
     }
 
     @if (ViewModel.SelectedProductDetails != null)
     {
         <div class="details-view animate-fade-in">
-            <button class="btn btn-secondary mb-3" @onclick="@(() => ViewModel.BackToListCommand.Execute(null))">
-                ← Retour
+            <button class="btn btn-secondary btn-back-fixed"
+                    @onclick="@(() => ViewModel.BackToListCommand.Execute(null))">
+                <i class="bi bi-arrow-left me-2"></i> Retour
             </button>
 
             @if (ViewModel.IsLoading)
@@ -136,12 +102,12 @@
             {
                 <div class="detail-container">
                     <div class="d-flex flex-column align-items-center mb-4">
-                            <h2>@ViewModel.SelectedProductDetails.Label</h2>
-                            <span class="badge-type">@ViewModel.SelectedProductDetails.CategoryLabel</span>
-                        </div>
+                        <h2>@ViewModel.SelectedProductDetails.Label</h2>
+                        <span class="badge-type">@ViewModel.SelectedProductDetails.CategoryLabel</span>
+                    </div>
 
                     <div class="detail-image-div">
-                        <img class="detail-image" src="@ViewModel.SelectedProductDetails.ProductPictureUrl" alt="@ViewModel.SelectedProductDetails.Label image" />
+                        <img class="detail-image" src="@ViewModel.SelectedProductDetails.ProductPictureUrl" alt="@ViewModel.SelectedProductDetails.Label" />
                         <h2 class="detail-price">@ViewModel.SelectedProductDetails.Price.ToString() €</h2>
                     </div>
 
@@ -153,20 +119,47 @@
                         </div>
                     }
 
-                    <div class="specific-details mt-4">
-                        <h3>Informations Techniques</h3>
-                        <div class="details-grid">
-                            <div class="detail-item"><span class="label">Catégorie</span><span class="value">@ViewModel.SelectedProductDetails.CategoryLabel</span></div>
-                            <div class="detail-item"><span class="label">Prix Unitaire</span><span class="value">@ViewModel.SelectedProductDetails.Price.ToString("N2") €</span></div>
-                            <div class="detail-item"><span class="label">Disponibilité</span><span class="value text-success">En Stock</span></div>
-                        </div>
-                    </div>
                     <div class="mt-5 d-flex justify-content-end">
-                        <button class="btn btn-primary btn-lg"
-                                @onclick="() => ViewModel.AddToCart(ViewModel.SelectedProduct!)">
-                            <i class="bi bi-cart-plus me-2"></i> Ajouter
+                        <button class="btn btn-primary btn-lg" @onclick="() => ViewModel.AddToCart(ViewModel.SelectedProduct!)">
+                            <i class="bi bi-cart-plus me-2"></i> Ajouter au panier
                         </button>
                     </div>
+
+                    @if (RelatedProducts != null && RelatedProducts.Any())
+                    {
+                        <div class="related-products mt-5 pt-4 border-top border-secondary">
+                            <h3 class="text-center mb-4" style="color: #a29bfe; font-family: 'Orbitron';">
+                                Ces @ViewModel.SelectedProductDetails.CategoryLabel pourraient vous intéresser
+                            </h3>
+
+                            <div class="bodies-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
+                                @foreach (var related in RelatedProducts)
+                                {
+                                    <div class="body-card related-card" @onclick="() => OpenDetails(related)" style="cursor: pointer;">
+                                        <img src="@related.ProductPictureUrl" alt="@related.Label" class="body-image"
+                                             style="height: 150px; object-fit: contain; width: 100%;" />
+
+                                        <div class="body-info p-2 d-flex flex-column justify-content-between" style="min-height: 120px;">
+                                            <div>
+                                                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">@related.Label</h3>
+                                                <h4 class="body-price" style="font-size: 1rem; color: #00d4ff;">@related.Price €</h4>
+                                            </div>
+                                            <button class="btn btn-sm btn-astralis-outline w-100 mt-2">
+                                                Voir la fiche
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (IsLoadingRelated)
+                    {
+                        <div class="text-center mt-5 text-muted">
+                            <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                            <span class="ms-2">Recherche d'équipements similaires...</span>
+                        </div>
+                    }
                 </div>
             }
         </div>
@@ -174,13 +167,14 @@
 </div>
 
 @code {
+    private List<ProductListDto> RelatedProducts = new();
+    private bool IsLoadingRelated = false;
+
     protected override async Task OnInitializedAsync()
     {
-        // On s'abonne aux events pour mettre à jour le compteur en temps réel
         ViewModel.PropertyChanged += (sender, e) => StateHasChanged();
         CartService.OnChange += StateHasChanged;
 
-        // On charge les produits et le panier
         await ViewModel.InitializeCommand.ExecuteAsync(null);
         await CartService.LoadCartAsync();
     }
@@ -193,6 +187,48 @@
     private async Task OpenDetails(ProductListDto product)
     {
         await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+
         ViewModel.ShowDetailsCommand.Execute(product);
+
+        if (product.CategoryId > 0)
+        {
+            await LoadRelatedProducts(product.CategoryId, product.Id);
+        }
+        else
+        {
+            Console.WriteLine("Attention: CategoryId est toujours à 0. Vérifiez le mapping.");
+        }
+    }
+
+    private async Task LoadRelatedProducts(int categoryId, int currentProductId)
+    {
+        IsLoadingRelated = true;
+        RelatedProducts.Clear();
+        StateHasChanged();
+
+        try
+        {
+            string url = $"Products/Search?ProductCategoryIds={categoryId}&PageSize=15";
+
+            var response = await HttpClient.GetFromJsonAsync<List<ProductListDto>>(url);
+
+            if (response != null)
+            {
+                RelatedProducts = response
+                    .Where(p => p.Id != currentProductId)
+                    .OrderBy(x => Guid.NewGuid())
+                    .Take(6)
+                    .ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur chargement produits liés : {ex.Message}");
+        }
+        finally
+        {
+            IsLoadingRelated = false;
+            StateHasChanged();
+        }
     }
 }
