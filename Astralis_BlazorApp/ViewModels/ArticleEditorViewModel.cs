@@ -17,6 +17,7 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty] private ArticleCreateDto article = new();
         [ObservableProperty] private List<ArticleTypeDto> articleTypes = new();
+
         [ObservableProperty] private List<int> selectedCategoryIds = new();
 
         [ObservableProperty] private bool isPublishing;
@@ -77,7 +78,7 @@ namespace Astralis_BlazorApp.ViewModels
                 if (IsEditMode)
                 {
                     await LoadExistingArticleAsync(ArticleId.Value);
-                }
+        }
             }
             catch (Exception ex)
             {
@@ -130,8 +131,11 @@ namespace Astralis_BlazorApp.ViewModels
         public void ToggleCategory(int categoryId)
         {
             if (SelectedCategoryIds.Contains(categoryId))
+            {
                 SelectedCategoryIds.Remove(categoryId);
+            }
             else
+            {
                 SelectedCategoryIds.Add(categoryId);
 
             OnPropertyChanged(nameof(SelectedCategoryIds));
@@ -148,6 +152,7 @@ namespace Astralis_BlazorApp.ViewModels
                     ErrorMessage = "L'image de couverture est trop lourde (Max 5Mo).";
                     return;
                 }
+
                 string url = await _uploadService.UploadImageAsync(e.File, UploadCategory.Articles);
                 if (!string.IsNullOrEmpty(url)) Article.CoverImageUrl = url;
             }
@@ -197,7 +202,7 @@ namespace Astralis_BlazorApp.ViewModels
             else if (existing.CategoryNames != null)
             {
                 foreach (var catName in existing.CategoryNames)
-                {
+            {
                     var type = ArticleTypes.FirstOrDefault(t => t.Label == catName);
                     if (type != null) SelectedCategoryIds.Add(type.Id);
                 }
@@ -236,7 +241,7 @@ namespace Astralis_BlazorApp.ViewModels
                         finalCategoryIds.Add(createdType.Id);
                     }
                     else
-                    {
+                {
                         finalCategoryIds.Add(id);
                     }
                 }
@@ -265,13 +270,15 @@ namespace Astralis_BlazorApp.ViewModels
                         foreach (var typeId in finalCategoryIds)
                         {
                             await _typeOfArticleService.AddAsync(new TypeOfArticleDto
-                            {
+                {
                                 ArticleId = createdArticle.Id,
                                 ArticleTypeId = typeId
                             });
-                        }
-                        _navigation.NavigateTo("/articles");
-                    }
+                }
+
+                await _articleService.AddAsync(Article);
+                _navigation.NavigateTo("/articles");
+            }
                 }
             }
             catch (Exception ex)

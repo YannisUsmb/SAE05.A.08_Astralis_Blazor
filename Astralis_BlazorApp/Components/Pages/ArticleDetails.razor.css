@@ -17,5 +17,12 @@
     .article-details-actions {
         top: 1rem;
         right: 1rem;
-    }
+}
+
+.article-body blockquote {
+    border-left: 4px solid #9d4edd;
+    padding-left: 1rem;
+    font-style: italic;
+    color: #bbb;
+    margin: 2rem 0;
 }

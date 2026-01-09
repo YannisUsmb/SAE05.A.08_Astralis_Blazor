@@ -11,7 +11,7 @@
 <div class="content-wrapper position-relative">
 
     @if (_articleToDelete != null)
-    {
+        {
         <div class="modal-backdrop-custom" @onclick="CancelDelete">
             <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
                 <div class="text-center mb-4">
@@ -29,14 +29,14 @@
                 <div class="d-flex justify-content-center gap-3">
                     <button class="btn btn-outline-light px-4" @onclick="CancelDelete">
                         Annuler
-                    </button>
+                </button>
                     <button class="btn btn-danger px-4" @onclick="ConfirmDelete">
                         <i class="bi bi-trash-fill me-2"></i> Supprimer
                     </button>
-                </div>
+            </div>
             </div>
         </div>
-    }
+        }
 
     <div class="page-header">
         <h1>Actualités</h1>
@@ -68,7 +68,7 @@
 
         <div class="d-flex align-items-center gap-3 ms-auto">
             <div class="form-check form-switch custom-switch m-0">
-                <input class="form-check-input" type="checkbox" id="premiumSwitch"
+            <input class="form-check-input" type="checkbox" id="premiumSwitch"
                        checked="@(ViewModel.Filter.IsPremium == true)"
                        @onchange="OnPremiumChanged">
                 <label class="form-check-label text-white small fw-bold ms-2" for="premiumSwitch" style="color: #ffd700 !important;">Premium</label>
