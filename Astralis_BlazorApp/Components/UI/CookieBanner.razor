@@ -1,0 +1,175 @@
+@inject IJSRuntime JS
+
+@if (_showBanner)
+{
+    <div class="cookie-overlay" @onclick="@(() => { if (!_showPreferences) CloseBanner(); })"></div>
+    
+    <div class="cookie-banner @(_showPreferences ? "preferences-open" : "")">
+        @if (!_showPreferences)
+        {
+            <div class="cookie-content">
+                <div class="cookie-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="cookie-info">
+                    <h3 class="cookie-title">🍪 Respect de votre vie privée</h3>
+                    <p class="cookie-text">
+                        Nous utilisons des cookies pour améliorer votre expérience sur Astralis. 
+                        Vous pouvez accepter tous les cookies ou personnaliser vos préférences.
+                    </p>
+                </div>
+                <div class="cookie-actions">
+                    <button class="btn-preferences" @onclick="ShowPreferences">
+                        <i class="bi bi-gear"></i> Personnaliser
+                    </button>
+                    <button class="btn-refuse" @onclick="RefuseAll">Tout refuser</button>
+                    <button class="btn-accept" @onclick="AcceptAll">Tout accepter</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="cookie-preferences">
+                <div class="preferences-header">
+                    <h3>Paramètres des cookies</h3>
+                    <button class="btn-close" @onclick="HidePreferences">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div class="preferences-body">
+                    <div class="cookie-category">
+                        <div class="category-header">
+                            <div class="category-info">
+                                <i class="bi bi-shield-fill-check category-icon essential"></i>
+                                <div>
+                                    <h4>Cookies essentiels</h4>
+                                    <p>Nécessaires au fonctionnement du site</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch disabled">
+                                <input type="checkbox" checked disabled />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="category-details">
+                            <p>Ces cookies sont indispensables pour naviguer sur le site et utiliser ses fonctionnalités (authentification, navigation).</p>
+                        </div>
+                    </div>
+
+                    <div class="cookie-category">
+                        <div class="category-header">
+                            <div class="category-info">
+                                <i class="bi bi-graph-up category-icon analytics"></i>
+                                <div>
+                                    <h4>Cookies analytiques</h4>
+                                    <p>Nous aident à améliorer le site</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" @bind="_allowAnalytics" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="category-details">
+                            <p>Ces cookies nous permettent de comprendre comment vous utilisez le site pour l'améliorer (pages visitées, temps de navigation).</p>
+                        </div>
+                    </div>
+
+                    <div class="cookie-category">
+                        <div class="category-header">
+                            <div class="category-info">
+                                <i class="bi bi-palette category-icon preferences"></i>
+                                <div>
+                                    <h4>Cookies de préférences</h4>
+                                    <p>Mémorisent vos choix personnels</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" @bind="_allowPreferences" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="category-details">
+                            <p>Ces cookies mémorisent vos préférences (langue, thème, filtres) pour une meilleure expérience personnalisée.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preferences-footer">
+                    <button class="btn-save" @onclick="SavePreferences">
+                        <i class="bi bi-check-circle"></i> Enregistrer mes choix
+                    </button>
+                    <a href="/privacy-policy" class="link-policy">Politique de confidentialité</a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private bool _showBanner = false;
+    private bool _showPreferences = false;
+    private bool _allowAnalytics = true;
+    private bool _allowPreferences = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var consent = await JS.InvokeAsync<string?>("localStorage.getItem", "cookieConsent");
+            _showBanner = string.IsNullOrEmpty(consent);
+            StateHasChanged();
+        }
+    }
+
+    private void ShowPreferences()
+    {
+        _showPreferences = true;
+    }
+
+    private void HidePreferences()
+    {
+        _showPreferences = false;
+    }
+
+    private async Task AcceptAll()
+    {
+        await SaveConsent("all");
+        _showBanner = false;
+    }
+
+    private async Task RefuseAll()
+    {
+        await SaveConsent("essential");
+        _showBanner = false;
+    }
+
+    private async Task SavePreferences()
+    {
+        var preferences = new
+        {
+            essential = true,
+            analytics = _allowAnalytics,
+            preferences = _allowPreferences
+        };
+        
+        await JS.InvokeVoidAsync("localStorage.setItem", "cookieConsent", 
+            System.Text.Json.JsonSerializer.Serialize(preferences));
+        
+        _showBanner = false;
+    }
+
+    private async Task SaveConsent(string type)
+    {
+        var consent = type == "all" 
+            ? System.Text.Json.JsonSerializer.Serialize(new { essential = true, analytics = true, preferences = true })
+            : System.Text.Json.JsonSerializer.Serialize(new { essential = true, analytics = false, preferences = false });
+        
+        await JS.InvokeVoidAsync("localStorage.setItem", "cookieConsent", consent);
+    }
+
+    private void CloseBanner()
+    {
+    }
+}
