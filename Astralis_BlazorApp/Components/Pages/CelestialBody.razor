@@ -47,13 +47,24 @@
                 
                 @if (showSubtypes)
                 {
-                    <select class="filter-pill-select" @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
-                        <option value="0">Toutes les sous-catégories</option>
-                        @foreach (CelestialBodySubtypeDto sub in ViewModel.CelestialSubtypes)
+                    <div class="subtype-filter-wrapper">
+                        <select class="filter-pill-select" @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
+                            <option value="0">Toutes les sous-catégories</option>
+                            @foreach (CelestialBodySubtypeDto sub in ViewModel.CelestialSubtypes)
+                            {
+                                <option value="@sub.Id">@sub.Label</option>
+                            }
+                        </select>
+                        
+                        @if (ViewModel.SelectedSubtypeId != 0)
                         {
-                            <option value="@sub.Id">@sub.Label</option>
+                            var selectedSubtype = ViewModel.CelestialSubtypes.FirstOrDefault(s => s.Id == ViewModel.SelectedSubtypeId);
+                            if (selectedSubtype != null && !string.IsNullOrEmpty(selectedSubtype.Description))
+                            {
+                                <InfoTooltip Text="@selectedSubtype.Description" />
+                            }
                         }
-                    </select>
+                    </div>
                 }
                 
                 @if (ViewModel.SelectedTypeId == 1 && ViewModel.Filter.StarFilter != null)
@@ -274,6 +285,7 @@
                             <span class="badge-type-inline">@ViewModel.SelectedBodyDetails.CelestialBodyTypeName</span>
                         </div>
 
+                        @* STAR DETAILS *@
                         <div class="detail-properties">
                             @if (ViewModel.SelectedBodyDetails.Star != null)
                             {
@@ -283,7 +295,13 @@
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Classe spectrale</span>
-                                        <span class="property-value">@star.SpectralClassName <InfoTooltip Text="Classification par température"/></span>
+                                        <span class="property-value">
+                                            @star.SpectralClassName 
+                                            @if (!string.IsNullOrEmpty(star.SpectralClassDescription))
+                                            {
+                                                <InfoTooltip Text="@star.SpectralClassDescription"/>
+                                            }
+                                        </span>
                                     </div>
                                 }
                                 @if (star.Temperature.HasValue)
@@ -344,10 +362,24 @@
                                 }
                             }
 
+                            @* PLANET DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Planet != null)
                             {
                                 PlanetDto planet = ViewModel.SelectedBodyDetails.Planet;
                                 
+                                @if (!string.IsNullOrEmpty(planet.PlanetTypeName))
+                                {
+                                    <div class="property-row">
+                                        <span class="property-label">Type de planète</span>
+                                        <span class="property-value">
+                                            @planet.PlanetTypeName
+                                            @if (!string.IsNullOrEmpty(planet.PlanetTypeDescription))
+                                            {
+                                                <InfoTooltip Text="@planet.PlanetTypeDescription"/>
+                                            }
+                                        </span>
+                                    </div>
+                                }
                                 @if (planet.Mass.HasValue)
                                 {
                                     <div class="property-row">
@@ -388,13 +420,6 @@
                                     <div class="property-row">
                                         <span class="property-label">Excentricité</span>
                                         <span class="property-value">@planet.Eccentricity.Value.ToString("N4")</span>
-                                    </div>
-                                }
-                                @if (!string.IsNullOrEmpty(planet.PlanetTypeName))
-                                {
-                                    <div class="property-row">
-                                        <span class="property-label">Type de planète</span>
-                                        <span class="property-value">@planet.PlanetTypeName</span>
                                     </div>
                                 }
                                 @if (!string.IsNullOrEmpty(planet.DetectionMethodName))
@@ -448,10 +473,24 @@
                                 }
                             }
 
+                            @* ASTEROID DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Asteroid != null)
                             {
                                 AsteroidDto asteroid = ViewModel.SelectedBodyDetails.Asteroid;
                                 
+                                @if (!string.IsNullOrEmpty(asteroid.OrbitalClassName))
+                                {
+                                    <div class="property-row">
+                                        <span class="property-label">Classe orbitale</span>
+                                        <span class="property-value">
+                                            @asteroid.OrbitalClassName
+                                            @if (!string.IsNullOrEmpty(asteroid.OrbitalClassDescription))
+                                            {
+                                                <InfoTooltip Text="@asteroid.OrbitalClassDescription"/>
+                                            }
+                                        </span>
+                                    </div>
+                                }
                                 @if (asteroid.DiameterMaxKm.HasValue)
                                 {
                                     <div class="property-row">
@@ -480,20 +519,6 @@
                                         <span class="property-value status-@(asteroid.IsPotentiallyHazardous.Value ? "danger" : "safe")">
                                             @(asteroid.IsPotentiallyHazardous.Value ? "Potentiellement dangereux" : "Non dangereux")
                                         </span>
-                                    </div>
-                                }
-                                @if (!string.IsNullOrEmpty(asteroid.OrbitalClassName))
-                                {
-                                    <div class="property-row">
-                                        <span class="property-label">Classe orbitale</span>
-                                        <span class="property-value">@asteroid.OrbitalClassName</span>
-                                    </div>
-                                }
-                                @if (!string.IsNullOrEmpty(asteroid.OrbitalClassDescription))
-                                {
-                                    <div class="property-row">
-                                        <span class="property-label">Description orbitale</span>
-                                        <span class="property-value">@asteroid.OrbitalClassDescription</span>
                                     </div>
                                 }
                                 @if (asteroid.SemiMajorAxis.HasValue)
@@ -540,6 +565,7 @@
                                 }
                             }
 
+                            @* SATELLITE DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Satellite != null)
                             {
                                 SatelliteDto satellite = ViewModel.SelectedBodyDetails.Satellite;
@@ -574,6 +600,7 @@
                                 }
                             }
 
+                            @* GALAXY/QUASAR DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.GalaxyQuasar != null)
                             {
                                 GalaxyQuasarDto galaxy = ViewModel.SelectedBodyDetails.GalaxyQuasar;
@@ -582,7 +609,13 @@
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Classe</span>
-                                        <span class="property-value">@galaxy.GalaxyQuasarClassName</span>
+                                        <span class="property-value">
+                                            @galaxy.GalaxyQuasarClassName
+                                            @if (!string.IsNullOrEmpty(galaxy.GalaxyClassDescription))
+                                            {
+                                                <InfoTooltip Text="@galaxy.GalaxyClassDescription"/>
+                                            }
+                                        </span>
                                     </div>
                                 }
                                 @if (galaxy.Redshift.HasValue)
@@ -629,6 +662,7 @@
                                 }
                             }
 
+                            @* COMET DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Comet != null)
                             {
                                 CometDto comet = ViewModel.SelectedBodyDetails.Comet;
