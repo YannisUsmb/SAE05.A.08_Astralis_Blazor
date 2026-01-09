@@ -103,7 +103,17 @@
                 <div class="detail-container">
                     <div class="d-flex flex-column align-items-center mb-4">
                         <h2>@ViewModel.SelectedProductDetails.Label</h2>
-                        <span class="badge-type">@ViewModel.SelectedProductDetails.CategoryLabel</span>
+
+                        <div class="category-tooltip-container">
+                            <span class="badge-type">@ViewModel.SelectedProductDetails.CategoryLabel</span>
+
+                            @if (!string.IsNullOrEmpty(ViewModel.SelectedProductDetails.CategoryDescription))
+                            {
+                                <div class="category-tooltip-text">
+                                    @ViewModel.SelectedProductDetails.CategoryDescription
+                                </div>
+                            }
+                        </div>
                     </div>
 
                     <div class="detail-image-div">
@@ -120,7 +130,7 @@
                     }
 
                     <div class="mt-5 d-flex justify-content-end">
-                        <button class="btn btn-primary btn-lg" @onclick="() => ViewModel.AddToCart(ViewModel.SelectedProduct!)">
+                        <button class="btn btn-primary btn-lg" @onclick="AddToCartAndGoBack">
                             <i class="bi bi-cart-plus me-2"></i> Ajouter au panier
                         </button>
                     </div>
@@ -194,9 +204,15 @@
         {
             await LoadRelatedProducts(product.CategoryId, product.Id);
         }
-        else
+    }
+
+    private async Task AddToCartAndGoBack()
+    {
+        if (ViewModel.SelectedProduct != null)
         {
-            Console.WriteLine("Attention: CategoryId est toujours à 0. Vérifiez le mapping.");
+            await ViewModel.AddToCart(ViewModel.SelectedProduct);
+            ViewModel.BackToListCommand.Execute(null);
+            await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
         }
     }
 
@@ -209,7 +225,6 @@
         try
         {
             string url = $"Products/Search?ProductCategoryIds={categoryId}&PageSize=15";
-
             var response = await HttpClient.GetFromJsonAsync<List<ProductListDto>>(url);
 
             if (response != null)
