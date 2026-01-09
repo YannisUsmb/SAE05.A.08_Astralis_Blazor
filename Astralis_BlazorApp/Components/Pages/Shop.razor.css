@@ -119,20 +119,20 @@
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
-.detail-container h2 {
-    font-family: "Orbitron", sans-serif;
-    color: #fff;
-    margin-bottom: 0.5rem;
-    font-size: 2.5rem;
-    text-align: center;
-}
+    .detail-container h2 {
+        font-family: "Orbitron", sans-serif;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+        text-align: center;
+    }
 
-.detail-container .text-muted {
-    text-align: center;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    color: #aaa;
-}
+    .detail-container .text-muted {
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        color: #aaa;
+    }
 
 .detail-container .badge-type {
         display: inline-block;
@@ -156,17 +156,17 @@
     border: 1px solid rgba(255,255,255,0.08);
 }
 
-.specific-details h3 {
-    color: #a76dff;
-    margin-bottom: 2rem;
-    font-size: 1.6rem;
-    font-weight: 600;
-    font-family: "Orbitron", sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    border-bottom: 2px solid rgba(167, 109, 255, 0.3);
-    padding-bottom: 0.8rem;
-}
+    .specific-details h3 {
+        color: #a76dff;
+        margin-bottom: 2rem;
+        font-size: 1.6rem;
+        font-weight: 600;
+        font-family: "Orbitron", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        border-bottom: 2px solid rgba(167, 109, 255, 0.3);
+        padding-bottom: 0.8rem;
+    }
 
 .details-grid {
     display: grid;
@@ -182,41 +182,41 @@
     transition: all 0.3s ease;
 }
 
-.detail-item:hover {
-    background: rgba(0,0,0,0.4);
-    border-left-color: #a76dff;
-    transform: translateX(5px);
-}
+    .detail-item:hover {
+        background: rgba(0,0,0,0.4);
+        border-left-color: #a76dff;
+        transform: translateX(5px);
+    }
 
-.detail-item.detail-item-full {
-    grid-column: 1 / -1;
-}
+    .detail-item.detail-item-full {
+        grid-column: 1 / -1;
+    }
 
-.detail-item .label {
-    display: block;
-    color: #aaa;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
+    .detail-item .label {
+        display: block;
+        color: #aaa;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
 
-.detail-item .value {
-    display: block;
-    color: #fff;
-    font-size: 1.3rem;
-    font-weight: 600;
-    line-height: 1.4;
-}
+    .detail-item .value {
+        display: block;
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
 
-.detail-item .value.status-danger {
-    color: #ff6b6b;
-}
+        .detail-item .value.status-danger {
+            color: #ff6b6b;
+        }
 
-.detail-item .value.status-safe {
-    color: #51cf66;
-}
+        .detail-item .value.status-safe {
+            color: #51cf66;
+        }
 
 .reference-section,
 .remark-section {
@@ -227,23 +227,23 @@
     border-left: 4px solid #a76dff;
 }
 
-.reference-section h4,
-.remark-section h4 {
-    color: #a76dff;
-    margin-bottom: 0.8rem;
-    font-size: 1.1rem;
-    font-family: "Orbitron", sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+    .reference-section h4,
+    .remark-section h4 {
+        color: #a76dff;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+        font-family: "Orbitron", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-.reference-section p,
-.remark-section p {
-    color: #e0e0e0;
-    line-height: 1.6;
-    margin: 0;
-    font-size: 0.95rem;
-}
+    .reference-section p,
+    .remark-section p {
+        color: #e0e0e0;
+        line-height: 1.6;
+        margin: 0;
+        font-size: 0.95rem;
+    }
 
 .spinner-container {
     display: flex;
@@ -268,11 +268,11 @@
     align-self: flex-start;
 }
 
-.btn-secondary:hover {
-    background: rgba(167, 109, 255, 0.25);
-    border-color: #a76dff;
-    transform: translateX(-5px);
-}
+    .btn-secondary:hover {
+        background: rgba(167, 109, 255, 0.25);
+        border-color: #a76dff;
+        transform: translateX(-5px);
+    }
 
 .btn-secondary:active {
     transform: translateX(-3px);
