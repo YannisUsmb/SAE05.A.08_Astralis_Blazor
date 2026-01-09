@@ -1,0 +1,78 @@
+﻿@page "/articles/{Id:int}"
+@using Astralis.Shared.DTOs
+@using Astralis_BlazorApp.Services.Interfaces
+@inject IArticleService ArticleService
+
+<PageTitle>@(_article?.Title ?? "Article") – Astralis</PageTitle>
+
+<div class="content-wrapper">
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-accent-purple"></div>
+        </div>
+    }
+    else if (_article == null)
+    {
+        <div class="alert alert-warning">Article introuvable ou supprimé.</div>
+    }
+    else
+    {
+        <div class="article-full-container glass-panel p-0 overflow-hidden">
+
+            <div class="article-hero position-relative p-5 d-flex flex-column justify-content-end"
+                 style="min-height: 400px; background: url('@(_article.CoverImageUrl ?? "/assets/images/nebula-placeholder.jpg")') center/cover no-repeat;">
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-50"></div>
+
+                <div class="position-relative z-1 text-start">
+                    <div class="d-flex gap-2 mb-3">
+                        @if (_article.IsPremium)
+                        {
+                            <span class="badge bg-warning text-dark shadow">Premium</span>
+                        }
+                        @foreach (var cat in _article.CategoryNames)
+                        {
+                            <span class="badge bg-black bg-opacity-75 border border-white-10 text-accent-purple">@cat</span>
+                        }
+                    </div>
+
+                    <h1 class="font-orbitron display-4 text-white fw-bold mb-3" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
+                        @_article.Title
+                    </h1>
+
+                    <div class="d-flex align-items-center gap-4 text-white-50">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="@_article.AuthorAvatarUrl" class="rounded-circle border border-white-50" width="40" height="40"
+                                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@_article.AuthorUsername&background=9d4edd&color=fff&rounded=true';" />
+                            <span class="text-white fw-bold">@_article.AuthorUsername</span>
+                        </div>
+                        <span>•</span>
+                        <span>@DateTime.Now.ToString("dd MMMM yyyy")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="article-body p-5 text-white">
+                @((MarkupString)_article.Content)
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private ArticleDetailDto? _article;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _article = await ArticleService.GetByIdAsync(Id);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

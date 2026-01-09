@@ -39,33 +39,34 @@ public class ArticleService(HttpClient httpClient) : IArticleService
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<List<ArticleListDto>> SearchAsync(ArticleFilterDto filter)
+    public async Task<PagedResultDto<ArticleListDto>> SearchAsync(ArticleFilterDto filter)
     {
         string queryString = ToQueryString(filter);
         string url = $"{Controller}/Search?{queryString}";
 
-        List<ArticleListDto>? result = await httpClient.GetFromJsonAsync<List<ArticleListDto>>(url);
-        return result ?? new List<ArticleListDto>();
+        var result = await httpClient.GetFromJsonAsync<PagedResultDto<ArticleListDto>>(url);
+
+        return result ?? new PagedResultDto<ArticleListDto>();
     }
 
     private string ToQueryString(ArticleFilterDto filter)
     {
-        List<string> parameters = new List<string>();
-        
+        var parameters = new List<string>();
+
         if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
-        {
             parameters.Add($"searchTerm={Uri.EscapeDataString(filter.SearchTerm)}");
-        }
-        
+
         if (filter.IsPremium.HasValue)
-        {
             parameters.Add($"isPremium={filter.IsPremium.Value}");
-        }
 
         if (filter.TypeIds is { Count: > 0 })
-        {
             parameters.AddRange(filter.TypeIds.Select(id => $"typeIds={id}"));
-        }
+
+        if (!string.IsNullOrEmpty(filter.SortBy))
+            parameters.Add($"sortBy={filter.SortBy}");
+
+        parameters.Add($"page={filter.PageNumber}");
+        parameters.Add($"pageSize={filter.PageSize}");
 
         return string.Join("&", parameters);
     }

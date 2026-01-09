@@ -1,0 +1,35 @@
+﻿.article-full-container {
+    border-radius: 20px;
+    background: rgba(15, 15, 35, 0.8);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.article-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin: 2rem 0;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+
+.article-body p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #e0e0e0;
+    margin-bottom: 1.5rem;
+}
+
+.article-body h2 {
+    color: #a76dff;
+    font-family: 'Orbitron', sans-serif;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.article-body blockquote {
+    border-left: 4px solid #9d4edd;
+    padding-left: 1rem;
+    font-style: italic;
+    color: #bbb;
+    margin: 2rem 0;
+}
