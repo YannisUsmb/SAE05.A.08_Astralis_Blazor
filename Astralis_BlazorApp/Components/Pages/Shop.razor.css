@@ -18,16 +18,18 @@
     height: 100%;
 }
 
-.body-card:hover {
-    transform: translateY(-8px);
-    border-color: #9d4edd;
-}
+    .body-card:hover {
+        transform: translateY(-8px);
+        border-color: #9d4edd;
+    }
+
 .body-image {
     width: 100%;
     border-radius: 16px;
     object-fit: contain;
     margin-bottom: 1rem;
 }
+
 .detail-image {
     display: block;
     margin: 0 auto;
@@ -37,11 +39,13 @@
     object-fit: contain;
     margin-bottom: 2rem;
 }
+
 .body-price {
     margin-bottom: 10px;
     font-size: 1.1rem;
     font-weight: bolder;
 }
+
 .body-info {
     padding: 1.2rem;
     display: flex;
@@ -50,22 +54,26 @@
     text-align: center;
     flex-grow: 1;
 }
+
 .content-wrapper {
     padding: 2rem 1rem;
     max-width: 1400px;
     margin: 0 auto;
     color: white;
 }
+
 .body-info h3 {
     font-family: "Orbitron", sans-serif;
     color: #fff;
     margin-bottom: 0.5rem;
     font-size: 1.2rem;
 }
+
 .body-info .btn {
-     margin-top: auto;
-     width: 100%;
+    margin-top: auto;
+    width: 100%;
 }
+
 .advanced-filters-bar {
     display: flex;
     justify-content: center;
@@ -84,6 +92,7 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -110,35 +119,35 @@
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
-.detail-container h2 {
-    font-family: "Orbitron", sans-serif;
-    color: #fff;
-    margin-bottom: 0.5rem;
-    font-size: 2.5rem;
-    text-align: center;
-}
+    .detail-container h2 {
+        font-family: "Orbitron", sans-serif;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+        text-align: center;
+    }
 
-.detail-container .text-muted {
-    text-align: center;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    color: #aaa;
-}
+    .detail-container .text-muted {
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        color: #aaa;
+    }
 
-.detail-container .badge-type {
-    display: block;
-    text-align: center;
-    margin: 1rem auto 2rem;
-    font-size: 1rem;
-    padding: 0.5rem 1.5rem;
-    background: rgba(157, 78, 221, 0.2);
-    border: 1px solid rgba(157, 78, 221, 0.4);
-    border-radius: 50px;
-    width: fit-content;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-}
+    .detail-container .badge-type {
+        display: block;
+        text-align: center;
+        margin: 1rem auto 2rem;
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+        background: rgba(157, 78, 221, 0.2);
+        border: 1px solid rgba(157, 78, 221, 0.4);
+        border-radius: 50px;
+        width: fit-content;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
 
 .specific-details {
     background: rgba(255,255,255,0.03);
@@ -148,17 +157,17 @@
     border: 1px solid rgba(255,255,255,0.08);
 }
 
-.specific-details h3 {
-    color: #a76dff;
-    margin-bottom: 2rem;
-    font-size: 1.6rem;
-    font-weight: 600;
-    font-family: "Orbitron", sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    border-bottom: 2px solid rgba(167, 109, 255, 0.3);
-    padding-bottom: 0.8rem;
-}
+    .specific-details h3 {
+        color: #a76dff;
+        margin-bottom: 2rem;
+        font-size: 1.6rem;
+        font-weight: 600;
+        font-family: "Orbitron", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        border-bottom: 2px solid rgba(167, 109, 255, 0.3);
+        padding-bottom: 0.8rem;
+    }
 
 .details-grid {
     display: grid;
@@ -174,41 +183,41 @@
     transition: all 0.3s ease;
 }
 
-.detail-item:hover {
-    background: rgba(0,0,0,0.4);
-    border-left-color: #a76dff;
-    transform: translateX(5px);
-}
+    .detail-item:hover {
+        background: rgba(0,0,0,0.4);
+        border-left-color: #a76dff;
+        transform: translateX(5px);
+    }
 
-.detail-item.detail-item-full {
-    grid-column: 1 / -1;
-}
+    .detail-item.detail-item-full {
+        grid-column: 1 / -1;
+    }
 
-.detail-item .label {
-    display: block;
-    color: #aaa;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
+    .detail-item .label {
+        display: block;
+        color: #aaa;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
 
-.detail-item .value {
-    display: block;
-    color: #fff;
-    font-size: 1.3rem;
-    font-weight: 600;
-    line-height: 1.4;
-}
+    .detail-item .value {
+        display: block;
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
 
-.detail-item .value.status-danger {
-    color: #ff6b6b;
-}
+        .detail-item .value.status-danger {
+            color: #ff6b6b;
+        }
 
-.detail-item .value.status-safe {
-    color: #51cf66;
-}
+        .detail-item .value.status-safe {
+            color: #51cf66;
+        }
 
 .reference-section,
 .remark-section {
@@ -219,23 +228,23 @@
     border-left: 4px solid #a76dff;
 }
 
-.reference-section h4,
-.remark-section h4 {
-    color: #a76dff;
-    margin-bottom: 0.8rem;
-    font-size: 1.1rem;
-    font-family: "Orbitron", sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+    .reference-section h4,
+    .remark-section h4 {
+        color: #a76dff;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+        font-family: "Orbitron", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-.reference-section p,
-.remark-section p {
-    color: #e0e0e0;
-    line-height: 1.6;
-    margin: 0;
-    font-size: 0.95rem;
-}
+    .reference-section p,
+    .remark-section p {
+        color: #e0e0e0;
+        line-height: 1.6;
+        margin: 0;
+        font-size: 0.95rem;
+    }
 
 .spinner-container {
     display: flex;
@@ -260,12 +269,36 @@
     align-self: flex-start;
 }
 
-.btn-secondary:hover {
-    background: rgba(167, 109, 255, 0.25);
-    border-color: #a76dff;
-    transform: translateX(-5px);
+    .btn-secondary:hover {
+        background: rgba(167, 109, 255, 0.25);
+        border-color: #a76dff;
+        transform: translateX(-5px);
+    }
+
+    .btn-secondary:active {
+        transform: translateX(-3px);
+    }
+
+/* =======================================
+   NOUVEAU : BOUTON RETOUR FIXE (STICKY)
+   ======================================= */
+.btn-back-fixed {
+    position: fixed; /* C'est ça qui fait que le bouton reste visible */
+    top: 100px; /* Distance du haut de l'écran (ajuste si besoin) */
+    left: 40px; /* Distance de la gauche */
+    z-index: 1000; /* Pour être sûr qu'il est au dessus des images */
+    margin: 0; /* On enlève les marges qui gênent */
+    /* Effet verre pour qu'on puisse lire même si ça passe sur du texte */
+    backdrop-filter: blur(8px);
+    background: rgba(15, 15, 35, 0.85);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-.btn-secondary:active {
-    transform: translateX(-3px);
+/* Sur mobile, on remet le bouton normal pour ne pas cacher le produit */
+@media (max-width: 1000px) {
+    .btn-back-fixed {
+        position: static;
+        display: block;
+        margin: 1rem 0;
+    }
 }
