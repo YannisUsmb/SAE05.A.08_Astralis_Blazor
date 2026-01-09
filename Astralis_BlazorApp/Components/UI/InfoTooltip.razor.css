@@ -18,19 +18,19 @@
 
 .info-tooltip {
     position: absolute;
-    bottom: calc(100% + 8px);
+    bottom: calc(100% + 12px);
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-20%);
     background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
     border: 1px solid rgba(167, 109, 255, 0.3);
     padding: 0.75rem 1rem;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     color: #e0e0e0;
-    font-size: 0.85rem;
-    line-height: 1.4;
-    white-space: nowrap;
-    z-index: 1000;
+    font-size: 0.80rem;
+    line-height: 1.2;
+    white-space: normal;
+    z-index: 9999;
     pointer-events: none;
     animation: tooltipFadeIn 0.2s ease-out;
 }
@@ -39,19 +39,52 @@
     content: '';
     position: absolute;
     top: 100%;
-    left: 50%;
+    left: 20%;
     transform: translateX(-50%);
     border: 6px solid transparent;
     border-top-color: #1a1a2e;
 }
 
+.detail-properties .info-tooltip {
+    bottom: auto;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-20%);
+    font-size: 0.90rem;
+    white-space: normal;
+    z-index: 9999;
+}
+
+.detail-properties .info-tooltip::after {
+    top: auto;
+    bottom: 100%; /* ← Flèche EN HAUT */
+    left: 20%;
+    border-top-color: transparent;
+    border-bottom-color: #1a1a2e; /* ← Couleur inversée */
+}
+
 @keyframes tooltipFadeIn {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(-5px);
+        transform: translateX(-20%) translateY(-5px);
     }
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateX(-20%) translateY(0);
+    }
+}
+
+.detail-properties .info-tooltip {
+    animation: tooltipFadeInDetail 0.2s ease-out;
+}
+
+@keyframes tooltipFadeInDetail {
+    from {
+        opacity: 0;
+        transform: translateX(-20%) translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-20%) translateY(0);
     }
 }
