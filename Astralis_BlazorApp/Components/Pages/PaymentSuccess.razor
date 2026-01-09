@@ -1,0 +1,96 @@
+﻿@page "/payment-success"
+@using Astralis_BlazorApp.Services
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager Navigation
+@inject ICartService CartService
+@inject HttpClient Http
+
+<div class="success-wrapper">
+    <div class="success-card">
+        @if (isLoading)
+        {
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <h2>Vérification du paiement...</h2>
+            <p>Nous confirmons la transaction auprès de la banque stellaire.</p>
+        }
+        else if (isSuccess)
+        {
+            <div class="icon-circle success">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            <h1>Paiement Validé !</h1>
+            <p class="text-white-50">Votre commande a été confirmée.</p>
+            <p>Vos équipements sont en cours de préparation pour le décollage.</p>
+
+            <button class="btn btn-primary mt-4" @onclick="GoHome">
+                Retour à l'accueil
+            </button>
+        }
+        else
+        {
+            <div class="icon-circle error">
+                <i class="bi bi-x-lg"></i>
+            </div>
+            <h1>Erreur</h1>
+            <p class="text-danger">@errorMessage</p>
+            <button class="btn btn-secondary mt-4" @onclick="GoHome">
+                Retour à l'accueil
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool isSuccess = false;
+    private string? sessionId;
+    private string errorMessage = "Une erreur inconnue est survenue.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+
+        // 1. On récupère l'ID Stripe dans l'URL
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("session_id", out var sId))
+        {
+            sessionId = sId;
+
+            try
+            {
+                // 2. APPEL API VERS LE COMMANDS CONTROLLER
+                // Correction ici : on appelle "Commands" et non plus "Order"
+                var response = await Http.PostAsync($"Commands/validate-payment?sessionId={sessionId}", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    isSuccess = true;
+                    // 3. Le backend a vidé la BDD, on vide le localStorage/état du front
+                    await CartService.ClearCartAsync();
+                }
+                else
+                {
+                    isSuccess = false;
+                    // On tente de lire le message d'erreur du backend
+                    var errorMsg = await response.Content.ReadAsStringAsync();
+                    errorMessage = !string.IsNullOrWhiteSpace(errorMsg)
+                        ? errorMsg
+                        : "Le paiement est validé mais l'enregistrement de la commande a échoué.";
+                }
+            }
+            catch (Exception ex)
+            {
+                isSuccess = false;
+                errorMessage = "Erreur de connexion au serveur : " + ex.Message;
+            }
+        }
+        else
+        {
+            isSuccess = false;
+            errorMessage = "Aucune session de paiement trouvée dans l'URL.";
+        }
+
+        isLoading = false;
+    }
+
+    private void GoHome() => Navigation.NavigateTo("/");
+}

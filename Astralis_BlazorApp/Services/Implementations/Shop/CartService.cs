@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.Security.Claims;
 using System.Text.Json;
-
+using System.Net.Http.Json;
 namespace Astralis_BlazorApp.Services;
+
 public interface ICartService
 {
     CartDto Cart { get; }
@@ -15,6 +16,9 @@ public interface ICartService
     Task IncreaseQuantityAsync(CartItemDto item);
     Task DecreaseQuantityAsync(CartItemDto item);
     Task RemoveFromCartAsync(CartItemDto item);
+    Task<string?> CheckoutAsync();
+
+    Task ClearCartAsync();
 }
 
 public class CartService : ICartService
@@ -22,6 +26,7 @@ public class CartService : ICartService
     private readonly ICartItemService _apiService;
     private readonly IJSRuntime _js;
     private readonly AuthenticationStateProvider _authStateProvider;
+    private readonly HttpClient _http;
 
     private const string LocalCartKey = "astralis_local_cart";
 
@@ -29,11 +34,12 @@ public class CartService : ICartService
 
     public event Action? OnChange;
 
-    public CartService(ICartItemService apiService, IJSRuntime js, AuthenticationStateProvider authStateProvider)
+    public CartService(ICartItemService apiService, IJSRuntime js, AuthenticationStateProvider authStateProvider, HttpClient http)
     {
         _apiService = apiService;
         _js = js;
         _authStateProvider = authStateProvider;
+        _http = http;
     }
 
     public async Task LoadCartAsync()
@@ -159,7 +165,22 @@ public class CartService : ICartService
         }
         await LoadCartAsync();
     }
+    public async Task ClearCartAsync()
+    {
+        if (await IsUserAuthenticated())
+        {
+            int userId = await GetUserId();
+            await _apiService.ClearCartAsync(userId);
+        }
+        else
+        {
+            Cart.Items.Clear();
+            await _js.InvokeVoidAsync("localStorage.removeItem", LocalCartKey);
+        }
 
+        // On recharge l'état (le panier sera vide)
+        await LoadCartAsync();
+    }
     public async Task RemoveFromCartAsync(CartItemDto item)
     {
         if (await IsUserAuthenticated())
@@ -179,7 +200,20 @@ public class CartService : ICartService
             }
         }
         await LoadCartAsync();
-    }    
+    }
+
+    public async Task<string?> CheckoutAsync()
+    {
+        var response = await _http.PostAsJsonAsync("Payment/create-checkout-session", Cart.Items);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<PaymentResponse>();
+            return result?.Url;
+        }
+
+        return null;
+    }
 
     private async Task SaveLocalCart(List<CartItemDto> items)
     {
@@ -201,4 +235,9 @@ public class CartService : ICartService
     }
 
     private void NotifyStateChanged() => OnChange?.Invoke();
+}
+
+public class PaymentResponse
+{
+    public string Url { get; set; }
 }

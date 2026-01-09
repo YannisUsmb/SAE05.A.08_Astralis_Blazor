@@ -1,8 +1,11 @@
 ﻿@page "/panier"
 @using Astralis_BlazorApp.Services
 @using Astralis.Shared.DTOs
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ICartService CartService
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
 @implements IDisposable
 
 <PageTitle>Mon Panier – Astralis</PageTitle>
@@ -30,6 +33,13 @@
         <div class="cart-layout">
 
             <div class="cart-list">
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-outline-danger btn-sm" @onclick="ClearCart">
+                        <i class="bi bi-trash"></i> Vider la soute
+                    </button>
+                </div>
+
                 @foreach (var item in CartService.Cart.Items)
                 {
                     <div class="cart-card">
@@ -64,7 +74,7 @@
                         </div>
 
                         <button class="btn-delete" @onclick="() => CartService.RemoveFromCartAsync(item)">
-                            <i class="bi bi-trash"></i>
+                            <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                 }
@@ -90,9 +100,35 @@
                         <span class="highlight">@CartService.Cart.GrandTotal.ToString("N2") €</span>
                     </div>
 
-                    <button class="btn btn-primary w-100 btn-lg mt-4">
-                        <i class="bi bi-credit-card me-2"></i> Payer
-                    </button>
+                    <AuthorizeView>
+                        <Authorized>
+                            <button class="btn btn-primary w-100 btn-lg mt-4"
+                                    @onclick="ProceedToPayment"
+                                    disabled="@isProcessingPayment">
+                                @if (isProcessingPayment)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    <span>Redirection Stripe...</span>
+                                }
+                                else
+                                {
+                                    <span><i class="bi bi-credit-card me-2"></i> Payer la commande</span>
+                                }
+                            </button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-secondary w-100 btn-lg mt-4" @onclick="GoToLogin">
+                                <i class="bi bi-person-lock me-2"></i> Se connecter pour payer
+                            </button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+
+                    @if (!string.IsNullOrEmpty(paymentError))
+                    {
+                        <div class="alert alert-danger mt-3 small">
+                            <i class="bi bi-exclamation-triangle me-1"></i> @paymentError
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -100,6 +136,9 @@
 </div>
 
 @code {
+    private bool isProcessingPayment = false;
+    private string? paymentError;
+
     protected override async Task OnInitializedAsync()
     {
         CartService.OnChange += StateHasChanged;
@@ -112,4 +151,49 @@
     }
 
     private void GoToShop() => Navigation.NavigateTo("/boutique");
+
+    private void GoToLogin()
+    {
+        var returnUrl = Uri.EscapeDataString(Navigation.Uri);
+        Navigation.NavigateTo($"/connexion?returnUrl={returnUrl}");
+    }
+
+    private async Task ClearCart()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Voulez-vous vraiment vider toute votre soute ?");
+        if (confirmed)
+        {
+            await CartService.ClearCartAsync();
+        }
+    }
+
+    private async Task ProceedToPayment()
+    {
+        if (isProcessingPayment) return;
+
+        isProcessingPayment = true;
+        paymentError = null;
+
+        try
+        {
+            var paymentUrl = await CartService.CheckoutAsync();
+
+            if (!string.IsNullOrEmpty(paymentUrl))
+            {
+                Navigation.NavigateTo(paymentUrl, forceLoad: true);
+            }
+            else
+            {
+                paymentError = "Erreur : Impossible d'initialiser la session de paiement.";
+            }
+        }
+        catch (Exception ex)
+        {
+            paymentError = "Erreur technique : " + ex.Message;
+        }
+        finally
+        {
+            isProcessingPayment = false;
+        }
+    }
 }
