@@ -18,10 +18,6 @@ public partial class ShopViewModel : ObservableObject
     private CancellationTokenSource? _searchCts;
 
     // --- Collections de données ---
-    // --- Gestion du Debounce (Recherche) ---
-    private CancellationTokenSource? _searchCts;
-
-    // --- Collections de données ---
     [ObservableProperty] private ObservableCollection<ProductListDto> products = new();
     [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
     
@@ -113,10 +109,10 @@ public partial class ShopViewModel : ObservableObject
 
     [RelayCommand]
     public async Task ApplyFilterAsync()
-        {
+    {
         CurrentPage = 1;
         await SearchDataAsync();
-        }
+        
     }
     
     [RelayCommand]
@@ -132,7 +128,7 @@ public partial class ShopViewModel : ObservableObject
             var results = await _productService.SearchAsync(Filter);
 
             HasNextPage = results.Count == PageSize;
-            
+
             // Tri côté client (si l'API ne le gère pas déjà)
             IEnumerable<ProductListDto> sortedList = results;
             switch (SortBy)
@@ -163,6 +159,7 @@ public partial class ShopViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        } 
     }
     
     public async Task OnFilterChanged()
@@ -209,17 +206,6 @@ public partial class ShopViewModel : ObservableObject
             await SearchDataAsync();
         }
     }
-
-    [RelayCommand]
-    public async Task NextPage()
-    {
-        if (HasNextPage)
-        {
-            CurrentPage++;
-            await SearchDataAsync();
-        }
-    }
-
     // --- CORRECTION MAJEURE ICI : ASYNC ---
     [RelayCommand]
     public async Task PreviousPage()

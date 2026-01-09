@@ -30,11 +30,24 @@ public class CartItemService(HttpClient httpClient) : ICartItemService
     public async Task<CartItemDto?> AddAsync(CartItemCreateDto dto)
     {
         // POST api/CartItems
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync(Controller, dto);
+        var response = await httpClient.PostAsJsonAsync(Controller, dto);
         response.EnsureSuccessStatusCode();
 
-        CartItemDto? createdEntity = await response.Content.ReadFromJsonAsync<CartItemDto>();
-        return createdEntity ?? throw new Exception("Error adding item to cart");
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent ||
+            response.Content.Headers.ContentLength == 0)
+        {
+            return new CartItemDto { ProductId = dto.ProductId, Quantity = dto.Quantity };
+        }
+
+        try
+        {
+            return await response.Content.ReadFromJsonAsync<CartItemDto>();
+        }
+        catch
+        {
+            // En cas d'erreur de parsing, on ne fait pas planter l'app
+            return new CartItemDto { ProductId = dto.ProductId, Quantity = dto.Quantity };
+        }
     }
 
     public async Task UpdateAsync(int userId, int productId, CartItemUpdateDto dto)
@@ -42,9 +55,6 @@ public class CartItemService(HttpClient httpClient) : ICartItemService
         // PUT api/CartItems/{userId}/{productId}
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{userId}/{productId}", dto);
         response.EnsureSuccessStatusCode();
-        
-        // Ton interface retourne "Task" (void), donc on ne retourne rien ici, 
-        // contrairement à ton exemple CelestialBody qui retournait l'objet.
     }
 
     public async Task DeleteAsync(int userId, int productId)
@@ -57,7 +67,6 @@ public class CartItemService(HttpClient httpClient) : ICartItemService
     public async Task ClearCartAsync(int userId)
     {
         // DELETE api/CartItems/user/{userId}
-        // J'ai ajouté "/user/" pour différencier de la suppression d'un item unique
         HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/user/{userId}");
         response.EnsureSuccessStatusCode();
     }

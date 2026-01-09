@@ -14,10 +14,11 @@
 
     @if (ViewModel.SelectedProductDetails == null)
     {
-        <div class="page-header d-flex justify-content-between align-items-center mb-4">
-            <h1>Boutique Astralis</h1>
+        <div class="page-header position-relative d-flex justify-content-center align-items-center mb-4">
 
-            <button class="btn btn-primary position-relative" @onclick='() => Navigation.NavigateTo("/panier")'>
+            <h1 class="m-0">Boutique Astralis</h1>
+
+            <button class="btn btn-primary position-absolute end-0" @onclick='() => Navigation.NavigateTo("/panier")'>
                 <i class="bi bi-cart3 me-2"></i> Mon Panier
                 @if (CartService.Cart.TotalItemsCount > 0)
                 {
@@ -141,7 +142,7 @@
 
                     <div class="detail-image-div">
                         <img class="detail-image" src="@ViewModel.SelectedProductDetails.ProductPictureUrl" alt="@ViewModel.SelectedProductDetails.Label image" />
-                        <h2 class="detail-price">@ViewModel.SelectedProductDetails.Price.ToString("C")</h2>
+                        <h2 class="detail-price">@ViewModel.SelectedProductDetails.Price.ToString() €</h2>
                     </div>
 
                     @if (!string.IsNullOrEmpty(ViewModel.SelectedProductDetails.Description))
