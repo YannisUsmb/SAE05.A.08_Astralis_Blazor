@@ -26,10 +26,9 @@
 
         <div class="input-group-astralis" style="max-width: 300px;">
             <span class="input-group-text bg-transparent border-end-0 text-white-50"><i class="bi bi-search"></i></span>
-            <input type="text" class="filter-input border-start-0 ps-0" placeholder="Rechercher..."
+            <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
                    @bind="ViewModel.Filter.SearchTerm"
-                   @bind:event="oninput"
-                   @onkeyup="() => ViewModel.UpdateUrl()" />
+                   @bind:after="() => ViewModel.UpdateUrl()" />
         </div>
 
         <select class="filter-input" @bind="ViewModel.SelectedTypeId" @bind:after="() => ViewModel.UpdateUrl()">
