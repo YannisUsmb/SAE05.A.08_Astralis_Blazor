@@ -53,7 +53,6 @@ namespace Astralis_BlazorApp.ViewModels
 
         public async Task InitializeAsync()
         {
-            IsLoading = true;
             try
             {
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
@@ -88,7 +87,6 @@ namespace Astralis_BlazorApp.ViewModels
                 var result = await _articleService.SearchAsync(Filter);
 
                 Articles = new ObservableCollection<ArticleListDto>(result.Items);
-
                 TotalCount = result.TotalCount;
                 TotalPages = result.TotalPages;
 

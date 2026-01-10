@@ -154,8 +154,6 @@
                                     <button class="ql-list" value="ordered"></button>
                                     <button class="ql-list" value="bullet"></button>
                                     <button class="ql-link"></button>
-                                    <select class="ql-color"></select>
-                                    <select class="ql-background"></select>
                                 </span>
                                 <span class="ql-formats">
                                     <button type="button" class="ql-image" @onclick="TriggerImageUpload"></button>
@@ -182,6 +180,16 @@
                         else
                         {
                             <span><i class="bi bi-send me-2"></i> @(ViewModel.IsEditMode ? "Mettre à jour" : "Publier")</span>
+                        }
+                    </button>
+                    <button type="submit" class="btn btn-astralis-premium px-5" disabled="@ViewModel.IsPublishing">
+                        @if (ViewModel.IsPublishing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span> <span>Publication...</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-send me-2"></i> Publier</span>
                         }
                     </button>
                 </div>

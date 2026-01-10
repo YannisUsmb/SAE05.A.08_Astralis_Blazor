@@ -17,7 +17,6 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty] private ArticleCreateDto article = new();
         [ObservableProperty] private List<ArticleTypeDto> articleTypes = new();
-
         [ObservableProperty] private List<int> selectedCategoryIds = new();
 
         [ObservableProperty] private bool isPublishing;
@@ -131,11 +130,8 @@ namespace Astralis_BlazorApp.ViewModels
         public void ToggleCategory(int categoryId)
         {
             if (SelectedCategoryIds.Contains(categoryId))
-            {
                 SelectedCategoryIds.Remove(categoryId);
-            }
             else
-            {
                 SelectedCategoryIds.Add(categoryId);
 
             OnPropertyChanged(nameof(SelectedCategoryIds));
@@ -152,7 +148,6 @@ namespace Astralis_BlazorApp.ViewModels
                     ErrorMessage = "L'image de couverture est trop lourde (Max 5Mo).";
                     return;
                 }
-
                 string url = await _uploadService.UploadImageAsync(e.File, UploadCategory.Articles);
                 if (!string.IsNullOrEmpty(url)) Article.CoverImageUrl = url;
             }
@@ -207,6 +202,7 @@ namespace Astralis_BlazorApp.ViewModels
                     if (type != null) SelectedCategoryIds.Add(type.Id);
                 }
             }
+            catch { return null; }
         }
 
         public async Task SaveArticleAsync()
