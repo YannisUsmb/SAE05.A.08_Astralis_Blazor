@@ -65,8 +65,8 @@ public class ArticleService(HttpClient httpClient) : IArticleService
         if (!string.IsNullOrEmpty(filter.SortBy))
             parameters.Add($"sortBy={filter.SortBy}");
 
-        parameters.Add($"page={filter.PageNumber}");
-        parameters.Add($"pageSize={filter.PageSize}");
+        parameters.Add($"PageNumber={filter.PageNumber}");
+        parameters.Add($"PageSize={filter.PageSize}");
 
         return string.Join("&", parameters);
     }

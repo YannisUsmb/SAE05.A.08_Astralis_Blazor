@@ -7,16 +7,23 @@ namespace Astralis_BlazorApp.Services.Implementations;
 public class ArticleTypeService(HttpClient httpClient) : IArticleTypeService
 {
     private const string Controller = "ArticleTypes";
-    
+
     public async Task<ArticleTypeDto?> GetByIdAsync(int id)
     {
-        ArticleTypeDto? articleType = await httpClient.GetFromJsonAsync<ArticleTypeDto>($"{Controller}/{id}");
-        return articleType;
+        return await httpClient.GetFromJsonAsync<ArticleTypeDto>($"{Controller}/{id}");
     }
-    
+
     public async Task<List<ArticleTypeDto>> GetAllAsync()
     {
-        List<ArticleTypeDto>? articleTypes = await httpClient.GetFromJsonAsync<List<ArticleTypeDto>>(Controller);
-        return articleTypes ?? new List<ArticleTypeDto>();
+        var result = await httpClient.GetFromJsonAsync<List<ArticleTypeDto>>(Controller);
+        return result ?? new List<ArticleTypeDto>();
+    }
+
+    public async Task<ArticleTypeDto> AddAsync(ArticleTypeDto dto)
+    {
+        var response = await httpClient.PostAsJsonAsync(Controller, dto);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ArticleTypeDto>()
+               ?? throw new Exception("Erreur lors de la création du type.");
     }
 }

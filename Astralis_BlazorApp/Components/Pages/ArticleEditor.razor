@@ -6,8 +6,32 @@
 
 <PageTitle>Rédaction – Astralis</PageTitle>
 
-<div class="content-wrapper">
+<div class="content-wrapper position-relative">
     
+    @if (ViewModel.IsTypeModalOpen)
+    {
+        <div class="modal-backdrop-custom">
+            <div class="modal-glass-content animate-fade-in">
+                <h4 class="text-white font-orbitron mb-3">Nouveau Type</h4>
+                <div class="mb-3">
+                    <label class="text-white-50 small mb-1">Nom du type</label>
+                    <input type="text" class="form-control-astralis" 
+                           @bind="ViewModel.NewTypeName" 
+                           @bind:event="oninput" 
+                           placeholder="Ex: Exobiologie" />
+                    @if (!string.IsNullOrEmpty(ViewModel.TypeCreationError))
+                    {
+                        <div class="text-danger small mt-1">@ViewModel.TypeCreationError</div>
+                    }
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-sm btn-outline-light" @onclick="ViewModel.CloseCreateTypeModal">Annuler</button>
+                    <button class="btn btn-sm btn-astralis-premium" @onclick="ViewModel.ConfirmCreateTypeLocal">Ajouter</button>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="glass-panel p-4 mb-5 animate-fade-in">
         <h2 class="mb-4 text-white font-orbitron text-center">Nouvelle Transmission</h2>
 
@@ -18,46 +42,67 @@
                 <div class="col-md-8">
                     <label class="text-white mb-2 required-label">Titre de l'article</label>
                     <InputText class="form-control-astralis" @bind-Value="ViewModel.Article.Title" placeholder="Ex: Les mystères de la nébuleuse d'Orion" />
-                    <ValidationMessage For="@(() => ViewModel.Article.Title)" class="validation-message" />
+                    @if (ViewModel.ShowValidation && string.IsNullOrWhiteSpace(ViewModel.Article.Title))
+                    {
+                        <div class="validation-message">Le titre est requis.</div>
+                    }
                 </div>
 
                 <div class="col-md-4">
                     <label class="text-white mb-2 required-label">Catégories</label>
                     <div class="dropdown">
-                        <button class="form-control-astralis text-start dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @(ViewModel.SelectedCategoryIds.Count > 0 ? $"{ViewModel.SelectedCategoryIds.Count} sélectionnées" : "Choisir...")
+                        <button class="form-control-astralis text-start dropdown-toggle d-flex justify-content-between align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>@(ViewModel.SelectedCategoryIds.Count > 0 ? $"{ViewModel.SelectedCategoryIds.Count} sélectionnées" : "Choisir...")</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-dark bg-dark border-white-10 p-2 w-100" style="max-height: 250px; overflow-y: auto;">
-                            @foreach (var type in ViewModel.ArticleTypes)
-                            {
-                                <li class="form-check mb-1">
-                                    <input class="form-check-input" type="checkbox" 
-                                           checked="@ViewModel.SelectedCategoryIds.Contains(type.Id)"
-                                           @onchange="@(e => ViewModel.ToggleCategory(type.Id))"
-                                           id="cat_@type.Id">
-                                    <label class="form-check-label text-white small" for="cat_@type.Id">
-                                        @type.Label
-                                    </label>
-                                </li>
-                            }
-                        </ul>
+                        
+                        <div class="dropdown-menu dropdown-menu-dark bg-dark border-white-10 p-2 w-100">
+                            <div class="input-group input-group-sm mb-2" @onclick:stopPropagation>
+                                <input type="text" class="form-control bg-black text-white border-secondary" 
+                                       placeholder="Chercher..." 
+                                       @bind="ViewModel.TypeSearchTerm" 
+                                       @bind:event="oninput" />
+                                
+                                <button class="btn btn-outline-secondary" type="button" @onclick="ViewModel.OpenCreateTypeModal">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                            
+                            <div style="max-height: 200px; overflow-y: auto;">
+                                @foreach (var type in ViewModel.FilteredTypes)
+                                {
+                                    <div class="form-check mb-1" @onclick:stopPropagation>
+                                        <input class="form-check-input" type="checkbox" 
+                                               checked="@ViewModel.SelectedCategoryIds.Contains(type.Id)"
+                                               @onchange="@(e => ViewModel.ToggleCategory(type.Id))"
+                                               id="cat_@type.Id">
+                                        <label class="form-check-label text-white small cursor-pointer" for="cat_@type.Id">
+                                            @type.Label 
+                                            @if(type.Id < 0) { <span class="text-warning small fst-italic">(Nouveau)</span> }
+                                        </label>
+                                    </div>
+                                }
+                                @if (!ViewModel.FilteredTypes.Any())
+                                {
+                                    <div class="text-white-50 small text-center fst-italic p-2">
+                                        Aucun résultat.<br/>
+                                        <a href="javascript:void(0)" class="text-accent-purple text-decoration-none" @onclick="ViewModel.OpenCreateTypeModal">Créer "@ViewModel.TypeSearchTerm" ?</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
                     </div>
-                    @if(ViewModel.SelectedCategoryIds.Count == 0) { <div class="validation-message">Une catégorie est requise.</div> }
-                </div>
-
-                <div class="col-12">
-                    <label class="text-white mb-2">Description courte (Aperçu)</label>
-                    <InputTextArea class="form-control-astralis" @bind-Value="ViewModel.Article.Description" rows="2" 
-                                   placeholder="Ce texte apparaîtra dans la liste des articles. Si vide, le début du contenu sera utilisé." />
-                    <ValidationMessage For="@(() => ViewModel.Article.Description)" class="validation-message" />
+                    @if(ViewModel.ShowValidation && ViewModel.SelectedCategoryIds.Count == 0) 
+                    { <div class="validation-message">Une catégorie est requise.</div> }
                 </div>
 
                 <div class="col-md-6">
-                    <label class="text-white mb-2">Image de couverture</label>
+                    <label class="text-white mb-2 required-label">Image de couverture</label>
                     <div class="d-flex gap-3 align-items-start">
                         <div class="flex-grow-1">
                             <InputFile OnChange="ViewModel.UploadCoverImageAsync" class="form-control-astralis" accept=".jpg,.png,.jpeg,.webp" />
                             @if (ViewModel.IsUploadingCover) { <div class="text-accent-purple small mt-1">Téléchargement...</div> }
+                            @if (ViewModel.ShowValidation && string.IsNullOrEmpty(ViewModel.Article.CoverImageUrl)) 
+                            { <div class="validation-message">L'image est requise.</div> }
                         </div>
                         @if (!string.IsNullOrEmpty(ViewModel.Article.CoverImageUrl))
                         {
@@ -66,19 +111,27 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 d-flex align-items-center mt-4">
-                    <div class="form-check form-switch custom-switch p-2 rounded border border-white-10 bg-black bg-opacity-25 w-100">
-                        <input class="form-check-input ms-0 me-3" type="checkbox" id="premiumEdit" @bind="ViewModel.Article.IsPremium" style="float:none;">
-                        <label class="form-check-label text-white" for="premiumEdit">
-                            <i class="bi bi-star-fill text-warning me-1"></i> Contenu Premium
+                <div class="col-md-6">
+                    <label class="text-white mb-2">Accessibilité</label>
+                    <div class="form-control-astralis d-flex align-items-center justify-content-between p-2">
+                        <label class="form-check-label text-white cursor-pointer m-0 flex-grow-1" for="premiumEdit">
+                            <i class="bi bi-star-fill text-warning me-2"></i> Contenu Premium
                         </label>
+                        <div class="form-check form-switch custom-switch m-0">
+                            <input class="form-check-input" type="checkbox" id="premiumEdit" @bind="ViewModel.Article.IsPremium">
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-12">
-                    <label class="text-white mb-2 required-label">Contenu de l'article</label>
+                    <label class="text-white mb-2">Description courte</label>
+                    <InputTextArea class="form-control-astralis" @bind-Value="ViewModel.Article.Description" rows="2" />
+                </div>
+
+                <div class="col-12">
+                    <label class="text-white mb-2 required-label">Contenu</label>
                     <div class="editor-dark-wrapper">
-                        <BlazoredTextEditor @ref="@quillHtml" Placeholder="Commencez votre rédaction...">
+                        <BlazoredTextEditor @ref="@quillHtml" Placeholder="Rédigez votre article...">
                             <ToolbarContent>
                                 <select class="ql-header">
                                     <option selected=""></option>
@@ -89,79 +142,78 @@
                                     <button class="ql-bold"></button>
                                     <button class="ql-italic"></button>
                                     <button class="ql-underline"></button>
+                                    <select class="ql-align">
+                                        <option selected=""></option>
+                                        <option value="center"></option>
+                                        <option value="right"></option>
+                                        <option value="justify"></option>
+                                    </select>
+                                </span>
+                                <span class="ql-formats">
                                     <button class="ql-list" value="ordered"></button>
                                     <button class="ql-list" value="bullet"></button>
                                     <button class="ql-link"></button>
-                                    <select class="ql-color"></select>
-                                    <select class="ql-background"></select>
                                 </span>
                                 <span class="ql-formats">
                                     <button type="button" class="ql-image" @onclick="TriggerImageUpload"></button>
                                 </span>
                             </ToolbarContent>
-                            <EditorContent>
-                            </EditorContent>
+                            <EditorContent></EditorContent>
                         </BlazoredTextEditor>
                     </div>
                     <InputFile id="editorImageInput" OnChange="InsertImageInEditor" hidden @ref="fileInput" accept=".jpg,.png,.jpeg,.webp" />
                     
-                    @if(string.IsNullOrEmpty(ViewModel.Article.Content) && ViewModel.ShowValidation) 
-                    { <div class="validation-message">Le contenu est obligatoire.</div> }
+                    @if(ViewModel.ShowValidation && string.IsNullOrWhiteSpace(ViewModel.Article.Content)) 
+                    { <div class="validation-message">Le contenu est requis.</div> }
                 </div>
 
-                <div class="col-12 text-end mt-4">
-                    <button type="button" class="btn btn-astralis-outline me-2" @onclick="UpdatePreview">Actualiser l'aperçu</button>
-                    <button type="submit" class="btn btn-astralis-premium px-5" disabled="@ViewModel.IsLoading">
-                        @(ViewModel.IsLoading ? "Publication..." : "Publier")
+                <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                    <button type="button" class="btn btn-astralis-outline" @onclick="UpdatePreview">
+                        <i class="bi bi-eye me-2"></i> Aperçu
+                    </button>
+                    <button type="submit" class="btn btn-astralis-premium px-5" disabled="@ViewModel.IsPublishing">
+                        @if (ViewModel.IsPublishing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span> <span>Publication...</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-send me-2"></i> Publier</span>
+                        }
                     </button>
                 </div>
-                
-                @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
-                {
-                    <div class="col-12 alert alert-danger mt-3">@ViewModel.ErrorMessage</div>
-                }
             </div>
         </EditForm>
+        
+        @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3">@ViewModel.ErrorMessage</div>
+        }
     </div>
 
     @if (ShowPreview)
     {
-        <div class="mt-5 pt-5 border-top border-white-10">
-            <h3 class="text-white-50 text-center mb-4">--- Aperçu du rendu ---</h3>
-            
-            <div class="article-full-container glass-panel animate-fade-in">
-                <div class="article-header text-center mb-5">
-                    <div class="badges mb-3 justify-content-center d-flex gap-2">
-                        @if (ViewModel.Article.IsPremium)
-                        {
-                            <span class="badge bg-warning text-dark">Premium</span>
-                        }
-                        @foreach(var typeId in ViewModel.SelectedCategoryIds)
-                        {
-                            <span class="badge bg-purple-soft">
-                                @ViewModel.ArticleTypes.FirstOrDefault(t => t.Id == typeId)?.Label
-                            </span>
-                        }
-                    </div>
-                    
-                    <h1 class="font-orbitron display-4 text-white mb-4">@(string.IsNullOrEmpty(ViewModel.Article.Title) ? "Titre de l'article" : ViewModel.Article.Title)</h1>
-                    
-                    @if (!string.IsNullOrEmpty(ViewModel.Article.CoverImageUrl))
-                    {
-                        <img src="@ViewModel.Article.CoverImageUrl" class="img-fluid rounded mb-4 shadow-lg" style="max-height: 400px;" />
-                    }
-
-                    <div class="meta text-white-50 d-flex justify-content-center align-items-center gap-4">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="rounded-circle bg-secondary" style="width:30px;height:30px;"></div>
-                            <span>Moi</span>
+        <div class="mt-5 pt-5 border-top border-white-10" id="preview-section">
+            <h3 class="text-white-50 text-center mb-4 font-orbitron">APERÇU FINAL</h3>
+            <div class="article-full-container glass-panel p-0 overflow-hidden">
+                <div class="article-hero position-relative p-5 d-flex flex-column justify-content-end" 
+                     style="min-height: 400px; background: url('@(ViewModel.Article.CoverImageUrl ?? "/assets/images/placeholder-space.jpg")') center/cover no-repeat;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-50"></div>
+                    <div class="position-relative z-1 text-start">
+                        <div class="d-flex gap-2 mb-3">
+                            @if (ViewModel.Article.IsPremium) { <span class="badge bg-warning text-dark shadow">Premium</span> }
+                            @foreach(var typeId in ViewModel.SelectedCategoryIds)
+                            {
+                                var type = ViewModel.ArticleTypes.FirstOrDefault(t => t.Id == typeId);
+                                if(type != null) {
+                                    <span class="badge bg-black bg-opacity-75 border border-white-10 text-accent-purple">@type.Label</span>
+                                }
+                            }
                         </div>
-                        <span>•</span>
-                        <span>@DateTime.Now.ToString("dd MMMM yyyy")</span>
+                        <h1 class="font-orbitron display-4 text-white fw-bold mb-3">@(string.IsNullOrEmpty(ViewModel.Article.Title) ? "Titre" : ViewModel.Article.Title)</h1>
                     </div>
                 </div>
-
-                <div class="article-body text-white ql-editor">
+                <div class="article-body p-5 text-white ql-editor">
                     @((MarkupString)PreviewContent)
                 </div>
             </div>
@@ -183,10 +235,7 @@
     private async Task InsertImageInEditor(InputFileChangeEventArgs e)
     {
         string? imageUrl = await ViewModel.UploadImageToContentAsync(e.File);
-        if (!string.IsNullOrEmpty(imageUrl))
-        {
-            await quillHtml.InsertImage(imageUrl);
-        }
+        if (!string.IsNullOrEmpty(imageUrl)) await quillHtml.InsertImage(imageUrl);
     }
 
     private async Task TriggerImageUpload()

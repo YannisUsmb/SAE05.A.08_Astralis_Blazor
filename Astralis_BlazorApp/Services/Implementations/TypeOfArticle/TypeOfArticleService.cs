@@ -6,7 +6,7 @@ namespace Astralis_BlazorApp.Services.Implementations;
 
 public class TypeOfArticleService(HttpClient httpClient) : ITypeOfArticleService
 {
-    private const string Controller = "TypeOfArticles";
+    private const string Controller = "TypesOfArticle";
 
     public async Task<TypeOfArticleDto> GetByIdAsync(int articleTypeId, int articleId)
     {
