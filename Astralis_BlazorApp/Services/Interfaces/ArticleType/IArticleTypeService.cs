@@ -6,4 +6,5 @@ public interface IArticleTypeService
 {
     Task<ArticleTypeDto?> GetByIdAsync(int id);
     Task<List<ArticleTypeDto>> GetAllAsync();
+    Task<ArticleTypeDto> AddAsync(ArticleTypeDto dto);
 }

@@ -25,3 +25,44 @@
 .editor-dark-wrapper .ql-picker {
     color: #ccc !important;
 }
+
+.ql-editor {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.15rem;
+    line-height: 1.8;
+}
+
+    .ql-editor p {
+        margin-bottom: 1.5rem;
+    }
+
+    .ql-editor img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin: 2rem 0;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+.modal-glass-content {
+    background: rgba(15, 15, 35, 0.95);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 400px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}

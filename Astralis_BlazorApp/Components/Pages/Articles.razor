@@ -4,34 +4,26 @@
 @using System.Security.Claims
 @inject ArticleListViewModel ViewModel
 @inject NavigationManager Navigation
+@implements IDisposable
 
 <PageTitle>Actualités Cosmiques – Astralis</PageTitle>
 
 <div class="content-wrapper">
-    <div class="text-center mb-5">
-        <h1 class="font-orbitron text-gradient">Actualités</h1>
-        <p class="text-white-50">Dernières découvertes et rapports d'exploration</p>
 
-        @if (ViewModel.IsCommercialEditor)
-        {
-            <div class="mt-3">
-                <button class="btn btn-astralis-premium" @onclick="ViewModel.NavigateToCreate">
-                    <i class="bi bi-plus-lg me-2"></i> Ajouter un article
-                </button>
-            </div>
-        }
+    <div class="page-header">
+        <h1>Actualités</h1>
     </div>
+    <p class="page-description">Dernières découvertes et rapports d'exploration</p>
 
-    <div class="filters-container glass-panel p-3 mb-5 d-flex flex-wrap gap-3 align-items-center justify-content-center">
+    <div class="filters-container">
+        <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
+               value="@ViewModel.Filter.SearchTerm"
+               @oninput="ViewModel.OnSearchInput"
+               @onchange="@(() => ViewModel.UpdateUrl())" />
 
-        <div class="input-group-astralis" style="max-width: 300px;">
-            <span class="input-group-text bg-transparent border-end-0 text-white-50"><i class="bi bi-search"></i></span>
-            <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
-                   @bind="ViewModel.Filter.SearchTerm"
-                   @bind:after="() => ViewModel.UpdateUrl()" />
-        </div>
-
-        <select class="filter-input" @bind="ViewModel.SelectedTypeId" @bind:after="() => ViewModel.UpdateUrl()">
+        <select class="filter-input"
+                value="@ViewModel.SelectedTypeId"
+                @onchange="OnTypeChanged">
             <option value="0">Toutes les catégories</option>
             @foreach (var type in ViewModel.ArticleTypes)
             {
@@ -39,19 +31,28 @@
             }
         </select>
 
-        <select class="filter-input" @bind="ViewModel.Filter.SortBy" @bind:after="() => ViewModel.UpdateUrl()">
+        <select class="filter-input"
+                value="@ViewModel.Filter.SortBy"
+                @onchange="OnSortChanged">
             <option value="date_desc">Plus récents</option>
             <option value="date_asc">Plus anciens</option>
             <option value="title_asc">Nom (A-Z)</option>
         </select>
 
-        <div class="form-check form-switch custom-switch ms-2">
-            <input class="form-check-input" type="checkbox" id="premiumSwitch"
-                   @bind="ViewModel.Filter.IsPremium"
-                   @bind:after="() => ViewModel.UpdateUrl()">
-            <label class="form-check-label text-white small fw-bold" for="premiumSwitch" style="color: #ffd700 !important;">
-                <i class="bi bi-star-fill me-1"></i> Premium
-            </label>
+        <div class="d-flex align-items-center gap-3 ms-auto">
+            <div class="form-check form-switch custom-switch m-0">
+                <input class="form-check-input" type="checkbox" id="premiumSwitch"
+                       checked="@(ViewModel.Filter.IsPremium == true)"
+                       @onchange="OnPremiumChanged">
+                <label class="form-check-label text-white small fw-bold ms-2" for="premiumSwitch" style="color: #ffd700 !important;">Premium</label>
+            </div>
+
+            @if (ViewModel.IsCommercialEditor)
+            {
+                <button class="btn btn-astralis-premium" @onclick="ViewModel.NavigateToCreate">
+                    <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Créer</span>
+                </button>
+            }
         </div>
     </div>
 
@@ -65,7 +66,7 @@
         else if (ViewModel.Articles.Count == 0)
         {
             <div class="col-12 text-center text-white-50 py-5">
-                <p class="fs-5">Aucun résultat trouvé dans ce quadrant.</p>
+                <p class="fs-5">Aucun résultat ne correspond à vos critères.</p>
             </div>
         }
         else
@@ -79,13 +80,17 @@
 
                         @if (article.IsPremium)
                         {
-                            <span class="badge-premium"><i class="bi bi-star-fill"></i> Premium</span>
+                            <span class="badge-premium"><i class="bi bi-star-fill"></i></span>
                         }
 
                         <div class="position-absolute bottom-0 start-0 p-2 d-flex gap-1 flex-wrap">
-                            @foreach (var cat in article.CategoryNames.Take(2))
+                            @foreach (var cat in article.CategoryNames.Take(3))
                             {
                                 <span class="badge bg-black bg-opacity-75 text-accent-purple border border-white-10">@cat</span>
+                            }
+                            @if (article.CategoryNames.Count > 3)
+                            {
+                                <span class="badge bg-black bg-opacity-75 text-white-50 border border-white-10">+@(article.CategoryNames.Count - 3)</span>
                             }
                         </div>
                     </div>
@@ -121,12 +126,12 @@
 
     @if (ViewModel.TotalPages > 1)
     {
-        <div class="pagination-container mt-5">
+        <div class="pagination-container">
             <button class="btn btn-astralis-outline" disabled="@(ViewModel.Filter.PageNumber <= 1)"
                     @onclick="() => ChangePage(ViewModel.Filter.PageNumber - 1)">
                 Précédent
             </button>
-            <span class="page-info">Page @ViewModel.Filter.PageNumber / @ViewModel.TotalPages</span>
+            <span class="text-white mx-3">Page @ViewModel.Filter.PageNumber / @ViewModel.TotalPages</span>
             <button class="btn btn-astralis-outline" disabled="@(ViewModel.Filter.PageNumber >= ViewModel.TotalPages)"
                     @onclick="() => ChangePage(ViewModel.Filter.PageNumber + 1)">
                 Suivant
@@ -144,19 +149,60 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ViewModel.Filter.SearchTerm = Search;
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        await ViewModel.InitializeAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ViewModel.Filter.PageNumber = Page ?? 1;
+
+        if (Search != null) ViewModel.Filter.SearchTerm = Search;
+
         ViewModel.SelectedTypeId = Type ?? 0;
         ViewModel.Filter.IsPremium = Premium;
         ViewModel.Filter.SortBy = Sort ?? "date_desc";
-        ViewModel.Filter.PageNumber = Page ?? 1;
 
-        await ViewModel.InitializeAsync();
+        await ViewModel.SearchDataAsync(updateUrl: false);
+    }
+
+    private void OnTypeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int val))
+        {
+            ViewModel.SelectedTypeId = val;
+            ViewModel.Filter.PageNumber = 1;
+            ViewModel.UpdateUrl();
+        }
+    }
+
+    private void OnSortChanged(ChangeEventArgs e)
+    {
+        ViewModel.Filter.SortBy = e.Value?.ToString() ?? "date_desc";
+        ViewModel.UpdateUrl();
+    }
+
+    private void OnPremiumChanged(ChangeEventArgs e)
+    {
+        ViewModel.Filter.IsPremium = (bool?)e.Value;
+        ViewModel.Filter.PageNumber = 1;
+        ViewModel.UpdateUrl();
     }
 
     private void ChangePage(int newPage)
     {
         ViewModel.Filter.PageNumber = newPage;
         ViewModel.UpdateUrl();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
 
     private string GetFallbackAvatar(string username)

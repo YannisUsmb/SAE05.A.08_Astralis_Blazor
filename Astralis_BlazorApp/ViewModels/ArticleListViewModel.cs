@@ -26,6 +26,8 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty] private int totalPages = 1;
         [ObservableProperty] private int totalCount;
 
+        private System.Timers.Timer _debounceTimer;
+
         public ArticleListViewModel(
             IArticleService articleService,
             IArticleTypeService typeService,
@@ -36,11 +38,17 @@ namespace Astralis_BlazorApp.ViewModels
             _typeService = typeService;
             _navigation = navigation;
             _authStateProvider = authStateProvider;
+
+            _debounceTimer = new System.Timers.Timer(500);
+            _debounceTimer.Elapsed += async (s, e) =>
+            {
+                await InvokeAsync(() => SearchDataAsync(updateUrl: false));
+            };
+            _debounceTimer.AutoReset = false;
         }
 
         public async Task InitializeAsync()
         {
-            IsLoading = true;
             try
             {
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
@@ -49,19 +57,20 @@ namespace Astralis_BlazorApp.ViewModels
 
                 var types = await _typeService.GetAllAsync();
                 ArticleTypes = new ObservableCollection<ArticleTypeDto>(types);
-
-                await SearchDataAsync();
             }
-            finally
+            catch (Exception ex)
             {
-                IsLoading = false;
+                Console.WriteLine(ex);
             }
         }
 
         [RelayCommand]
-        public async Task SearchDataAsync()
+        public async Task SearchDataAsync(bool updateUrl = true)
         {
+            if (IsLoading) return;
             IsLoading = true;
+            OnPropertyChanged(nameof(IsLoading));
+
             try
             {
                 Filter.TypeIds = SelectedTypeId != 0 ? new List<int> { SelectedTypeId } : null;
@@ -69,22 +78,23 @@ namespace Astralis_BlazorApp.ViewModels
                 var result = await _articleService.SearchAsync(Filter);
 
                 Articles = new ObservableCollection<ArticleListDto>(result.Items);
-
                 TotalCount = result.TotalCount;
                 TotalPages = result.TotalPages;
+
+                if (updateUrl) UpdateUrl(false);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur recherche: {ex.Message}");
-                Articles.Clear();
+                Console.WriteLine(ex.Message);
             }
             finally
             {
                 IsLoading = false;
+                OnPropertyChanged(nameof(IsLoading));
             }
         }
 
-        public void UpdateUrl()
+        public void UpdateUrl(bool forceLoad = false)
         {
             var uri = _navigation.GetUriWithQueryParameters(new Dictionary<string, object?>
             {
@@ -95,7 +105,14 @@ namespace Astralis_BlazorApp.ViewModels
                 ["page"] = Filter.PageNumber <= 1 ? null : Filter.PageNumber
             });
 
-            _navigation.NavigateTo(uri);
+            _navigation.NavigateTo(uri, forceLoad);
+        }
+
+        public void OnSearchInput(ChangeEventArgs e)
+        {
+            Filter.SearchTerm = e.Value?.ToString();
+            _debounceTimer.Stop();
+            _debounceTimer.Start();
         }
 
         public void NavigateToCreate()
@@ -107,5 +124,7 @@ namespace Astralis_BlazorApp.ViewModels
         {
             _navigation.NavigateTo($"/articles/{id}");
         }
+
+        private async Task InvokeAsync(Func<Task> action) => await action();
     }
 }

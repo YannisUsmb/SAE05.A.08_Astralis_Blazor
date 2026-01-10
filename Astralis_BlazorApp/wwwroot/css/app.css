@@ -746,3 +746,30 @@ body {
         border-color: #ffd700;
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e");
     }
+
+.article-body.ql-editor {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #e0e0e0;
+}
+
+    .article-body.ql-editor p {
+        margin-bottom: 1.5rem;
+    }
+
+    .article-body.ql-editor h2 {
+        color: #a76dff;
+        font-family: 'Orbitron', sans-serif;
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .article-body.ql-editor blockquote {
+        border-left: 4px solid #9d4edd;
+        padding-left: 1rem;
+        font-style: italic;
+        color: #ccc;
+        background: rgba(255,255,255,0.05);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
