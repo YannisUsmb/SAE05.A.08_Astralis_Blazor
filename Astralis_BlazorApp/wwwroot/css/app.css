@@ -773,3 +773,58 @@ body {
         padding: 1rem;
         border-radius: 0 8px 8px 0;
     }
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+
+.btn-action-edit {
+    background-color: #ffd700;
+    color: #000;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background-color 0.2s;
+    text-decoration: none;
+}
+
+    .btn-action-edit:hover {
+        background-color: #ffca2c;
+        transform: scale(1.1);
+        color: #000;
+    }
+
+.btn-action-delete {
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background-color 0.2s;
+}
+
+    .btn-action-delete:hover {
+        background-color: #cc0000;
+        transform: scale(1.1);
+        color: #fff;
+    }
+
+.btn-action-confirm {
+    background-color: #ff4d4d;
+    color: white;
+    border-radius: 20px;
+    padding: 0 12px;
+    height: 36px;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: bold;
+    animation: fadeIn 0.3s ease;
+}

@@ -8,7 +8,35 @@
 
 <PageTitle>Actualités Cosmiques – Astralis</PageTitle>
 
-<div class="content-wrapper">
+<div class="content-wrapper position-relative">
+
+    @if (_articleToDelete != null)
+    {
+        <div class="modal-backdrop-custom" @onclick="CancelDelete">
+            <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="text-white font-orbitron">Confirmer la suppression</h4>
+                    <p class="text-white-50">
+                        Voulez-vous vraiment supprimer l'article : <br />
+                        <span class="text-white fw-bold">"@_articleToDelete.Title"</span> ?
+                    </p>
+                    <p class="small text-danger fst-italic">Cette action est irréversible.</p>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-outline-light px-4" @onclick="CancelDelete">
+                        Annuler
+                    </button>
+                    <button class="btn btn-danger px-4" @onclick="ConfirmDelete">
+                        <i class="bi bi-trash-fill me-2"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="page-header">
         <h1>Actualités</h1>
@@ -18,8 +46,7 @@
     <div class="filters-container">
         <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
                value="@ViewModel.Filter.SearchTerm"
-               @oninput="ViewModel.OnSearchInput"
-               @onchange="@(() => ViewModel.UpdateUrl())" />
+               @oninput="ViewModel.OnSearchInput" />
 
         <select class="filter-input"
                 value="@ViewModel.SelectedTypeId"
@@ -73,14 +100,28 @@
         {
             @foreach (var article in ViewModel.Articles)
             {
-                <div class="article-card glass-card h-100 d-flex flex-column" @onclick="() => ViewModel.NavigateToDetails(article.Id)">
-                    <div class="article-thumb position-relative">
+                <div class="article-card glass-card h-100 d-flex flex-column">
+
+                    <div class="article-thumb position-relative" @onclick="() => ViewModel.NavigateToDetails(article.Id)" style="cursor: pointer;">
                         <img src="@(string.IsNullOrEmpty(article.CoverImageUrl) ? "/assets/images/placeholder-space.jpg" : article.CoverImageUrl)"
                              class="w-100 h-100 object-fit-cover" alt="Couverture" />
 
                         @if (article.IsPremium)
                         {
                             <span class="badge-premium"><i class="bi bi-star-fill"></i></span>
+                        }
+
+                        @if (ViewModel.IsCommercialEditor)
+                        {
+                            <div class="article-actions" @onclick:stopPropagation>
+                                <a href="/admin/articles/edition/@article.Id" class="btn-action-edit" title="Modifier">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+
+                                <button class="btn-action-delete" @onclick="() => OpenDeleteModal(article)" title="Supprimer">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </div>
                         }
 
                         <div class="position-absolute bottom-0 start-0 p-2 d-flex gap-1 flex-wrap">
@@ -95,7 +136,7 @@
                         </div>
                     </div>
 
-                    <div class="p-4 flex-grow-1 d-flex flex-column">
+                    <div class="p-4 flex-grow-1 d-flex flex-column" @onclick="() => ViewModel.NavigateToDetails(article.Id)" style="cursor: pointer;">
                         <div class="text-white-50 small mb-2">
                             <i class="bi bi-calendar3 me-1"></i> @article.PublicationDate.ToString("dd MMM yyyy")
                         </div>
@@ -147,6 +188,8 @@
     [SupplyParameterFromQuery] public string? Sort { get; set; }
     [SupplyParameterFromQuery] public int? Page { get; set; }
 
+    private ArticleListDto? _articleToDelete;
+
     protected override async Task OnInitializedAsync()
     {
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
@@ -156,9 +199,7 @@
     protected override async Task OnParametersSetAsync()
     {
         ViewModel.Filter.PageNumber = Page ?? 1;
-
         if (Search != null) ViewModel.Filter.SearchTerm = Search;
-
         ViewModel.SelectedTypeId = Type ?? 0;
         ViewModel.Filter.IsPremium = Premium;
         ViewModel.Filter.SortBy = Sort ?? "date_desc";
@@ -203,6 +244,25 @@
     public void Dispose()
     {
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+    }
+
+    private void OpenDeleteModal(ArticleListDto article)
+    {
+        _articleToDelete = article;
+    }
+
+    private void CancelDelete()
+    {
+        _articleToDelete = null;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (_articleToDelete != null)
+        {
+            await ViewModel.DeleteArticleAsync(_articleToDelete.Id);
+            _articleToDelete = null;
+        }
     }
 
     private string GetFallbackAvatar(string username)
