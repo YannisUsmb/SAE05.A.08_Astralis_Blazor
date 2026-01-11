@@ -1,11 +1,42 @@
 ﻿@page "/articles/{Id:int}"
 @using Astralis.Shared.DTOs
 @using Astralis_BlazorApp.Services.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IArticleService ArticleService
+@inject NavigationManager Navigation
 
 <PageTitle>@(_article?.Title ?? "Article") – Astralis</PageTitle>
 
-<div class="content-wrapper">
+<div class="content-wrapper position-relative">
+
+    @if (ShowConfirmDelete && _article != null)
+    {
+        <div class="modal-backdrop-custom" @onclick="() => ShowConfirmDelete = false">
+            <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="text-white font-orbitron">Confirmer la suppression</h4>
+                    <p class="text-white-50">
+                        Voulez-vous vraiment supprimer l'article : <br />
+                        <span class="text-white fw-bold">"@_article.Title"</span> ?
+                    </p>
+                    <p class="small text-danger fst-italic">Cette action est irréversible.</p>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-outline-light px-4" @onclick="() => ShowConfirmDelete = false">
+                        Annuler
+                    </button>
+                    <button class="btn btn-danger px-4" @onclick="DeleteArticle">
+                        <i class="bi bi-trash-fill me-2"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
     @if (_isLoading)
     {
         <div class="text-center py-5">
@@ -21,8 +52,21 @@
         <div class="article-full-container glass-panel p-0 overflow-hidden">
 
             <div class="article-hero position-relative p-5 d-flex flex-column justify-content-end"
-                 style="min-height: 400px; background: url('@(_article.CoverImageUrl ?? "/assets/images/nebula-placeholder.jpg")') center/cover no-repeat;">
+                 style="min-height: 400px; background: url('@(_article.CoverImageUrl ?? "/assets/images/placeholder-space.jpg")') center/cover no-repeat;">
+
                 <div class="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-50"></div>
+
+                <AuthorizeView Roles="Rédacteur Commercial, Admin">
+                    <div class="article-details-actions">
+                        <a href="/admin/articles/edition/@_article.Id" class="btn-action-edit" title="Modifier">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+
+                        <button class="btn-action-delete" @onclick="() => ShowConfirmDelete = true" title="Supprimer">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </div>
+                </AuthorizeView>
 
                 <div class="position-relative z-1 text-start">
                     <div class="d-flex gap-2 mb-3">
@@ -63,6 +107,7 @@
     [Parameter] public int Id { get; set; }
     private ArticleDetailDto? _article;
     private bool _isLoading = true;
+    private bool ShowConfirmDelete = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,6 +118,15 @@
         finally
         {
             _isLoading = false;
+        }
+    }
+
+    private async Task DeleteArticle()
+    {
+        if (_article != null)
+        {
+            await ArticleService.DeleteAsync(_article.Id);
+            Navigation.NavigateTo("/articles");
         }
     }
 }

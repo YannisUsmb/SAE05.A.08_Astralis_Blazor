@@ -125,6 +125,24 @@ namespace Astralis_BlazorApp.ViewModels
             _navigation.NavigateTo($"/articles/{id}");
         }
 
+        public async Task DeleteArticleAsync(int articleId)
+        {
+            try
+            {
+                await _articleService.DeleteAsync(articleId);
+
+                var articleToRemove = Articles.FirstOrDefault(a => a.Id == articleId);
+                if (articleToRemove != null)
+                {
+                    Articles.Remove(articleToRemove);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur suppression: {ex.Message}");
+            }
+        }
+
         private async Task InvokeAsync(Func<Task> action) => await action();
     }
 }

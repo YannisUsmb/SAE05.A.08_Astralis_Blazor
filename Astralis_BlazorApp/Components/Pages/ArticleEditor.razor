@@ -1,10 +1,11 @@
 ﻿@page "/admin/articles/nouveau"
+@page "/admin/articles/edition/{Id:int}"
 @using Astralis_BlazorApp.ViewModels
 @using Blazored.TextEditor
 @inject ArticleEditorViewModel ViewModel
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Rédaction – Astralis</PageTitle>
+<PageTitle>@(ViewModel.IsEditMode ? "Édition" : "Rédaction") – Astralis</PageTitle>
 
 <div class="content-wrapper position-relative">
     
@@ -33,7 +34,9 @@
     }
 
     <div class="glass-panel p-4 mb-5 animate-fade-in">
-        <h2 class="mb-4 text-white font-orbitron text-center">Nouvelle Transmission</h2>
+        <h2 class="mb-4 text-white font-orbitron text-center">
+            @(ViewModel.IsEditMode ? "Mise à jour de la Transmission" : "Nouvelle Transmission")
+        </h2>
 
         <EditForm Model="ViewModel.Article" OnSubmit="Publish">
             <DataAnnotationsValidator />
@@ -41,11 +44,9 @@
             <div class="row g-4">
                 <div class="col-md-8">
                     <label class="text-white mb-2 required-label">Titre de l'article</label>
-                    <InputText class="form-control-astralis" @bind-Value="ViewModel.Article.Title" placeholder="Ex: Les mystères de la nébuleuse d'Orion" />
+                    <InputText class="form-control-astralis" @bind-Value="ViewModel.Article.Title" placeholder="Ex: Les mystères..." />
                     @if (ViewModel.ShowValidation && string.IsNullOrWhiteSpace(ViewModel.Article.Title))
-                    {
-                        <div class="validation-message">Le titre est requis.</div>
-                    }
+                    { <div class="validation-message">Le titre est requis.</div> }
                 </div>
 
                 <div class="col-md-4">
@@ -61,7 +62,6 @@
                                        placeholder="Chercher..." 
                                        @bind="ViewModel.TypeSearchTerm" 
                                        @bind:event="oninput" />
-                                
                                 <button class="btn btn-outline-secondary" type="button" @onclick="ViewModel.OpenCreateTypeModal">
                                     <i class="bi bi-plus-lg"></i>
                                 </button>
@@ -79,13 +79,6 @@
                                             @type.Label 
                                             @if(type.Id < 0) { <span class="text-warning small fst-italic">(Nouveau)</span> }
                                         </label>
-                                    </div>
-                                }
-                                @if (!ViewModel.FilteredTypes.Any())
-                                {
-                                    <div class="text-white-50 small text-center fst-italic p-2">
-                                        Aucun résultat.<br/>
-                                        <a href="javascript:void(0)" class="text-accent-purple text-decoration-none" @onclick="ViewModel.OpenCreateTypeModal">Créer "@ViewModel.TypeSearchTerm" ?</a>
                                     </div>
                                 }
                             </div>
@@ -174,11 +167,11 @@
                     <button type="submit" class="btn btn-astralis-premium px-5" disabled="@ViewModel.IsPublishing">
                         @if (ViewModel.IsPublishing)
                         {
-                            <span class="spinner-border spinner-border-sm me-2"></span> <span>Publication...</span>
+                            <span class="spinner-border spinner-border-sm me-2"></span> <span>Sauvegarde...</span>
                         }
                         else
                         {
-                            <span><i class="bi bi-send me-2"></i> Publier</span>
+                            <span><i class="bi bi-send me-2"></i> @(ViewModel.IsEditMode ? "Mettre à jour" : "Publier")</span>
                         }
                     </button>
                 </div>
@@ -222,14 +215,36 @@
 </div>
 
 @code {
+    [Parameter] public int? Id { get; set; }
+
     private BlazoredTextEditor quillHtml;
     private InputFile fileInput;
     private string PreviewContent = "";
     private bool ShowPreview = false;
+    private bool _contentLoaded = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        await ViewModel.InitializeAsync();
+        _contentLoaded = false; 
+        await ViewModel.InitializeAsync(Id);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (ViewModel.IsEditMode && !_contentLoaded && !string.IsNullOrEmpty(ViewModel.Article.Content))
+        {
+            await Task.Delay(100);
+            
+            try 
+            {
+                await quillHtml.LoadHTMLContent(ViewModel.Article.Content);
+                
+                _contentLoaded = true; 
+            }
+            catch(Exception ex)
+            {
+            }
+        }
     }
 
     private async Task InsertImageInEditor(InputFileChangeEventArgs e)

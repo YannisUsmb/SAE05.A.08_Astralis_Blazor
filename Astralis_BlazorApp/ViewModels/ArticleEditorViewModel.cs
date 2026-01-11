@@ -23,6 +23,7 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty] private bool showValidation;
         [ObservableProperty] private string? errorMessage;
         [ObservableProperty] private bool isUploadingCover;
+        [ObservableProperty] private int? articleId;
 
         [ObservableProperty] private string typeSearchTerm = "";
         [ObservableProperty] private bool isTypeModalOpen;
@@ -30,6 +31,8 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty] private string? typeCreationError;
 
         private int _tempIdCounter = -1;
+
+        public bool IsEditMode => ArticleId.HasValue && ArticleId.Value > 0;
 
         public IEnumerable<ArticleTypeDto> FilteredTypes => string.IsNullOrWhiteSpace(TypeSearchTerm)
             ? ArticleTypes
@@ -49,7 +52,7 @@ namespace Astralis_BlazorApp.ViewModels
             _navigation = navigation;
         }
 
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(int? id = null)
         {
             Article = new ArticleCreateDto();
             SelectedCategoryIds.Clear();
@@ -59,14 +62,20 @@ namespace Astralis_BlazorApp.ViewModels
             TypeSearchTerm = "";
             IsTypeModalOpen = false;
             _tempIdCounter = -1;
+            ArticleId = id;
 
             try
             {
                 ArticleTypes = await _articleTypeService.GetAllAsync();
+
+                if (IsEditMode)
+                {
+                    await LoadExistingArticleAsync(ArticleId.Value);
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur chargement types: {ex.Message}");
+                Console.WriteLine($"Erreur init: {ex.Message}");
             }
         }
 
@@ -156,6 +165,39 @@ namespace Astralis_BlazorApp.ViewModels
             catch { return null; }
         }
 
+        private async Task LoadExistingArticleAsync(int id)
+        {
+            var existing = await _articleService.GetByIdAsync(id);
+            if (existing == null)
+            {
+                ErrorMessage = "Article introuvable.";
+                return;
+            }
+
+            Article = new ArticleCreateDto
+            {
+                Title = existing.Title,
+                Description = existing.Description,
+                Content = existing.Content,
+                CoverImageUrl = existing.CoverImageUrl,
+                IsPremium = existing.IsPremium
+            };
+
+            SelectedCategoryIds.Clear();
+            if (existing.CategoryIds != null && existing.CategoryIds.Any())
+            {
+                SelectedCategoryIds.AddRange(existing.CategoryIds);
+            }
+            else if (existing.CategoryNames != null)
+            {
+                foreach (var catName in existing.CategoryNames)
+                {
+                    var type = ArticleTypes.FirstOrDefault(t => t.Label == catName);
+                    if (type != null) SelectedCategoryIds.Add(type.Id);
+                }
+            }
+        }
+
         public async Task SaveArticleAsync()
         {
             if (IsPublishing) return;
@@ -193,25 +235,37 @@ namespace Astralis_BlazorApp.ViewModels
                     }
                 }
 
-                var createdArticle = await _articleService.AddAsync(Article);
-
-                if (createdArticle != null && createdArticle.Id > 0)
+                if (IsEditMode)
                 {
-                    foreach (var typeId in finalCategoryIds)
+                    var updateDto = new ArticleUpdateDto
                     {
-                        var linkDto = new TypeOfArticleDto
-                        {
-                            ArticleId = createdArticle.Id,
-                            ArticleTypeId = typeId
-                        };
-                        await _typeOfArticleService.AddAsync(linkDto);
-                    }
+                        Title = Article.Title,
+                        Description = Article.Description,
+                        Content = Article.Content,
+                        CoverImageUrl = Article.CoverImageUrl,
+                        IsPremium = Article.IsPremium,
+                        CategoryIds = finalCategoryIds
+                    };
 
-                    _navigation.NavigateTo("/articles");
+                    await _articleService.UpdateAsync(ArticleId.Value, updateDto);
+
+                    _navigation.NavigateTo($"/articles/{ArticleId.Value}");
                 }
                 else
                 {
-                    throw new Exception("L'article n'a pas pu être créé (ID invalide).");
+                    var createdArticle = await _articleService.AddAsync(Article);
+                    if (createdArticle != null && createdArticle.Id > 0)
+                    {
+                        foreach (var typeId in finalCategoryIds)
+                        {
+                            await _typeOfArticleService.AddAsync(new TypeOfArticleDto
+                            {
+                                ArticleId = createdArticle.Id,
+                                ArticleTypeId = typeId
+                            });
+                        }
+                        _navigation.NavigateTo("/articles");
+                    }
                 }
             }
             catch (Exception ex)
