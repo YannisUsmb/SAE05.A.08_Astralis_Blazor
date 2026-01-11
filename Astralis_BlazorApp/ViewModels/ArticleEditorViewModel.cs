@@ -197,6 +197,39 @@ namespace Astralis_BlazorApp.ViewModels
             else if (existing.CategoryNames != null)
             {
                 foreach (var catName in existing.CategoryNames)
+                {
+                    var type = ArticleTypes.FirstOrDefault(t => t.Label == catName);
+                    if (type != null) SelectedCategoryIds.Add(type.Id);
+                }
+            }
+        }
+
+        private async Task LoadExistingArticleAsync(int id)
+        {
+            var existing = await _articleService.GetByIdAsync(id);
+            if (existing == null)
+            {
+                ErrorMessage = "Article introuvable.";
+                return;
+            }
+
+            Article = new ArticleCreateDto
+            {
+                Title = existing.Title,
+                Description = existing.Description,
+                Content = existing.Content,
+                CoverImageUrl = existing.CoverImageUrl,
+                IsPremium = existing.IsPremium
+            };
+
+            SelectedCategoryIds.Clear();
+            if (existing.CategoryIds != null && existing.CategoryIds.Any())
+            {
+                SelectedCategoryIds.AddRange(existing.CategoryIds);
+            }
+            else if (existing.CategoryNames != null)
+            {
+                foreach (var catName in existing.CategoryNames)
             {
                     var type = ArticleTypes.FirstOrDefault(t => t.Label == catName);
                     if (type != null) SelectedCategoryIds.Add(type.Id);

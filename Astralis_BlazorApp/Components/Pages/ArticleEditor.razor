@@ -189,7 +189,7 @@
                         }
                         else
                         {
-                            <span><i class="bi bi-send me-2"></i> Publier</span>
+                            <span><i class="bi bi-send me-2"></i> @(ViewModel.IsEditMode ? "Mettre à jour" : "Publier")</span>
                         }
                     </button>
                 </div>

@@ -248,4 +248,13 @@
     {
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
+
+    private async Task DeleteArticle()
+    {
+        if (_article != null)
+        {
+            await ArticleService.DeleteAsync(_article.Id);
+            Navigation.NavigateTo("/articles");
+        }
+    }
 }
