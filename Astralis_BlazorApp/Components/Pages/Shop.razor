@@ -2,6 +2,7 @@
 @using Astralis.Shared.DTOs
 @using Astralis_BlazorApp.ViewModels
 @using Astralis_BlazorApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ShopViewModel ViewModel
 @inject ICartService CartService
 @inject IJSRuntime JSRuntime
@@ -15,6 +16,7 @@
 
     @if (ViewModel.SelectedProductDetails == null)
     {
+        @* HEADER *@
         <div class="page-header position-relative d-flex justify-content-center align-items-center mb-4">
             <h1 class="m-0">Boutique Astralis</h1>
             <button class="btn btn-primary position-absolute end-0" @onclick='() => Navigation.NavigateTo("/panier")'>
@@ -30,32 +32,54 @@
 
         <p class="page-description">Équipements, modules et ressources pour vos voyages interstellaires</p>
 
-        <div class="filters-container">
-            <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
-                   @bind="ViewModel.SearchText" @bind:event="oninput" />
+        @* BARRE DE FILTRES AUTOMATIQUES *@
+        <div class="filters-container d-flex flex-wrap align-items-center gap-2">
 
-            <select class="filter-input" @bind="ViewModel.SelectedTypeId" @bind:after="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
-                <option value="0">Toutes les catégories</option>
-                @foreach (ProductCategoryDto cat in ViewModel.ProductCategories)
+            <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
+                   @bind="ViewModel.SearchText"
+                   @bind:event="oninput"
+                   style="width: 180px;" />
+
+            <select class="filter-input"
+                    @bind="ViewModel.SelectedTypeId"
+                    @bind:after="ViewModel.ApplyFilterAsync">
+                <option value="0">Toutes catégories</option>
+                @foreach (var cat in ViewModel.ProductCategories)
                 {
                     <option value="@cat.Id">@cat.Label</option>
                 }
             </select>
 
-            <select class="filter-input" @bind="ViewModel.SortBy" @bind:after="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
+            <input type="number" class="filter-input" placeholder="Min €"
+                   @bind="ViewModel.MinPrice"
+                   @bind:after="ViewModel.ApplyFilterAsync"
+                   style="width: 90px;" />
+
+            <input type="number" class="filter-input" placeholder="Max €"
+                   @bind="ViewModel.MaxPrice"
+                   @bind:after="ViewModel.ApplyFilterAsync"
+                   style="width: 90px;" />
+
+            <select class="filter-input"
+                    @bind="ViewModel.SortBy"
+                    @bind:after="ViewModel.ApplyFilterAsync">
                 <option value="name">Nom (A–Z)</option>
                 <option value="category">Catégorie (A–Z)</option>
                 <option value="price_asc">Prix (Croissant)</option>
                 <option value="price_desc">Prix (Décroissant)</option>
             </select>
 
-            <div class="d-flex gap-3 align-items-center">
-                <button class="btn btn-astralis-outline btn-sm" @onclick="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
-                    Appliquer les filtres
-                </button>
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                @if (ViewModel.IsCommercialEditor)
+                {
+                    <button class="btn btn-success d-flex align-items-center gap-2" @onclick="ViewModel.NavigateToCreate">
+                        <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Créer</span>
+                    </button>
+                }
             </div>
         </div>
 
+        @* GRILLE *@
         <div class="bodies-grid">
             @if (ViewModel.IsLoading)
             {
@@ -67,14 +91,27 @@
             }
             else
             {
-                @foreach (ProductListDto product in ViewModel.Products)
+                @foreach (var product in ViewModel.Products)
                 {
-                    <div class="body-card" @onclick="() => OpenDetails(product)">
+                    <div class="body-card position-relative" @onclick="() => OpenDetails(product)">
+
+                        @if (ViewModel.IsCommercialEditor)
+                        {
+                            <a href="/admin/produits/modifier/@product.Id"
+                               class="btn btn-warning btn-sm position-absolute top-0 end-0 m-2 shadow-sm"
+                               style="z-index: 10; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
+                               @onclick:stopPropagation="true">
+                                <i class="bi bi-pencil-fill text-dark"></i>
+                            </a>
+                        }
+
                         <img src="@product.ProductPictureUrl" alt="@product.Label image" class="body-image" />
                         <div class="body-info">
                             <h3>@product.Label</h3>
-                            <h4 class="body-price">@product.Price €</h4>
+                            <h4 class="body-price">@product.Price.ToString("N2") €</h4>
+
                             <p><span class="badge-type">@product.CategoryLabel</span></p>
+
                             <button class="btn btn-primary btn-lg" @onclick:stopPropagation="true" @onclick="() => ViewModel.AddToCart(product)">
                                 <i class="bi bi-cart-plus me-2"></i> Ajouter
                             </button>
@@ -84,6 +121,20 @@
             }
         </div>
 
+        @* PAGINATION *@
+        <div class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-5">
+            <button class="btn btn-astralis-outline"
+                    disabled="@(ViewModel.CurrentPage <= 1)"
+                    @onclick="ViewModel.PreviousPageCommand.ExecuteAsync">
+                Précédent
+            </button>
+            <span class="text-white">Page @ViewModel.CurrentPage</span>
+            <button class="btn btn-astralis-outline"
+                    disabled="@(!ViewModel.HasNextPage)"
+                    @onclick="ViewModel.NextPageCommand.ExecuteAsync">
+                Suivant
+            </button>
+        </div>
     }
 
     @if (ViewModel.SelectedProductDetails != null)
@@ -118,7 +169,8 @@
 
                     <div class="detail-image-div">
                         <img class="detail-image" src="@ViewModel.SelectedProductDetails.ProductPictureUrl" alt="@ViewModel.SelectedProductDetails.Label" />
-                        <h2 class="detail-price">@ViewModel.SelectedProductDetails.Price.ToString() €</h2>
+                        @* --- CHANGEMENT PRIX ICI --- *@
+                        <h2 class="detail-price">@ViewModel.SelectedProductDetails.Price.ToString("N2") €</h2>
                     </div>
 
                     @if (!string.IsNullOrEmpty(ViewModel.SelectedProductDetails.Description))
@@ -129,7 +181,14 @@
                         </div>
                     }
 
-                    <div class="mt-5 d-flex justify-content-end">
+                    <div class="mt-5 d-flex justify-content-end gap-3">
+                        @if (ViewModel.IsCommercialEditor)
+                        {
+                            <a href="/admin/produits/modifier/@ViewModel.SelectedProductDetails.Id" class="btn btn-warning btn-lg text-white">
+                                <i class="bi bi-pencil-square me-2"></i> Modifier
+                            </a>
+                        }
+
                         <button class="btn btn-primary btn-lg" @onclick="AddToCartAndGoBack">
                             <i class="bi bi-cart-plus me-2"></i> Ajouter au panier
                         </button>
@@ -145,19 +204,22 @@
                             <div class="bodies-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
                                 @foreach (var related in RelatedProducts)
                                 {
-                                    <div class="body-card related-card" @onclick="() => OpenDetails(related)" style="cursor: pointer;">
-                                        <img src="@related.ProductPictureUrl" alt="@related.Label" class="body-image"
-                                             style="height: 150px; object-fit: contain; width: 100%;" />
+                                    @* AJOUT : position-relative *@
+                                    <div class="body-card related-card position-relative" @onclick="() => OpenDetails(related)" style="cursor: pointer;">
 
-                                        <div class="body-info p-2 d-flex flex-column justify-content-between" style="min-height: 120px;">
-                                            <div>
-                                                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">@related.Label</h3>
-                                                <h4 class="body-price" style="font-size: 1rem; color: #00d4ff;">@related.Price €</h4>
-                                            </div>
-                                            <button class="btn btn-sm btn-astralis-outline w-100 mt-2">
-                                                Voir la fiche
-                                            </button>
-                                        </div>
+                                        @* AJOUT : Bouton Modifier *@
+                                        @if (ViewModel.IsCommercialEditor)
+                                        {
+                                            <a href="/admin/produits/modifier/@related.Id"
+                                               class="btn btn-warning btn-sm position-absolute top-0 end-0 m-1 shadow-sm"
+                                               style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
+                                               @onclick:stopPropagation="true">
+                                                <i class="bi bi-pencil-fill text-dark" style="font-size: 0.8rem;"></i>
+                                            </a>
+                                        }
+
+                                        <img src="@related.ProductPictureUrl" alt="@related.Label" class="body-image"
+                                             style="height: 150px; object-fit: contain; width: 100%;" />                                        
                                     </div>
                                 }
                             </div>
@@ -198,7 +260,7 @@
     {
         await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
 
-        ViewModel.ShowDetailsCommand.Execute(product);
+        await ViewModel.ShowDetails(product);
 
         if (product.CategoryId > 0)
         {
@@ -208,9 +270,20 @@
 
     private async Task AddToCartAndGoBack()
     {
-        if (ViewModel.SelectedProduct != null)
+        if (ViewModel.SelectedProductDetails != null)
         {
-            await ViewModel.AddToCart(ViewModel.SelectedProduct);
+            var productToAdd = new ProductListDto
+            {
+                Id = ViewModel.SelectedProductDetails.Id,
+                Label = ViewModel.SelectedProductDetails.Label,
+                Price = ViewModel.SelectedProductDetails.Price,
+                ProductPictureUrl = ViewModel.SelectedProductDetails.ProductPictureUrl,
+                CategoryId = ViewModel.SelectedProductDetails.CategoryId,
+                CategoryLabel = ViewModel.SelectedProductDetails.CategoryLabel
+            };
+
+            await ViewModel.AddToCart(productToAdd);
+
             ViewModel.BackToListCommand.Execute(null);
             await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
         }

@@ -1,0 +1,142 @@
+﻿@page "/admin/produits/creer"
+@page "/admin/produits/modifier/{Id:int}"
+@using Astralis_BlazorApp.ViewModels
+@using Astralis.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin,Rédacteur Commercial")]
+@inject ProductEditorViewModel ViewModel
+
+<PageTitle>@(ViewModel.IsEditMode ? "Modifier" : "Créer") un produit – Admin</PageTitle>
+
+<div class="content-wrapper container mt-4" style="max-width: 900px;">
+    
+    <div>
+        
+        <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center py-3">
+            <h3 class="mb-0 text-white" style="font-family: 'Orbitron', sans-serif;">
+                <i class="bi @(ViewModel.IsEditMode ? "bi-pencil-square" : "bi-plus-circle") me-2" style="color: #00d4ff;"></i>
+                @(ViewModel.IsEditMode ? "Modifier le produit" : "Nouveau produit")
+            </h3>
+            <button class="btn btn-sm btn-outline-light" @onclick="ViewModel.NavigateBack">
+                <i class="bi bi-x-lg"></i> Fermer
+            </button>
+        </div>
+
+        <div class="card-body p-4">
+            
+            @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+            {
+                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>@ViewModel.ErrorMessage</div>
+                </div>
+            }
+
+            <EditForm Model="@ViewModel.Product" OnValidSubmit="ViewModel.SaveProductAsync">
+                <DataAnnotationsValidator />
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold required-label">Nom du produit</label>
+                    <InputText @bind-Value="ViewModel.Product.Label" class="form-control form-control-astralis" placeholder="Ex: Moteur à ions Mark IV" />
+                    <ValidationMessage For="@(() => ViewModel.Product.Label)" class="text-danger small" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Description</label>
+                    
+                    <div class="editor-dark-wrapper">
+                        <InputTextArea @bind-Value="ViewModel.Product.Description" 
+                                       class="form-control form-control-astralis" 
+                                       style="min-height: 200px;" 
+                                       placeholder="Détails techniques et lore..." />
+                    </div>
+                    
+                    <ValidationMessage For="@(() => ViewModel.Product.Description)" class="text-danger small" />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold required-label">Prix (€)</label>
+                        <InputNumber @bind-Value="ViewModel.Product.Price" class="form-control form-control-astralis" />
+                        <ValidationMessage For="@(() => ViewModel.Product.Price)" class="text-danger small" />
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold required-label">Catégorie</label>
+                        
+                        @* --- CORRECTION ICI : Ajout de TValue="int" --- *@
+                        <InputSelect @bind-Value="ViewModel.Product.ProductCategoryId" TValue="int" class="form-select form-select-astralis cursor-pointer">
+                            <option value="0" class="text-muted">-- Sélectionner --</option>
+                            @foreach (var cat in ViewModel.Categories)
+                            {
+                                <option value="@cat.Id">@cat.Label</option>
+                            }
+                        </InputSelect>
+                        
+                        <ValidationMessage For="@(() => ViewModel.Product.ProductCategoryId)" class="text-danger small" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Image du produit</label>
+                    <div class="d-flex align-items-start gap-3 border border-secondary rounded p-3" style="background-color: rgba(255,255,255,0.05);">
+                        
+                        <div class="position-relative border border-secondary bg-dark d-flex align-items-center justify-content-center overflow-hidden rounded" 
+                             style="width: 120px; height: 120px;">
+                            @if (!string.IsNullOrEmpty(ViewModel.Product.ProductPictureUrl))
+                            {
+                                <img src="@ViewModel.Product.ProductPictureUrl" alt="Aperçu" style="width: 100%; height: 100%; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-image text-secondary" style="font-size: 2rem;"></i>
+                            }
+
+                            @if (ViewModel.IsUploadingImage)
+                            {
+                                <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex align-items-center justify-content-center">
+                                    <div class="spinner-border text-light spinner-border-sm"></div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <InputFile OnChange="@ViewModel.UploadProductImageAsync" accept=".jpg,.jpeg,.png,.webp" class="form-control file-input-astralis cursor-pointer mb-2" />
+                            <small class="text-white-50 d-block">Formats supportés : JPG, PNG, WEBP (Max 5Mo).</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 border-top border-secondary pt-3">
+                    <button type="button" class="btn btn-outline-light" @onclick="ViewModel.NavigateBack">
+                        Annuler
+                    </button>
+
+                    <button type="submit" class="btn btn-primary px-4 cursor-pointer" 
+                            style="background-color: #00d4ff; border-color: #00d4ff; color: #000; font-weight: bold;"
+                            disabled="@(ViewModel.IsSaving || ViewModel.IsUploadingImage)">
+                        @if (ViewModel.IsSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span> <span>Sauvegarde...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check-lg me-2"></i> <span>@(ViewModel.IsEditMode ? "Mettre à jour" : "Créer le produit")</span>
+                        }
+                    </button>
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ViewModel.InitializeAsync(Id);
+    }
+}

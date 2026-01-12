@@ -3,216 +3,216 @@ using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Collections.ObjectModel;
 
-namespace Astralis_BlazorApp.ViewModels;
-
-public partial class ShopViewModel : ObservableObject
+namespace Astralis_BlazorApp.ViewModels
 {
-    private readonly IProductService _productService;
-    private readonly IProductCategoryService _typeService;
-    private readonly ICartService _cartService;
-
-    private CancellationTokenSource? _searchCts;
-
-    [ObservableProperty] private ObservableCollection<ProductListDto> products = new();
-    [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
-
-    [ObservableProperty] private ProductFilterDto filter = new();
-    [ObservableProperty] private int selectedTypeId = 0;
-    [ObservableProperty] private string sortBy = "name";
-
-    [ObservableProperty] private int currentPage = 1;
-    [ObservableProperty] private int pageSize = 30;
-    [ObservableProperty] private bool hasNextPage = true;
-
-    [ObservableProperty] private bool isLoading;
-    [ObservableProperty] private ProductListDto? selectedProduct;
-    [ObservableProperty] private ProductDetailDto? selectedProductDetails;
-
-    private string _searchText = string.Empty;
-
-    public string SearchText
+    public partial class ShopViewModel : ObservableObject
     {
-        get => _searchText;
-        set
+        private readonly IProductService _productService;
+        private readonly IProductCategoryService _typeService;
+        private readonly ICartService _cartService;
+        private readonly NavigationManager _navigation;
+        private readonly AuthenticationStateProvider _authStateProvider;
+
+        private CancellationTokenSource? _searchCts;
+
+        [ObservableProperty] private ObservableCollection<ProductListDto> products = new();
+        [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
+
+        [ObservableProperty] private ProductFilterDto filter = new();
+
+        // --- FILTRES ---
+        [ObservableProperty] private int selectedTypeId = 0;
+        [ObservableProperty] private string sortBy = "name";
+        [ObservableProperty] private decimal? minPrice;
+        [ObservableProperty] private decimal? maxPrice;
+
+        [ObservableProperty] private int currentPage = 1;
+        [ObservableProperty] private int pageSize = 30;
+        [ObservableProperty] private bool hasNextPage = true;
+
+        [ObservableProperty] private bool isLoading;
+        [ObservableProperty] private bool isCommercialEditor;
+
+        [ObservableProperty] private ProductListDto? selectedProduct;
+        [ObservableProperty] private ProductDetailDto? selectedProductDetails;
+
+        private string _searchText = string.Empty;
+        public string SearchText
         {
-            if (SetProperty(ref _searchText, value))
+            get => _searchText;
+            set
             {
-                TriggerDebounceSearch(value);
+                if (SetProperty(ref _searchText, value))
+                {
+                    // Déclenche la recherche avec délai lors de la frappe
+                    TriggerDebounceSearch(value);
+                }
             }
         }
-    }
 
-    public ShopViewModel(
-        IProductService productService,
-        IProductCategoryService typeService,
-        ICartService cartService)
-    {
-        _productService = productService;
-        _typeService = typeService;
-        _cartService = cartService;
-    }
-
-    private async void TriggerDebounceSearch(string text)
-    {
-        Filter.SearchText = text;
-        _searchCts?.Cancel();
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
-
-        try
+        public ShopViewModel(
+            IProductService productService,
+            IProductCategoryService typeService,
+            ICartService cartService,
+            NavigationManager navigation,
+            AuthenticationStateProvider authStateProvider)
         {
-            await Task.Delay(500, token);
-            if (!token.IsCancellationRequested)
-            {
-                await ApplyFilterAsync();
-            }
+            _productService = productService;
+            _typeService = typeService;
+            _cartService = cartService;
+            _navigation = navigation;
+            _authStateProvider = authStateProvider;
         }
-        catch (TaskCanceledException) { }
-    }
 
-
-    [RelayCommand]
-    public async Task InitializeAsync()
-    {
-        IsLoading = true;
-        try
+        private async void TriggerDebounceSearch(string text)
         {
-            var types = await _typeService.GetAllAsync();
-            ProductCategories = new ObservableCollection<ProductCategoryDto>(types);
+            Filter.SearchText = text;
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
 
+            try
+            {
+                await Task.Delay(500, token); // Pause de 500ms
+                if (!token.IsCancellationRequested)
+                {
+                    await ApplyFilterAsync();
+                }
+            }
+            catch (TaskCanceledException) { }
+        }
+
+        [RelayCommand]
+        public async Task InitializeAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                IsCommercialEditor = user.IsInRole("Rédacteur Commercial") || user.IsInRole("Admin");
+
+                var types = await _typeService.GetAllAsync();
+                ProductCategories = new ObservableCollection<ProductCategoryDto>(types);
+
+                await SearchDataAsync();
+                await _cartService.LoadCartAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur init : {ex.Message}");
+            }
+            finally { IsLoading = false; }
+        }
+
+        [RelayCommand]
+        public async Task ApplyFilterAsync()
+        {
+            // Reset page 1 dès qu'un filtre change
+            CurrentPage = 1;
             await SearchDataAsync();
-
-            await _cartService.LoadCartAsync();
         }
-        catch (Exception ex)
+
+        [RelayCommand]
+        public async Task SearchDataAsync()
         {
-            Console.WriteLine($"Erreur init : {ex.Message}");
-        }
-        finally { IsLoading = false; }
-    }
-
-    [RelayCommand]
-    public async Task ApplyFilterAsync()
-    {
-        CurrentPage = 1;
-        await SearchDataAsync();
-
-    }
-
-    [RelayCommand]
-    public async Task SearchDataAsync()
-    {
-        IsLoading = true;
-        try
-        {
-            Filter.ProductCategoryIds = SelectedTypeId != 0 ? new List<int> { SelectedTypeId } : null;
-            Filter.PageNumber = CurrentPage;
-            Filter.PageSize = PageSize;
-
-            var results = await _productService.SearchAsync(Filter);
-
-            HasNextPage = results.Count == PageSize;
-
-            IEnumerable<ProductListDto> sortedList = results;
-            switch (SortBy)
+            IsLoading = true;
+            try
             {
-                case "category":
-                    sortedList = results.OrderBy(p => p.CategoryLabel).ThenBy(p => p.Label);
-                    break;
-                case "price_asc":
-                    sortedList = results.OrderBy(p => p.Price);
-                    break;
-                case "price_desc":
-                    sortedList = results.OrderByDescending(p => p.Price);
-                    break;
-                case "name":
-                default:
-                    sortedList = results.OrderBy(p => p.Label);
-                    break;
-            }
+                Filter.ProductCategoryIds = SelectedTypeId != 0 ? new List<int> { SelectedTypeId } : null;
+                Filter.MinPrice = MinPrice;
+                Filter.MaxPrice = MaxPrice;
+                Filter.PageNumber = CurrentPage;
+                Filter.PageSize = PageSize;
 
-            Products = new ObservableCollection<ProductListDto>(sortedList);
+                var results = await _productService.SearchAsync(Filter);
+
+                HasNextPage = results.Count() == PageSize;
+
+                // Tri côté client (rapide)
+                IEnumerable<ProductListDto> sortedList = results;
+                switch (SortBy)
+                {
+                    case "category": sortedList = results.OrderBy(p => p.CategoryLabel).ThenBy(p => p.Label); break;
+                    case "price_asc": sortedList = results.OrderBy(p => p.Price); break;
+                    case "price_desc": sortedList = results.OrderByDescending(p => p.Price); break;
+                    case "name": default: sortedList = results.OrderBy(p => p.Label); break;
+                }
+
+                Products = new ObservableCollection<ProductListDto>(sortedList);
+                SelectedProductDetails = null; // Reset détail si on re-filtre
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur recherche : {ex.Message}");
+                Products.Clear();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task ShowDetails(ProductListDto body)
+        {
+            if (body == null) return;
+            IsLoading = true;
+            SelectedProduct = body;
+
+            try
+            {
+                var details = await _productService.GetByIdAsync(body.Id);
+                SelectedProductDetails = details;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur détails : {ex.Message}");
+                SelectedProductDetails = null;
+            }
+            finally { IsLoading = false; }
+        }
+
+        [RelayCommand]
+        public void BackToList()
+        {
             SelectedProductDetails = null;
+            SelectedProduct = null;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erreur recherche : {ex.Message}");
-            Products.Clear();
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
 
-    public async Task OnFilterChanged()
-    {
-    }
-
-    [RelayCommand]
-    public async Task ShowDetails(ProductListDto body)
-    {
-        if (body == null) return;
-
-        IsLoading = true;
-        SelectedProduct = body;
-
-        try
+        [RelayCommand]
+        public async Task NextPage()
         {
-            var details = await _productService.GetByIdAsync(body.Id);
-            SelectedProductDetails = details;
+            if (HasNextPage) { CurrentPage++; await SearchDataAsync(); }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erreur d�tails : {ex.Message}");
-            SelectedProductDetails = null;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
 
-    [RelayCommand]
-    public void BackToList()
-    {
-        SelectedProductDetails = null;
-        SelectedProduct = null;
-    }
-
-    [RelayCommand]
-    public async Task NextPage()
-    {
-        if (HasNextPage)
+        [RelayCommand]
+        public async Task PreviousPage()
         {
-            CurrentPage++;
-            await SearchDataAsync();
+            if (CurrentPage > 1) { CurrentPage--; await SearchDataAsync(); }
         }
-    }
-    [RelayCommand]
-    public async Task PreviousPage()
-    {
-        if (CurrentPage > 1)
-        {
-            CurrentPage--;
-            await SearchDataAsync();
-        }
-    }
 
-    [RelayCommand]
-    public async Task AddToCart(ProductListDto product)
-    {
-        if (product == null) return;
-
-        try
+        [RelayCommand]
+        public async Task AddToCart(ProductListDto product)
         {
-            await _cartService.AddToCartAsync(product);
+            if (product == null) return;
+            try
+            {
+                await _cartService.AddToCartAsync(product);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur ajout panier : {ex.Message}");
+            }
         }
-        catch (Exception ex)
+
+        public void NavigateToCreate()
         {
-            Console.WriteLine($"Erreur ajout panier : {ex.Message}");
+            _navigation.NavigateTo("/admin/produits/creer");
         }
     }
 }
