@@ -45,7 +45,6 @@ public class CartItemService(HttpClient httpClient) : ICartItemService
         }
         catch
         {
-            // En cas d'erreur de parsing, on ne fait pas planter l'app
             return new CartItemDto { ProductId = dto.ProductId, Quantity = dto.Quantity };
         }
     }
