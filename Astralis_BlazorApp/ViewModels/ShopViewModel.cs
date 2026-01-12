@@ -9,34 +9,27 @@ namespace Astralis_BlazorApp.ViewModels;
 
 public partial class ShopViewModel : ObservableObject
 {
-    // --- Services injectés ---
     private readonly IProductService _productService;
     private readonly IProductCategoryService _typeService;
     private readonly ICartService _cartService;
 
-    // --- Gestion du Debounce (Recherche) ---
     private CancellationTokenSource? _searchCts;
 
-    // --- Collections de donn�es ---
     [ObservableProperty] private ObservableCollection<ProductListDto> products = new();
     [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
 
-    // --- Filtres et Tri ---
     [ObservableProperty] private ProductFilterDto filter = new();
     [ObservableProperty] private int selectedTypeId = 0;
     [ObservableProperty] private string sortBy = "name";
 
-    // --- Pagination ---
     [ObservableProperty] private int currentPage = 1;
     [ObservableProperty] private int pageSize = 30;
     [ObservableProperty] private bool hasNextPage = true;
 
-    // --- États de l'interface ---
     [ObservableProperty] private bool isLoading;
     [ObservableProperty] private ProductListDto? selectedProduct;
     [ObservableProperty] private ProductDetailDto? selectedProductDetails;
 
-    // --- PROPRIÉTÉ DE RECHERCHE (Impl�mentation Manuelle pour Debounce) ---
     private string _searchText = string.Empty;
 
     public string SearchText
@@ -51,7 +44,6 @@ public partial class ShopViewModel : ObservableObject
         }
     }
 
-    // --- CONSTRUCTEUR ---
     public ShopViewModel(
         IProductService productService,
         IProductCategoryService typeService,
@@ -62,8 +54,6 @@ public partial class ShopViewModel : ObservableObject
         _cartService = cartService;
     }
 
-    // --- LOGIQUE DE RECHERCHE ---
-
     private async void TriggerDebounceSearch(string text)
     {
         Filter.SearchText = text;
@@ -73,16 +63,15 @@ public partial class ShopViewModel : ObservableObject
 
         try
         {
-            await Task.Delay(500, token); // Attente de 500ms
+            await Task.Delay(500, token);
             if (!token.IsCancellationRequested)
             {
                 await ApplyFilterAsync();
             }
         }
-        catch (TaskCanceledException) { /* Ignorer */ }
+        catch (TaskCanceledException) {  }
     }
 
-    // --- COMMANDES (Actions) ---
 
     [RelayCommand]
     public async Task InitializeAsync()
@@ -90,14 +79,11 @@ public partial class ShopViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            // 1. Chargement des cat�gories
             var types = await _typeService.GetAllAsync();
             ProductCategories = new ObservableCollection<ProductCategoryDto>(types);
 
-            // 2. Chargement initial des produits
             await SearchDataAsync();
 
-            // 3. Chargement de l'état du panier (pour le badge)
             await _cartService.LoadCartAsync();
         }
         catch (Exception ex)
@@ -129,7 +115,6 @@ public partial class ShopViewModel : ObservableObject
 
             HasNextPage = results.Count == PageSize;
 
-            // Tri côté client (si l'API ne le g�re pas d�j�)
             IEnumerable<ProductListDto> sortedList = results;
             switch (SortBy)
             {
@@ -149,7 +134,7 @@ public partial class ShopViewModel : ObservableObject
             }
 
             Products = new ObservableCollection<ProductListDto>(sortedList);
-            SelectedProductDetails = null; // Reset détail si on cherche
+            SelectedProductDetails = null;
         }
         catch (Exception ex)
         {
@@ -206,7 +191,6 @@ public partial class ShopViewModel : ObservableObject
             await SearchDataAsync();
         }
     }
-    // --- CORRECTION MAJEURE ICI : ASYNC ---
     [RelayCommand]
     public async Task PreviousPage()
     {
@@ -217,7 +201,6 @@ public partial class ShopViewModel : ObservableObject
         }
     }
 
-    // --- CORRECTION MAJEURE ICI : ASYNC ---
     [RelayCommand]
     public async Task AddToCart(ProductListDto product)
     {
@@ -225,7 +208,6 @@ public partial class ShopViewModel : ObservableObject
 
         try
         {
-            // Appel asynchrone au service API
             await _cartService.AddToCartAsync(product);
         }
         catch (Exception ex)
