@@ -264,8 +264,10 @@ namespace Astralis_BlazorApp.ViewModels
         [RelayCommand]
         public async Task SaveEditAsync()
         {
-            if (EditingCommentId == null || string.IsNullOrWhiteSpace(EditCommentText)) return;
-            if (EditCommentText.Length > 300) return;
+            if (EditingCommentId == null || string.IsNullOrWhiteSpace(EditCommentText))
+                return;
+            if (EditCommentText.Length > 300)
+                return;
 
             IsSubmitting = true;
             try
@@ -273,19 +275,25 @@ namespace Astralis_BlazorApp.ViewModels
                 var updateDto = new CommentUpdateDto { Text = EditCommentText };
                 await _commentService.UpdateAsync(EditingCommentId.Value, updateDto);
 
-                var commentToUpdate = FindCommentById(Comments, EditingCommentId.Value);
-                if (commentToUpdate != null)
-                {
-                    commentToUpdate.Text = EditCommentText;
-                    commentToUpdate.IsEdited = true;
-
-                    Comments = new ObservableCollection<CommentDto>(Comments);
-                }
+                await LoadCommentsAsync(Article!.Id);
 
                 CancelEditing();
             }
-            catch (Exception ex) { Console.WriteLine($"Erreur edit: {ex.Message}"); }
-            finally { IsSubmitting = false; }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur edit: {ex.Message}");
+            }
+            finally
+            {
+                IsSubmitting = false;
+            }
+        }
+
+        private void RefreshComments()
+        {
+            Comments = new ObservableCollection<CommentDto>(Comments);
+            OnPropertyChanged(nameof(Comments));
+            OnPropertyChanged(nameof(TotalCommentCount));
         }
 
         private CommentDto? FindCommentById(IEnumerable<CommentDto> list, int id)
@@ -314,26 +322,23 @@ namespace Astralis_BlazorApp.ViewModels
             if (CommentToDelete == null)
                 return;
 
+            var commentIdToDelete = CommentToDelete.Id;
             IsSubmitting = true;
+
             try
             {
-                await _commentService.DeleteAsync(CommentToDelete.Id);
+                await _commentService.DeleteAsync(commentIdToDelete);
 
-                if (RemoveCommentLocally(Comments, CommentToDelete.Id))
-                {
-                    Comments = new ObservableCollection<CommentDto>(Comments);
-                    OnPropertyChanged(nameof(TotalCommentCount));
-                }
-                else
-                {
-                    await LoadCommentsAsync(Article!.Id);
-                }
+                await LoadCommentsAsync(Article!.Id);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Erreur delete: {ex.Message}");
             }
-            finally { 
-                CommentToDelete = null; IsSubmitting = false;
+            finally
+            {
+                CommentToDelete = null;
+                IsSubmitting = false;
             }
         }
 

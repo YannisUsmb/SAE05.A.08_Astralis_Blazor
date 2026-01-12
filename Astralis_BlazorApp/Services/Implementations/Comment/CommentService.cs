@@ -33,21 +33,27 @@ public class CommentService(HttpClient httpClient) : ICommentService
         CommentDto? createdComment = await response.Content.ReadFromJsonAsync<CommentDto>();
         return createdComment ?? throw new Exception("Unable to add comment");
     }
-    
+
     public async Task<CommentDto?> UpdateAsync(int id, CommentUpdateDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
         response.EnsureSuccessStatusCode();
 
-        CommentDto? updatedComment = await response.Content.ReadFromJsonAsync<CommentDto>();
-        return updatedComment ?? throw new Exception("Unable to update comment");
+        CommentDto? updatedComment = await GetByIdAsync(id);
+        return updatedComment;
     }
-    
+
     public async Task<CommentDto?> DeleteAsync(int id)
     {
         HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}");
         response.EnsureSuccessStatusCode();
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+            return null;
+        }
+
         CommentDto? deletedComment = await response.Content.ReadFromJsonAsync<CommentDto>();
-        return deletedComment ?? throw new Exception("Unable to delete comment");
+        return deletedComment;
     }
 }

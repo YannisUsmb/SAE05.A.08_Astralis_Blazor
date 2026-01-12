@@ -23,7 +23,7 @@
     <div class="d-flex gap-3 position-relative">
         <div class="flex-shrink-0">
             <img src="@Comment.UserAvatarUrl" class="rounded-circle border border-white-10" width="40" height="40"
-                 onerror="this.src='https://ui-avatars.com/api/?name=@Comment.Username&background=9d4edd&color=fff&rounded=true';" />
+                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@Comment.Username&background=9d4edd&color=fff&rounded=true';" />
         </div>
 
         <div class="flex-grow-1">
@@ -171,6 +171,7 @@
     {
         if (e.PropertyName == nameof(ViewModel.Comments) ||
             e.PropertyName == nameof(ViewModel.EditingCommentId) ||
+            e.PropertyName == nameof(ViewModel.ReplyingToCommentId) ||
             e.PropertyName == nameof(ViewModel.IsSubmitting))
         {
             InvokeAsync(StateHasChanged);
