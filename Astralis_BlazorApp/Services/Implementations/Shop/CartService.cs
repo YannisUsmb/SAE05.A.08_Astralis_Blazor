@@ -200,19 +200,30 @@ public class CartService : ICartService
             }
         }
         await LoadCartAsync();
-    }    
+    }
 
     public async Task<string?> CheckoutAsync()
     {
-        var response = await _http.PostAsJsonAsync("Payment/create-checkout-session", Cart.Items);
-
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var result = await response.Content.ReadFromJsonAsync<PaymentResponse>();
-            return result?.Url;
+            var response = await _http.PostAsJsonAsync("Payment/create-checkout-session", Cart.Items);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<PaymentResponse>();
+                return result?.Url;
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"ERREUR PAIEMENT : {response.StatusCode} - {errorMsg}");
+                return null;
+            }
         }
-
-        return null;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"EXCEPTION PAIEMENT : {ex.Message}");
+            return null;
+        }
     }
 
     private async Task SaveLocalCart(List<CartItemDto> items)

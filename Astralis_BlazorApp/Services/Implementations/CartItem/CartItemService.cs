@@ -7,7 +7,7 @@ namespace Astralis_BlazorApp.Services.Implementations;
 public class CartItemService(HttpClient httpClient) : ICartItemService
 {
     private const string Controller = "CartItems";
-    
+
     public async Task<CartItemDto?> GetByIdAsync(int userId, int productId)
     {
         // GET api/CartItems/{userId}/{productId}

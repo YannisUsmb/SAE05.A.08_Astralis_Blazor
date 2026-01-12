@@ -69,29 +69,21 @@
                             
                             <div style="max-height: 200px; overflow-y: auto;">
                                 @foreach (var type in ViewModel.FilteredTypes)
-                            {
+                                {
                                     <div class="form-check mb-1" @onclick:stopPropagation>
-                                    <input class="form-check-input" type="checkbox" 
-                                           checked="@ViewModel.SelectedCategoryIds.Contains(type.Id)"
-                                           @onchange="@(e => ViewModel.ToggleCategory(type.Id))"
-                                           id="cat_@type.Id">
+                                        <input class="form-check-input" type="checkbox" 
+                                               checked="@ViewModel.SelectedCategoryIds.Contains(type.Id)"
+                                               @onchange="@(e => ViewModel.ToggleCategory(type.Id))"
+                                               id="cat_@type.Id">
                                         <label class="form-check-label text-white small cursor-pointer" for="cat_@type.Id">
-                                        @type.Label
+                                            @type.Label 
                                             @if(type.Id < 0) { <span class="text-warning small fst-italic">(Nouveau)</span> }
-                                    </label>
+                                        </label>
                                     </div>
-                            }
-                        </ul>
+                                }
+                            </div>
+                        </div>
                     </div>
-                    @if(ViewModel.SelectedCategoryIds.Count == 0) { <div class="validation-message">Une catégorie est requise.</div> }
-                </div>
-
-                <div class="col-12">
-                    <label class="text-white mb-2">Description courte (Aperçu)</label>
-                    <InputTextArea class="form-control-astralis" @bind-Value="ViewModel.Article.Description" rows="2" 
-                                   placeholder="Ce texte apparaîtra dans la liste des articles. Si vide, le début du contenu sera utilisé." />
-                    <ValidationMessage For="@(() => ViewModel.Article.Description)" class="validation-message" />
-                </div>
                     @if(ViewModel.ShowValidation && ViewModel.SelectedCategoryIds.Count == 0) 
                     { <div class="validation-message">Une catégorie est requise.</div> }
                 </div>
@@ -120,8 +112,8 @@
                         </label>
                         <div class="form-check form-switch custom-switch m-0">
                             <input class="form-check-input" type="checkbox" id="premiumEdit" @bind="ViewModel.Article.IsPremium">
+                        </div>
                     </div>
-                </div>
                 </div>
 
                 <div class="col-12">
@@ -182,26 +174,14 @@
                             <span><i class="bi bi-send me-2"></i> @(ViewModel.IsEditMode ? "Mettre à jour" : "Publier")</span>
                         }
                     </button>
-                    <button type="submit" class="btn btn-astralis-premium px-5" disabled="@ViewModel.IsPublishing">
-                        @if (ViewModel.IsPublishing)
-                        {
-                            <span class="spinner-border spinner-border-sm me-2"></span> <span>Publication...</span>
-                        }
-                        else
-                        {
-                            <span><i class="bi bi-send me-2"></i> @(ViewModel.IsEditMode ? "Mettre à jour" : "Publier")</span>
-                        }
-                    </button>
                 </div>
             </div>
         </EditForm>
-                
-                @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
-                {
+        
+        @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+        {
             <div class="alert alert-danger mt-3">@ViewModel.ErrorMessage</div>
-                }
-            </div>
-        </EditForm>
+        }
     </div>
 
     @if (ShowPreview)
@@ -215,30 +195,18 @@
                     <div class="position-relative z-1 text-start">
                         <div class="d-flex gap-2 mb-3">
                             @if (ViewModel.Article.IsPremium) { <span class="badge bg-warning text-dark shadow">Premium</span> }
-                        @foreach(var typeId in ViewModel.SelectedCategoryIds)
-                        {
+                            @foreach(var typeId in ViewModel.SelectedCategoryIds)
+                            {
                                 var type = ViewModel.ArticleTypes.FirstOrDefault(t => t.Id == typeId);
                                 if(type != null) {
                                     <span class="badge bg-black bg-opacity-75 border border-white-10 text-accent-purple">@type.Label</span>
-                        }
-                    </div>
-                    
-                    <h1 class="font-orbitron display-4 text-white mb-4">@(string.IsNullOrEmpty(ViewModel.Article.Title) ? "Titre de l'article" : ViewModel.Article.Title)</h1>
-                    
-                    @if (!string.IsNullOrEmpty(ViewModel.Article.CoverImageUrl))
-                    {
-                        <img src="@ViewModel.Article.CoverImageUrl" class="img-fluid rounded mb-4 shadow-lg" style="max-height: 400px;" />
-                    }
-
-                    <div class="meta text-white-50 d-flex justify-content-center align-items-center gap-4">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="rounded-circle bg-secondary" style="width:30px;height:30px;"></div>
-                            <span>Moi</span>
+                                }
+                            }
                         </div>
                         <h1 class="font-orbitron display-4 text-white fw-bold mb-3">@(string.IsNullOrEmpty(ViewModel.Article.Title) ? "Titre" : ViewModel.Article.Title)</h1>
                     </div>
                 </div>
-
+                
                 <div class="article-body p-5 text-white article-content-style">
                     @((MarkupString)PreviewContent)
                 </div>
@@ -271,11 +239,11 @@
             try 
             {
                 await quillHtml.LoadHTMLContent(ViewModel.Article.Content);
-
+                
                 _contentLoaded = true; 
             }
             catch(Exception ex)
-    {
+            {
             }
         }
     }

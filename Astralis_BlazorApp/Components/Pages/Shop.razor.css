@@ -1,4 +1,4 @@
-.bodies-grid {
+ï»¿.bodies-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
@@ -18,10 +18,10 @@
     height: 100%;
 }
 
-.body-card:hover {
-    transform: translateY(-8px);
-    border-color: #9d4edd;
-}
+    .body-card:hover {
+        transform: translateY(-8px);
+        border-color: #9d4edd;
+    }
 
 .body-image {
     width: 100%;
@@ -134,19 +134,19 @@
         color: #aaa;
     }
 
-.detail-container .badge-type {
+    .detail-container .badge-type {
         display: inline-block;
         margin: 0;
-    font-size: 1rem;
-    padding: 0.5rem 1.5rem;
-    background: rgba(157, 78, 221, 0.2);
-    border: 1px solid rgba(157, 78, 221, 0.4);
-    border-radius: 50px;
-    width: fit-content;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-}
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+        background: rgba(157, 78, 221, 0.2);
+        border: 1px solid rgba(157, 78, 221, 0.4);
+        border-radius: 50px;
+        width: fit-content;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
 
 .specific-details {
     background: rgba(255,255,255,0.03);
@@ -274,26 +274,21 @@
         transform: translateX(-5px);
     }
 
-.btn-secondary:active {
-    transform: translateX(-3px);
-}
+    .btn-secondary:active {
+        transform: translateX(-3px);
+    }
 
-/* =======================================
-   NOUVEAU : BOUTON RETOUR FIXE (STICKY)
-   ======================================= */
 .btn-back-fixed {
-    position: fixed; /* C'est ça qui fait que le bouton reste visible */
-    top: 100px; /* Distance du haut de l'écran (ajuste si besoin) */
-    left: 40px; /* Distance de la gauche */
-    z-index: 1000; /* Pour être sûr qu'il est au dessus des images */
-    margin: 0; /* On enlève les marges qui gênent */
-    /* Effet verre pour qu'on puisse lire même si ça passe sur du texte */
+    position: fixed;
+    top: 100px;
+    left: 40px;
+    z-index: 1000;
+    margin: 0;
     backdrop-filter: blur(8px);
     background: rgba(15, 15, 35, 0.85);
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-/* Sur mobile, on remet le bouton normal pour ne pas cacher le produit */
 @media (max-width: 1000px) {
     .btn-back-fixed {
         position: static;
@@ -301,6 +296,7 @@
         margin: 1rem 0;
     }
 }
+
 .category-tooltip-container {
     position: relative;
     display: inline-block;

@@ -57,10 +57,10 @@
 
     .detail-properties .info-tooltip::after {
         top: auto;
-        bottom: 100%; /* ← Flèche EN HAUT */
+        bottom: 100%;
         left: 20%;
         border-top-color: transparent;
-        border-bottom-color: #1a1a2e; /* ← Couleur inversée */
+        border-bottom-color: #1a1a2e;
     }
 
 @keyframes tooltipFadeIn {

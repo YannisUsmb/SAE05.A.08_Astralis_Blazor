@@ -11,18 +11,8 @@
 <PageTitle>Abonnement Premium – Astralis</PageTitle>
 
 <div class="premium-page-container">
-    <div class="stars-bg"></div>
-    <div class="nebula-overlay"></div>
 
-    @if (IsLoading)
-    {
-        <div class="loading-state">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p>Synchronisation avec le réseau stellaire...</p>
-        </div>
-    }
-    else
-    {
+    
         <AuthorizeView>
             <NotAuthorized>
                 <div class="glass-card auth-wall animate-up">
@@ -110,7 +100,7 @@
                 }
             </Authorized>
         </AuthorizeView>
-    }
+    
 </div>
 
 @code {
