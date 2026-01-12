@@ -27,7 +27,6 @@ public partial class ShopViewModel : ObservableObject
     [ObservableProperty] private bool hasNextPage = true;
 
     [ObservableProperty] private bool isLoading;
-    [ObservableProperty] private bool is3DVisible;
     [ObservableProperty] private ProductListDto? selectedProduct;
     [ObservableProperty] private ProductDetailDto? selectedProductDetails;
 
@@ -96,7 +95,7 @@ public partial class ShopViewModel : ObservableObject
 
     [RelayCommand]
     public async Task ApplyFilterAsync()
-        {
+    {
         CurrentPage = 1;
         await SearchDataAsync();
 
