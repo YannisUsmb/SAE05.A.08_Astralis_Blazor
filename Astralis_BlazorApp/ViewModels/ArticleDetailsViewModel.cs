@@ -14,6 +14,8 @@ namespace Astralis_BlazorApp.ViewModels
     {
         private readonly IArticleService _articleService;
         private readonly ICommentService _commentService;
+        private readonly IReportService _reportService;
+        private readonly IReportMotiveService _reportMotiveService;
         private readonly AuthenticationStateProvider _authStateProvider;
         private readonly NavigationManager _navigation;
 
@@ -28,28 +30,46 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty] private bool isPageLoading = true;
         [ObservableProperty] private bool areCommentsLoading = true;
+
         [ObservableProperty] private bool isSubmitting = false;
+
         [ObservableProperty] private bool isAuthenticated;
         [ObservableProperty] private int currentUserId;
+
         [ObservableProperty] private string newCommentText = "";
         [ObservableProperty] private bool isCommentBoxOpen;
         [ObservableProperty] private string? commentErrorMessage;
+
         [ObservableProperty] private int? replyingToCommentId;
         [ObservableProperty] private string replyCommentText = "";
         [ObservableProperty] private string? replyErrorMessage;
+
         [ObservableProperty] private int? editingCommentId;
         [ObservableProperty] private string editCommentText = "";
         [ObservableProperty] private CommentDto? commentToDelete;
 
+        [ObservableProperty] private bool isReportModalOpen;
+        [ObservableProperty] private CommentDto? commentToReport;
+        [ObservableProperty] private List<ReportMotiveDto> reportMotives = new();
+        [ObservableProperty] private int selectedReportMotiveId;
+        [ObservableProperty] private string reportDescription = "";
+        [ObservableProperty] private bool isReportSubmitting;
+        [ObservableProperty] private string? reportErrorMessage;
+        [ObservableProperty] private bool showReportSuccessMessage;
+
         public ArticleDetailsViewModel(
             IArticleService articleService,
             ICommentService commentService,
+            IReportService reportService,
+            IReportMotiveService reportMotiveService,
             AuthenticationStateProvider authStateProvider,
             NavigationManager navigation)
         {
             _articleService = articleService;
             _commentService = commentService;
             _authStateProvider = authStateProvider;
+            _reportService = reportService;
+            _reportMotiveService = reportMotiveService;
             _navigation = navigation;
         }
 
@@ -90,6 +110,18 @@ namespace Astralis_BlazorApp.ViewModels
                 if (IsAuthenticated && int.TryParse(user2.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uid))
                 {
                     CurrentUserId = uid;
+                }
+
+                if (ReportMotives.Count == 0)
+                {
+                    try
+                    {
+                        ReportMotives = await _reportMotiveService.GetAllAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erreur chargement motifs: {ex.Message}");
+                    }
                 }
 
                 AreCommentsLoading = true;
@@ -322,6 +354,68 @@ namespace Astralis_BlazorApp.ViewModels
             }
 
             return false;
+        }
+
+        public void OpenReportModal(CommentDto comment)
+        {
+            if (!IsAuthenticated)
+            {
+                _navigation.NavigateToLogin(_navigation.Uri);
+                return;
+            }
+
+            CommentToReport = comment;
+            SelectedReportMotiveId = 0;
+            ReportDescription = "";
+            ReportErrorMessage = null;
+            ShowReportSuccessMessage = false;
+            IsReportModalOpen = true;
+        }
+
+        public void CloseReportModal()
+        {
+            IsReportModalOpen = false;
+            CommentToReport = null;
+        }
+
+        [RelayCommand]
+        public async Task SubmitReportAsync()
+        {
+            if (CommentToReport == null) return;
+            if (SelectedReportMotiveId == 0)
+            {
+                ReportErrorMessage = "Veuillez sélectionner un motif.";
+                return;
+            }
+
+            IsReportSubmitting = true;
+            ReportErrorMessage = null;
+
+            try
+            {
+                var dto = new ReportCreateDto
+                {
+                    CommentId = CommentToReport.Id,
+                    ReportMotiveId = SelectedReportMotiveId,
+                    Description = ReportDescription
+                };
+
+                await _reportService.AddAsync(dto);
+
+                ShowReportSuccessMessage = true;
+
+                await Task.Delay(1500);
+                CloseReportModal();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur signalement: {ex.Message}");
+                ReportErrorMessage = "Une erreur est survenue lors de l'envoi.";
+            }
+            finally
+            {
+                IsReportSubmitting = false;
+            }
         }
     }
 }

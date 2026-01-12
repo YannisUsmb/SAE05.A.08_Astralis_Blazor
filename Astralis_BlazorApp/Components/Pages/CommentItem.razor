@@ -3,6 +3,22 @@
 @inject IJSRuntime JSRuntime
 @implements IDisposable
 
+@if (_showMenu)
+{
+    <div class="custom-dropdown-menu animate-fade-in">
+        @if (ViewModel.CurrentUserId == Comment.UserId)
+        {
+        }
+        else
+        {
+            <button class="dropdown-item-custom text-warning" @onclick="ReportComment">
+                <i class="bi bi-flag me-2"></i> Signaler
+            </button>
+        }
+    </div>
+    <div class="menu-overlay" @onclick="CloseMenu"></div>
+}
+
 <div class="comment-item animate-fade-in @(Comment.RepliesToId.HasValue ? "reply-item" : "")">
     <div class="d-flex gap-3 position-relative">
         <div class="flex-shrink-0">
@@ -184,6 +200,7 @@
     private void ReportComment()
     {
         CloseMenu();
+        ViewModel.OpenReportModal(Comment);
     }
 
     private async Task OnReplyClick()

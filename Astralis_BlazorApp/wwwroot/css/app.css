@@ -1047,7 +1047,7 @@ body {
 }
 
 /* ============================================
-   MODALES (Commun)
+   MODALES
    ============================================ */
 .modal-backdrop-custom {
     position: fixed;
@@ -1103,4 +1103,117 @@ body {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+/* ============================================
+   SELECTION LIST
+   ============================================ */
+.motive-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+    .motive-list::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .motive-list::-webkit-scrollbar-thumb {
+        background: rgba(157, 78, 221, 0.5);
+        border-radius: 4px;
+    }
+
+.motive-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .motive-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .motive-item.active {
+        background: rgba(157, 78, 221, 0.2);
+        border-color: #9d4edd;
+        box-shadow: 0 0 10px rgba(157, 78, 221, 0.1);
+    }
+
+.motive-label {
+    color: #e0e0e0;
+    font-size: 0.95rem;
+}
+
+.motive-item.active .motive-label {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ============================================
+   PERSONALIZED TOOLTIP
+   ============================================ */
+.info-tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-icon {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+    transition: color 0.2s;
+}
+
+.motive-item:hover .info-icon {
+    color: #a76dff;
+}
+
+.custom-tooltip {
+    visibility: hidden;
+    width: 220px;
+    background-color: rgba(10, 10, 25, 0.95);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    position: absolute;
+    z-index: 1000;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+}
+
+    .custom-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -5px;
+        margin-top: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent transparent rgba(157, 78, 221, 0.3);
+    }
+
+.info-tooltip-wrapper:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(-50%) translateX(-5px);
 }
