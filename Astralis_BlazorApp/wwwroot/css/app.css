@@ -828,3 +828,109 @@ body {
     font-weight: bold;
     animation: fadeIn 0.3s ease;
 }
+
+/* ============================================
+   COMMENTS & REPLIES
+   ============================================ */
+
+.comment-replies {
+    margin-left: 3rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(157, 78, 221, 0.3);
+}
+
+.comment-item {
+    margin-bottom: 1.5rem;
+}
+
+.reply-item {
+    margin-bottom: 1rem;
+}
+
+.btn-reply-styled {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #a76dff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+    .btn-reply-styled:hover:not(:disabled) {
+        background: rgba(167, 109, 255, 0.2);
+        border-color: #a76dff;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-reply-styled:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+.reply-context {
+    background: rgba(0,0,0,0.2);
+    padding: 4px 8px;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.custom-dropdown-menu {
+    position: absolute;
+    top: 25px;
+    right: 0;
+    background: rgba(30, 30, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 5px 0;
+    z-index: 1000;
+    min-width: 150px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.dropdown-item-custom {
+    display: block;
+    width: 100%;
+    padding: 8px 15px;
+    text-align: left;
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .dropdown-item-custom:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    cursor: default;
+}
+
+.edit-input-box textarea:focus {
+    background: rgba(20, 20, 45, 0.9);
+    border-color: #9d4edd;
+    box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
+}
+
+@media (max-width: 576px) {
+    .comment-replies {
+        margin-left: 1rem;
+        padding-left: 0.5rem;
+    }
+}

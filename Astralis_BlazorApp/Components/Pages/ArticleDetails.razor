@@ -4,6 +4,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IArticleService ArticleService
 @inject NavigationManager Navigation
+@inject ArticleDetailsViewModel ViewModel
+@implements IDisposable
 
 <PageTitle>@(_article?.Title ?? "Article") – Astralis</PageTitle>
 
@@ -29,8 +31,28 @@
                     <button class="btn btn-outline-light px-4" @onclick="() => ShowConfirmDelete = false">
                         Annuler
                     </button>
-                    <button class="btn btn-danger px-4" @onclick="DeleteArticle">
-                        <i class="bi bi-trash-fill me-2"></i> Supprimer
+                    <button class="btn btn-danger px-4" @onclick="ConfirmDelete">
+                        <i class="bi bi-trash-fill me-2"></i>Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (ViewModel.CommentToDelete != null)
+    {
+        <div class="modal-backdrop-custom" @onclick="ViewModel.CancelDeleteComment">
+            <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
+                <div class="text-center mb-4">
+                    <div class="mb-3"><i class="bi bi-trash3 text-danger" style="font-size: 3rem;"></i></div>
+                    <h4 class="text-white font-orbitron">Supprimer ce commentaire ?</h4>
+                    <p class="text-white-50 small fst-italic">"@ViewModel.CommentToDelete.Text"</p>
+                    <p class="text-danger small mt-2">Attention : Cela supprimera également toutes les réponses associées.</p>
+                </div>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-outline-light px-4" @onclick="ViewModel.CancelDeleteComment" disabled="@ViewModel.IsSubmitting">Annuler</button>
+                    <button class="btn btn-danger px-4" @onclick="ViewModel.ConfirmDeleteCommentAsync" disabled="@ViewModel.IsSubmitting">
+                        @if (ViewModel.IsSubmitting) { <span class="spinner-border spinner-border-sm"></span> } else { <span>Supprimer</span> }
                     </button>
                 </div>
             </div>
@@ -99,6 +121,75 @@
             <div class="article-body p-5 text-white">
                 @((MarkupString)_article.Content)
             </div>
+
+            <div class="comments-section p-5 border-top border-white-10">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="font-orbitron m-0 text-white"><i class="bi bi-chat-left-text me-2"></i> Commentaires (@ViewModel.TotalCommentCount)</h3>
+                    
+                    @if (!ViewModel.IsCommentBoxOpen)
+                    {
+                        <button class="btn btn-astralis-premium btn-sm" @onclick="OpenCommentBox">
+                            <i class="bi bi-plus-lg me-2"></i> Laisser un commentaire
+                        </button>
+                    }
+                </div>
+
+                @if (ViewModel.IsCommentBoxOpen)
+                {
+                    <div class="comment-input-box mb-5 animate-fade-in">
+                        <textarea @ref="_commentInputRef" class="form-control-astralis mb-2" rows="3" 
+                                  placeholder="Partagez votre avis..." 
+                                  @bind="ViewModel.NewCommentText"
+                                  disabled="@ViewModel.IsSubmitting"></textarea>
+                        
+                        @if (!string.IsNullOrEmpty(ViewModel.CommentErrorMessage))
+                        {
+                            <div class="text-danger small mb-2">@ViewModel.CommentErrorMessage</div>
+                        }
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-outline-light btn-sm" 
+                                    @onclick="ViewModel.ToggleCommentBox" 
+                                    disabled="@ViewModel.IsSubmitting">Annuler</button>
+                            
+                            <button class="btn btn-astralis-premium btn-sm" 
+                                    @onclick="ViewModel.PostCommentAsync"
+                                    disabled="@ViewModel.IsSubmitting">
+                                @if (ViewModel.IsSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2"></span> <span>Envoi...</span>
+                                }
+                                else
+                                {
+                                    <span>Envoyer</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                @if (ViewModel.AreCommentsLoading)
+                {
+                    <div class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-accent-purple"></div>
+                        <span class="ms-2 text-white-50 small">Chargement des discussions...</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="comments-list">
+                        @foreach (var comment in ViewModel.Comments)
+                        {
+                            <CommentItem @key="comment.Id" Comment="comment" ViewModel="ViewModel" />
+                        }
+                        
+                        @if (ViewModel.Comments.Count == 0)
+                        {
+                            <p class="text-white-50 fst-italic text-center py-3">Aucun signal reçu pour le moment.</p>
+                        }
+                    </div>
+                }
+            </div>
         </div>
     }
 </div>
@@ -108,12 +199,14 @@
     private ArticleDetailDto? _article;
     private bool _isLoading = true;
     private bool ShowConfirmDelete = false;
+    private ElementReference _commentInputRef;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             _article = await ArticleService.GetByIdAsync(Id);
+            ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         }
         finally
         {
@@ -121,12 +214,36 @@
         }
     }
 
-    private async Task DeleteArticle()
+    protected override async Task OnParametersSetAsync()
     {
-        if (_article != null)
+        await ViewModel.InitializeAsync(Id);
+    }
+
+    private async Task ConfirmDelete()
+    {
+        await ViewModel.DeleteArticleAsync();
+    }
+
+    private async Task OpenCommentBox()
+    {
+        ViewModel.ToggleCommentBox();
+        if (ViewModel.IsCommentBoxOpen)
         {
-            await ArticleService.DeleteAsync(_article.Id);
-            Navigation.NavigateTo("/articles");
+            await Task.Delay(50);
+            await _commentInputRef.FocusAsync();
         }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.Comments) || e.PropertyName == nameof(ViewModel.TotalCommentCount))
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
 }

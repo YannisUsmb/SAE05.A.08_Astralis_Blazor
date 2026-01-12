@@ -13,7 +13,13 @@ public class CommentService(HttpClient httpClient) : ICommentService
         CommentDto? comment = await httpClient.GetFromJsonAsync<CommentDto>($"{Controller}/{id}");
         return comment ?? throw new Exception("Comment not found");
     }
-    
+
+    public async Task<List<CommentDto>> GetByArticleIdAsync(int articleId)
+    {
+        var comments = await httpClient.GetFromJsonAsync<List<CommentDto>>($"{Controller}/Article/{articleId}?t={DateTime.UtcNow.Ticks}");
+        return comments ?? new List<CommentDto>();
+    }
+
     public async Task<List<CommentDto>> GetAllAsync()
     {
         List<CommentDto>? comments = await httpClient.GetFromJsonAsync<List<CommentDto>>($"{Controller}");

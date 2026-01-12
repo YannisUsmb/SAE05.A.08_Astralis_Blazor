@@ -5,6 +5,7 @@ namespace Astralis_BlazorApp.Services.Interfaces;
 public interface ICommentService
 {
     Task<CommentDto?> GetByIdAsync(int id);
+    Task<List<CommentDto>> GetByArticleIdAsync(int articleId);
     Task<List<CommentDto>> GetAllAsync();
     Task<CommentDto?> AddAsync(CommentCreateDto commentCreateDto);
     Task<CommentDto?> UpdateAsync(int id, CommentUpdateDto commentUpdateDto);

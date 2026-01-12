@@ -77,6 +77,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ProfileViewModel>();
         services.AddScoped<ArticleListViewModel>();
         services.AddScoped<ArticleEditorViewModel>();
+        services.AddScoped<ArticleDetailsViewModel>();
 
         return services;
     }

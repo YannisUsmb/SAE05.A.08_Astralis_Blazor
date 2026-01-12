@@ -1,0 +1,207 @@
+﻿@using Astralis.Shared.DTOs
+@using Astralis_BlazorApp.ViewModels
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<div class="comment-item animate-fade-in @(Comment.RepliesToId.HasValue ? "reply-item" : "")">
+    <div class="d-flex gap-3 position-relative">
+        <div class="flex-shrink-0">
+            <img src="@Comment.UserAvatarUrl" class="rounded-circle border border-white-10" width="40" height="40"
+                 onerror="this.src='https://ui-avatars.com/api/?name=@Comment.Username&background=9d4edd&color=fff&rounded=true';" />
+        </div>
+
+        <div class="flex-grow-1">
+            <div class="comment-header mb-1 d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-white fw-bold me-2">@Comment.Username</span>
+                    <span class="text-white-50 small">@Comment.Date.ToString("dd MMM à HH:mm")</span>
+                    @if (Comment.IsEdited)
+                    {
+                        <span class="text-white-50 small fst-italic ms-2">(modifié)</span>
+                    }
+                </div>
+
+                <div class="dropdown">
+                    <button class="btn btn-link text-white-50 p-0" type="button" @onclick="ToggleMenu" @onclick:stopPropagation>
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+
+                    @if (_showMenu)
+                    {
+                        <div class="custom-dropdown-menu animate-fade-in">
+                            @if (ViewModel.CurrentUserId == Comment.UserId)
+                            {
+                                <button class="dropdown-item-custom" @onclick="EnableEdit">
+                                    <i class="bi bi-pencil me-2"></i> Modifier
+                                </button>
+                                <button class="dropdown-item-custom text-danger" @onclick="RequestDelete">
+                                    <i class="bi bi-trash me-2"></i> Supprimer
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="dropdown-item-custom text-warning" @onclick="ReportComment">
+                                    <i class="bi bi-flag me-2"></i> Signaler
+                                </button>
+                            }
+                        </div>
+                        <div class="menu-overlay" @onclick="CloseMenu"></div>
+                    }
+                </div>
+            </div>
+
+            @if (ViewModel.EditingCommentId == Comment.Id)
+            {
+                <div class="edit-input-box mt-2 animate-fade-in">
+                    <textarea class="form-control-astralis form-control-sm mb-2" rows="3"
+                              @bind="ViewModel.EditCommentText"
+                              maxlength="300"
+                              disabled="@ViewModel.IsSubmitting"></textarea>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-sm btn-outline-light" @onclick="ViewModel.CancelEditing" disabled="@ViewModel.IsSubmitting">Annuler</button>
+                        <button class="btn btn-sm btn-astralis-premium" @onclick="ViewModel.SaveEditAsync" disabled="@ViewModel.IsSubmitting">
+                            @if (ViewModel.IsSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+
+                                <span>Enregistrer</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @if (!string.IsNullOrEmpty(Comment.ParentUsername))
+                {
+                    <div class="reply-context small text-white-50 mb-1 fst-italic border-start border-2 border-secondary ps-2">
+                        <i class="bi bi-arrow-return-right me-1"></i>
+                        En réponse à <strong>@Comment.ParentUsername</strong> : "@Comment.ParentTextPreview"
+                    </div>
+                }
+
+                <div class="comment-text text-white mb-2">
+                    @Comment.Text
+                </div>
+
+                <div class="comment-actions">
+                    <button class="btn-reply-styled" @onclick="OnReplyClick" disabled="@ViewModel.IsSubmitting">
+                        <i class="bi bi-reply-fill"></i> Répondre
+                    </button>
+                </div>
+            }
+
+            @if (ViewModel.ReplyingToCommentId == Comment.Id && ViewModel.EditingCommentId != Comment.Id)
+            {
+                <div class="reply-input-box mt-3 animate-fade-in">
+                    <textarea @ref="_replyInputRef" class="form-control-astralis form-control-sm mb-2" rows="2"
+                              placeholder="Votre réponse..."
+                              @bind="ViewModel.ReplyCommentText"
+                              maxlength="300"
+                              disabled="@ViewModel.IsSubmitting"></textarea>
+
+                    @if (!string.IsNullOrEmpty(ViewModel.ReplyErrorMessage))
+                    {
+                        <div class="text-danger small mb-2">@ViewModel.ReplyErrorMessage</div>
+                    }
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-astralis-premium" @onclick="PostReply" disabled="@ViewModel.IsSubmitting">
+                            @if (ViewModel.IsSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+
+                                <span>Envoyer</span>
+                            }
+                        </button>
+                        <button class="btn btn-sm btn-outline-light" @onclick="OnCancelReply" disabled="@ViewModel.IsSubmitting">Annuler</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Comment.Replies != null && Comment.Replies.Any())
+    {
+        <div class="comment-replies mt-3">
+            @foreach (var reply in Comment.Replies)
+            {
+                <CommentItem @key="reply.Id" Comment="reply" ViewModel="ViewModel" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public required CommentDto Comment { get; set; }
+    [Parameter] public required ArticleDetailsViewModel ViewModel { get; set; }
+
+    private ElementReference _replyInputRef;
+    private bool _showMenu = false;
+
+    protected override void OnInitialized()
+    {
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.Comments) ||
+            e.PropertyName == nameof(ViewModel.EditingCommentId) ||
+            e.PropertyName == nameof(ViewModel.IsSubmitting))
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+    }
+
+    private void ToggleMenu() => _showMenu = !_showMenu;
+    private void CloseMenu() => _showMenu = false;
+
+    private void EnableEdit()
+    {
+        CloseMenu();
+        ViewModel.StartEditing(Comment);
+    }
+
+    private void RequestDelete()
+    {
+        CloseMenu();
+        ViewModel.RequestDeleteComment(Comment);
+    }
+
+    private void ReportComment()
+    {
+        CloseMenu();
+    }
+
+    private async Task OnReplyClick()
+    {
+        ViewModel.SetReplyingTo(Comment.Id);
+        if (ViewModel.ReplyingToCommentId == Comment.Id)
+        {
+            await Task.Delay(50);
+            await _replyInputRef.FocusAsync();
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+    }
+
+    private void OnCancelReply() => ViewModel.SetReplyingTo(Comment.Id);
+    private async Task PostReply() => await ViewModel.PostReplyAsync(Comment.Id);
+}

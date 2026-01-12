@@ -50,6 +50,7 @@
     }
 }
 
+/* Modale */
 .modal-backdrop-custom {
     position: fixed;
     top: 0;
@@ -77,6 +78,7 @@
     animation: slideUp 0.3s ease-out;
 }
 
+/* Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
