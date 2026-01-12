@@ -67,7 +67,7 @@ namespace Astralis_BlazorApp.ViewModels
             try
             {
                 var types = await _articleTypeService.GetAllAsync();
-                
+
                 var sortedTypes = types
                     .OrderBy(t => t.Label.Equals("Autre", StringComparison.OrdinalIgnoreCase))
                     .ThenBy(t => t.Label);
@@ -77,7 +77,7 @@ namespace Astralis_BlazorApp.ViewModels
                 if (IsEditMode)
                 {
                     await LoadExistingArticleAsync(ArticleId.Value);
-        }
+                }
             }
             catch (Exception ex)
             {
@@ -204,40 +204,6 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
-        private async Task LoadExistingArticleAsync(int id)
-        {
-            var existing = await _articleService.GetByIdAsync(id);
-            if (existing == null)
-            {
-                ErrorMessage = "Article introuvable.";
-                return;
-            }
-
-            Article = new ArticleCreateDto
-            {
-                Title = existing.Title,
-                Description = existing.Description,
-                Content = existing.Content,
-                CoverImageUrl = existing.CoverImageUrl,
-                IsPremium = existing.IsPremium
-            };
-
-            SelectedCategoryIds.Clear();
-            if (existing.CategoryIds != null && existing.CategoryIds.Any())
-            {
-                SelectedCategoryIds.AddRange(existing.CategoryIds);
-            }
-            else if (existing.CategoryNames != null)
-            {
-                foreach (var catName in existing.CategoryNames)
-            {
-                    var type = ArticleTypes.FirstOrDefault(t => t.Label == catName);
-                    if (type != null) SelectedCategoryIds.Add(type.Id);
-                }
-            }
-            catch { return null; }
-        }
-
         public async Task SaveArticleAsync()
         {
             if (IsPublishing) return;
@@ -270,7 +236,7 @@ namespace Astralis_BlazorApp.ViewModels
                         finalCategoryIds.Add(createdType.Id);
                     }
                     else
-                {
+                    {
                         finalCategoryIds.Add(id);
                     }
                 }
@@ -299,15 +265,13 @@ namespace Astralis_BlazorApp.ViewModels
                         foreach (var typeId in finalCategoryIds)
                         {
                             await _typeOfArticleService.AddAsync(new TypeOfArticleDto
-                {
+                            {
                                 ArticleId = createdArticle.Id,
                                 ArticleTypeId = typeId
                             });
-                }
-
-                await _articleService.AddAsync(Article);
-                _navigation.NavigateTo("/articles");
-            }
+                        }
+                        _navigation.NavigateTo("/articles");
+                    }
                 }
             }
             catch (Exception ex)
@@ -317,5 +281,5 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
     }
-    
+
 }
