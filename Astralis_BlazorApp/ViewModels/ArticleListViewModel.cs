@@ -21,12 +21,15 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty] private int selectedTypeId = 0;
         [ObservableProperty] private bool isCommercialEditor;
-        [ObservableProperty] private bool isLoading;
+
+        [ObservableProperty] private bool isLoading = true;
 
         [ObservableProperty] private int totalPages = 1;
         [ObservableProperty] private int totalCount;
 
         private System.Timers.Timer _debounceTimer;
+
+        private bool _isBusy = false;
 
         public ArticleListViewModel(
             IArticleService articleService,
@@ -56,7 +59,11 @@ namespace Astralis_BlazorApp.ViewModels
                 IsCommercialEditor = user.IsInRole("Rédacteur Commercial") || user.IsInRole("Admin");
 
                 var types = await _typeService.GetAllAsync();
-                ArticleTypes = new ObservableCollection<ArticleTypeDto>(types);
+                var sortedTypes = types
+                    .OrderBy(t => t.Label.Equals("Autre", StringComparison.OrdinalIgnoreCase))
+                    .ThenBy(t => t.Label);
+
+                ArticleTypes = new ObservableCollection<ArticleTypeDto>(sortedTypes);
             }
             catch (Exception ex)
             {
@@ -67,9 +74,10 @@ namespace Astralis_BlazorApp.ViewModels
         [RelayCommand]
         public async Task SearchDataAsync(bool updateUrl = true)
         {
-            if (IsLoading) return;
+            if (_isBusy) return;
+            _isBusy = true;
+
             IsLoading = true;
-            OnPropertyChanged(nameof(IsLoading));
 
             try
             {
@@ -90,7 +98,7 @@ namespace Astralis_BlazorApp.ViewModels
             finally
             {
                 IsLoading = false;
-                OnPropertyChanged(nameof(IsLoading));
+                _isBusy = false;
             }
         }
 

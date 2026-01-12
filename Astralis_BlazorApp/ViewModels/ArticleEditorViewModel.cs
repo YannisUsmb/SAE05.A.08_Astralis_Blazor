@@ -66,7 +66,13 @@ namespace Astralis_BlazorApp.ViewModels
 
             try
             {
-                ArticleTypes = await _articleTypeService.GetAllAsync();
+                var types = await _articleTypeService.GetAllAsync();
+                
+                var sortedTypes = types
+                    .OrderBy(t => t.Label.Equals("Autre", StringComparison.OrdinalIgnoreCase))
+                    .ThenBy(t => t.Label);
+
+                ArticleTypes = sortedTypes.ToList();
 
                 if (IsEditMode)
                 {

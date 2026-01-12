@@ -178,19 +178,18 @@
 }
 
 .article-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(20, 20, 35, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
     overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s;
-    display: flex;
-    flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
     .article-card:hover {
-        transform: translateY(-5px);
-        border-color: #9d4edd;
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(157, 78, 221, 0.2);
+        border-color: rgba(157, 78, 221, 0.5);
     }
 
 .article-actions {

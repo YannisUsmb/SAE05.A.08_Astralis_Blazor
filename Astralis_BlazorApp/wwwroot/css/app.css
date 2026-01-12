@@ -830,13 +830,80 @@ body {
 }
 
 /* ============================================
+   ARTICLES & CONTENT
+   ============================================ */
+.article-content-style {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #e0e0e0;
+}
+
+    .article-content-style p {
+        margin-bottom: 1.5rem;
+    }
+
+    .article-content-style h1 {
+        color: #a76dff;
+        font-family: 'Orbitron', sans-serif;
+        margin-top: 3.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 2.2rem;
+        font-weight: bold;
+    }
+
+    .article-content-style h2 {
+        color: #a76dff;
+        font-family: 'Orbitron', sans-serif;
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+
+    .article-content-style h3 {
+        color: #fff;
+        font-family: 'Orbitron', sans-serif;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-size: 1.4rem;
+    }
+
+    .article-content-style blockquote {
+        border-left: 4px solid #9d4edd;
+        padding-left: 1rem;
+        font-style: italic;
+        color: #bbb;
+        margin: 2rem 0;
+        background: rgba(157, 78, 221, 0.05);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .article-content-style img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin: 2rem 0;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+
+    .article-content-style ul,
+    .article-content-style ol {
+        margin-bottom: 1.5rem;
+        padding-left: 2rem;
+    }
+
+    .article-content-style li {
+        margin-bottom: 0.5rem;
+    }
+
+/* ============================================
    COMMENTS & REPLIES
    ============================================ */
-
 .comment-replies {
-    margin-left: 3rem;
+    margin-left: 2rem;
     padding-left: 1rem;
     border-left: 2px solid rgba(157, 78, 221, 0.3);
+    margin-top: 1rem;
 }
 
 .comment-item {
@@ -860,6 +927,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    margin-top: 5px;
 }
 
     .btn-reply-styled:hover:not(:disabled) {
@@ -870,17 +938,35 @@ body {
     }
 
     .btn-reply-styled:disabled {
-        opacity: 0.6;
+        opacity: 0.5;
         cursor: not-allowed;
     }
 
 .reply-context {
-    background: rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.05);
     padding: 4px 8px;
-    border-radius: 0 4px 4px 0;
+    border-radius: 4px;
     margin-bottom: 0.5rem;
     font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    border-left: 3px solid #6c757d;
 }
+
+.comment-input-box textarea,
+.reply-input-box textarea,
+.edit-input-box textarea {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+    .comment-input-box textarea:focus,
+    .reply-input-box textarea:focus,
+    .edit-input-box textarea:focus {
+        background: rgba(20, 20, 45, 0.9);
+        border-color: #9d4edd;
+        box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
+    }
 
 .custom-dropdown-menu {
     position: absolute;
@@ -922,15 +1008,61 @@ body {
     cursor: default;
 }
 
-.edit-input-box textarea:focus {
-    background: rgba(20, 20, 45, 0.9);
-    border-color: #9d4edd;
-    box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
+/* ============================================
+   MODALES (Commun)
+   ============================================ */
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-glass-content {
+    background: rgba(20, 20, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    animation: slideUp 0.3s ease-out;
 }
 
 @media (max-width: 576px) {
     .comment-replies {
-        margin-left: 1rem;
+        margin-left: 0.5rem;
         padding-left: 0.5rem;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
 }
