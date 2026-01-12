@@ -1,0 +1,420 @@
+/* --- LAYOUT GLOBAL & FOND --- */
+.premium-page-container {
+    min-height: 85vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    color: white;
+    font-family: 'Rajdhani', sans-serif; /* Police Sci-Fi si dispo, sinon sans-serif */
+}
+
+/* Fond étoilé animé */
+.stars-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #1b1b2f 0%, #0f0f1a 100%);
+    z-index: -2;
+}
+
+.nebula-overlay {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(157, 78, 221, 0.15), transparent 70%);
+    animation: rotateNebula 60s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotateNebula {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- CARTES EFFET VERRE (Glassmorphism) --- */
+.glass-card {
+    background: rgba(20, 20, 35, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border-radius: 24px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- ANIMATIONS --- */
+.animate-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- ÉTAT 1 : AUTH WALL --- */
+.auth-wall {
+    text-align: center;
+}
+
+.icon-glow i {
+    font-size: 4rem;
+    color: #9d4edd;
+    filter: drop-shadow(0 0 15px rgba(157, 78, 221, 0.6));
+}
+
+.auth-wall h1 {
+    font-family: 'Orbitron', sans-serif;
+    margin: 1rem 0;
+}
+
+.auth-wall p {
+    color: #aaa;
+    margin-bottom: 2rem;
+}
+
+/* --- ÉTAT 2 : OFFRE (PRICING) --- */
+.offer-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.offer-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+    .offer-header h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .offer-header p {
+        color: #bbb;
+        font-size: 1.1rem;
+    }
+
+.pricing-card {
+    max-width: 550px;
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    transition: transform 0.3s;
+}
+
+    .pricing-card:hover {
+        transform: translateY(-5px);
+        border-color: #9d4edd;
+    }
+
+.card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #9d4edd, #00d4ff, transparent);
+}
+
+.pricing-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 1.5rem;
+}
+
+    .pricing-header h3 {
+        color: #00d4ff;
+        font-family: 'Orbitron', sans-serif;
+        margin-bottom: 1rem;
+    }
+
+.price-tag .amount {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.price-tag .currency {
+    font-size: 1.5rem;
+    vertical-align: top;
+    color: #aaa;
+}
+
+.price-tag .period {
+    font-size: 1rem;
+    color: #888;
+}
+
+/* --- LISTE DES AVANTAGES --- */
+.features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 10px;
+    border-radius: 12px;
+    transition: background 0.3s;
+}
+
+    /* Mise en valeur de l'Audio Spatial */
+    .feature-item.highlight {
+        background: linear-gradient(90deg, rgba(157, 78, 221, 0.1), transparent);
+        border-left: 3px solid #9d4edd;
+    }
+
+.feature-icon {
+    background: rgba(255,255,255,0.05);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .feature-icon i {
+        color: #00d4ff;
+        font-size: 1.2rem;
+    }
+
+.feature-item.highlight .feature-icon i {
+    color: #9d4edd;
+}
+
+.feature-text {
+    display: flex;
+    flex-direction: column;
+}
+
+    .feature-text strong {
+        font-size: 1.1rem;
+        color: #fff;
+        margin-bottom: 2px;
+    }
+
+    .feature-text span {
+        font-size: 0.9rem;
+        color: #aaa;
+        line-height: 1.4;
+    }
+
+/* --- ÉTAT 3 : DASHBOARD --- */
+.dashboard {
+    text-align: center;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(46, 213, 115, 0.2);
+    color: #2ed573;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(46, 213, 115, 0.4);
+}
+
+.dashboard h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+}
+
+.dashboard .subtext {
+    color: #bbb;
+    margin-bottom: 2rem;
+}
+
+.current-plan-info {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.2);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+    .info-item .label {
+        font-size: 0.8rem;
+        color: #888;
+        text-transform: uppercase;
+    }
+
+    .info-item .value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: white;
+    }
+
+/* --- BOUTONS --- */
+.btn-neon {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(90deg, #9d4edd, #6c5ce7);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+    transition: all 0.3s;
+}
+
+    .btn-neon:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(157, 78, 221, 0.6);
+    }
+
+.btn-outline-neon {
+    padding: 0.8rem 2rem;
+    background: transparent;
+    border: 1px solid #9d4edd;
+    color: #9d4edd;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .btn-outline-neon:hover {
+        background: rgba(157, 78, 221, 0.1);
+        color: white;
+        border-color: white;
+    }
+
+.terms {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+}
+
+.manage-hint {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.loading-state {
+    text-align: center;
+    color: #aaa;
+}
+/* --- TOGGLE SWITCH --- */
+.plan-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+}
+
+    .plan-toggle-container span {
+        color: #666;
+        transition: color 0.3s;
+        cursor: pointer;
+    }
+
+        .plan-toggle-container span.active {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+.toggle-switch {
+    width: 60px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+    .toggle-switch.checked {
+        background: rgba(157, 78, 221, 0.3);
+        border-color: #9d4edd;
+        box-shadow: 0 0 15px rgba(157, 78, 221, 0.4);
+    }
+
+.slider {
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Effet rebond */
+}
+
+.toggle-switch.checked .slider {
+    left: 30px;
+    background: #00d4ff;
+    box-shadow: 0 0 10px #00d4ff;
+}
+
+/* Badge promotion */
+.badge-save {
+    background: #2ed573;
+    color: #000;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    vertical-align: super;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.savings-text {
+    color: #2ed573;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    font-weight: bold;
+}

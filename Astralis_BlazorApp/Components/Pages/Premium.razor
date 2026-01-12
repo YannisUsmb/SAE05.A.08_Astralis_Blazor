@@ -1,0 +1,220 @@
+﻿@page "/premium"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Text.Json
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@inject HttpClient HttpClient
+
+<PageTitle>Abonnement Premium – Astralis</PageTitle>
+
+<div class="premium-page-container">
+    <div class="stars-bg"></div>
+    <div class="nebula-overlay"></div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Synchronisation avec le réseau stellaire...</p>
+        </div>
+    }
+    else
+    {
+        <AuthorizeView>
+            <NotAuthorized>
+                <div class="glass-card auth-wall animate-up">
+                    <div class="icon-glow"><i class="bi bi-shield-lock-fill"></i></div>
+                    <h1>Accès Restreint</h1>
+                    <p>Connectez-vous pour accéder aux accréditations.</p>
+                    <button class="btn-neon" @onclick="GoToLogin">Connexion au Terminal</button>
+                </div>
+            </NotAuthorized>
+
+            <Authorized>
+                @if (IsUserPremium)
+                {
+                    <div class="glass-card dashboard animate-up">
+                        <div class="status-badge">
+                            <i class="bi bi-patch-check-fill"></i> Actif
+                        </div>
+                        <h2>Membre Astralis Premium</h2>
+                        <p class="subtext">Votre accès aux fréquences Audio SpatialPRO est opérationnel.</p>
+
+                        <div class="dashboard-actions">
+                            <button class="btn-outline-neon" @onclick="GoToStripePortal">
+                                <i class="bi bi-gear-fill me-2"></i> Gérer mon abonnement
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="offer-container animate-up">
+                        <div class="offer-header">
+                            <h1>Passez à la vitesse supérieure</h1>
+                            <p>Choisissez votre engagement.</p>
+                        </div>
+
+                        <div class="plan-toggle-container">
+                            <span class="@(!IsYearly ? "active" : "")" @onclick="() => IsYearly = false">Mensuel</span>
+                            <div class="toggle-switch @(IsYearly ? "checked" : "")" @onclick="TogglePlan">
+                                <div class="slider"></div>
+                            </div>
+                            <span class="@(IsYearly ? "active" : "")" @onclick="() => IsYearly = true">
+                                Annuel <span class="badge-save">-20%</span>
+                            </span>
+                        </div>
+
+                        <div class="glass-card pricing-card">
+                            <div class="card-glow"></div>
+
+                            <div class="pricing-header">
+                                <h3>Astralis Premium</h3>
+                                <div class="price-tag">
+                                    <span class="currency">€</span>
+                                    <span class="amount">@(IsYearly ? "144.99" : "14.99")</span>
+                                    <span class="period">/@(IsYearly ? "an" : "mois")</span>
+                                </div>
+                                @if (IsYearly)
+                                {
+                                    <div class="savings-text">Soit 2 mois offerts !</div>
+                                }
+                            </div>
+
+                            <div class="features-list">
+                                <div class="feature-item highlight">
+                                    <div class="feature-icon"><i class="bi bi-soundwave"></i></div>
+                                    <div class="feature-text">
+                                        <strong>Audio SpatialPRO</strong>
+                                        <span>Sonification des ondes radio.</span>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon"><i class="bi bi-file-earmark-lock2-fill"></i></div>
+                                    <div class="feature-text">
+                                        <strong>Archives Classifiées</strong>
+                                        <span>Accès illimité aux articles.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn-neon btn-block" @onclick="SubscribeToPremium">
+                                Choisir le plan @(IsYearly ? "Annuel" : "Mensuel")
+                            </button>
+                            <p class="terms">Paiement sécurisé par Stripe.</p>
+                        </div>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+    }
+</div>
+
+@code {
+    private bool IsLoading = true;
+    private bool IsUserPremium = false;
+    private bool IsYearly = false;
+
+    public class SyncStatusResponse
+    {
+        public bool IsPremium { get; set; }
+    }
+
+    public class StripeUrlResponse
+    {
+        public string Url { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            try
+            {
+                var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+                if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("session_id", out var sessionId))
+                {
+                    await HttpClient.GetAsync($"payment/verify-premium?session_id={sessionId}");
+                    Navigation.NavigateTo("/premium");
+                    return; 
+                }
+
+                var response = await HttpClient.GetAsync("payment/sync-status");
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<SyncStatusResponse>();
+                    IsUserPremium = result?.IsPremium ?? false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur init premium: {ex.Message}");
+            }
+        }
+        IsLoading = false;
+    }
+
+    private void TogglePlan() => IsYearly = !IsYearly;
+    private void GoToLogin() => Navigation.NavigateTo("/login");
+
+    private async Task SubscribeToPremium()
+    {
+        IsLoading = true;
+        try
+        {
+            var payload = new { planType = IsYearly ? "yearly" : "monthly" };
+            var response = await HttpClient.PostAsJsonAsync("payment/subscribe", payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<StripeUrlResponse>();
+                if (!string.IsNullOrEmpty(result?.Url))
+                {
+                    Navigation.NavigateTo(result.Url, forceLoad: true);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Erreur HTTP: {response.StatusCode}");
+                IsLoading = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur Exception: {ex.Message}");
+            IsLoading = false;
+        }
+    }
+
+    private async Task GoToStripePortal()
+    {
+        IsLoading = true;
+        try
+        {
+            var response = await HttpClient.PostAsync("payment/portal", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<StripeUrlResponse>();
+                if (!string.IsNullOrEmpty(result?.Url))
+                {
+                    Navigation.NavigateTo(result.Url, forceLoad: true);
+                }
+            }
+            else
+            {
+                IsLoading = false;
+            }
+        }
+        catch
+        {
+            IsLoading = false;
+        }
+    }
+}
