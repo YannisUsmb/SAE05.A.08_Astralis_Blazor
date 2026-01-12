@@ -123,15 +123,17 @@
 
         <div class="login-right">
             <h2>Ou continuer avec</h2>
-            
 
             <div class="social-login">
 
-                @* <div id="google-btn-container" class="social-login-wrapper"></div> *@
-                <button type="button" class="btn-social">
-                    <img src="/assets/google.svg" alt="Google" width="24" height="24" />
-                    <span>Continuer avec Google</span>
-                </button>
+                <div class="google-custom-wrapper">
+                    <button type="button" class="btn-social">
+                        <img src="/assets/google.svg" alt="Google" width="24" height="24" />
+                        <span>Continuer avec Google</span>
+                    </button>
+
+                    <div id="google-btn-container" class="google-overlay"></div>
+                </div>
 
                 <button type="button" class="btn-social">
                     <img src="/assets/facebook.svg" alt="Facebook" width="24" height="24" />
@@ -142,7 +144,9 @@
                     <img src="/assets/microsoft.svg" alt="Microsoft" width="24" height="24" />
                     <span>Continuer avec Microsoft</span>
                 </button>
+
             </div>
+
         </div>
 
     </div>
@@ -162,7 +166,7 @@
             try
             {
                 var dotNetReference = DotNetObjectReference.Create(this);
-                // À déplacer dans appsettings
+
                 string clientId = "472091593732-pggcg9c8ohdnaqard33pi7rf10249b5d.apps.googleusercontent.com";
 
                 await JS.InvokeVoidAsync("googleAuth.initialize", dotNetReference, clientId);
@@ -179,5 +183,6 @@
     public async Task HandleGoogleLogin(string idToken)
     {
         await ViewModel.LoginWithGoogleAsync(idToken);
+        StateHasChanged();
     }
 }

@@ -48,7 +48,6 @@
     border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* --- SWITCH MODE (Slider Boutons) --- */
 .login-mode-switch {
     display: flex;
     position: relative;
@@ -60,7 +59,6 @@
     height: 45px;
 }
 
-/* Le fond animé (Plus doux maintenant) */
 .mode-slider-bg {
     position: absolute;
     top: 4px;
@@ -69,7 +67,6 @@
     height: calc(100% - 8px);
     background: rgba(157, 78, 221, 0.4);
     border-radius: 8px;
-    /* Courbe plus douce, sans effet de rebond agressif */
     transition: transform 0.35s cubic-bezier(0.45, 0, 0.55, 1);
     z-index: 0;
     box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
@@ -96,8 +93,6 @@
         font-weight: 600;
     }
 
-/* --- SLIDER INPUTS (Nouvelle logique inversée) --- */
-/* On utilise une grille pour superposer les éléments au même endroit */
 .input-slider-viewport {
     display: grid;
     grid-template-areas: "stack";
@@ -107,32 +102,26 @@
 }
 
 .input-slide {
-    grid-area: stack; /* Les deux sections sont l'une sur l'autre */
+    grid-area: stack;
     width: 100%;
     transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
-    /* Un peu de padding pour éviter que le focus outline soit coupé */
     padding: 2px;
 }
 
-/* --- LOGIQUE D'ANIMATION --- */
-
-/* Cas 1 : Mode STANDARD (Email) Actif */
 .mode-standard .slide-standard {
     transform: translateX(0);
     opacity: 1;
-    z-index: 2; /* Au-dessus */
+    z-index: 2;
     pointer-events: auto;
 }
 
 .mode-standard .slide-phone {
-    /* Le téléphone part vers la gauche (ou est caché à gauche) */
     transform: translateX(-100%);
     opacity: 0;
     z-index: 1;
     pointer-events: none;
 }
 
-/* Cas 2 : Mode PHONE Actif */
 .mode-phone .slide-phone {
     transform: translateX(0);
     opacity: 1;
@@ -141,7 +130,6 @@
 }
 
 .mode-phone .slide-standard {
-    /* Le standard part vers la droite (ou est caché à droite) */
     transform: translateX(100%);
     opacity: 0;
     z-index: 1;

@@ -1,5 +1,6 @@
 ﻿using Astralis.Shared.DTOs;
 using Astralis.Shared.Enums;
+using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -13,6 +14,7 @@ namespace Astralis_BlazorApp.ViewModels
     {
         private readonly IUserService _userService;
         private readonly ICountryService _countryService;
+        private readonly IAuthService _authService;
         private readonly NavigationManager _navigation;
 
         [ObservableProperty]
@@ -43,10 +45,12 @@ namespace Astralis_BlazorApp.ViewModels
         public SignUpViewModel(
             IUserService userService,
             ICountryService countryService,
+            IAuthService authService,
             NavigationManager navigation)
         {
             _userService = userService;
             _countryService = countryService;
+            _authService = authService;
             _navigation = navigation;
         }
 
@@ -192,6 +196,38 @@ namespace Astralis_BlazorApp.ViewModels
                 }
                 catch
                 { }
+            }
+        }
+
+        public async Task RegisterWithGoogleAsync(string idToken)
+        {
+            if (IsLoading) return;
+            IsLoading = true;
+            ErrorMessage = null;
+
+            try
+            {
+                var googleDto = new GoogleLoginDto { IdToken = idToken };
+
+                var result = await _authService.GoogleLogin(googleDto);
+
+                if (result != null)
+                {
+                    _navigation.NavigateTo("/");
+                }
+                else
+                {
+                    ErrorMessage = "L'inscription avec Google a échoué.";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur Google: {ex.Message}");
+                ErrorMessage = "Une erreur technique est survenue.";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
