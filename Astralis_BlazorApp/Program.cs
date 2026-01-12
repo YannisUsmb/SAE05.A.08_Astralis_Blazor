@@ -27,11 +27,9 @@ namespace Astralis_BlazorApp
             .AddHttpMessageHandler<HttpResponseHandler>();
 
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("AstralisAPI"));
-            builder.Services.AddScoped<ICartService, CartService>();
             // --- Services & ViewModels ---
             builder.Services.AddApplicationServices();
             builder.Services.AddViewModels();
-            builder.Services.AddScoped<ShopViewModel>();
             // --- Authorization & Auth ---
             builder.Services.AddAuthorizationCore(options =>
             {

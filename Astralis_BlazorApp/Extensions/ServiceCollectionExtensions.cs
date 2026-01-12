@@ -1,4 +1,5 @@
 using Astralis_BlazorApp.Handlers;
+using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
 using Astralis_BlazorApp.ViewModels;
@@ -55,11 +56,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IArticleService, ArticleService>();
         services.AddScoped<IAliasStatusService, AliasStatusService>();
         services.AddScoped<IAddressService, AddressService>();
-
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<AuthenticationStateProvider, CustomAuthProvider>();
         services.AddTransient<HttpResponseHandler>();
-
+        services.AddScoped<ICartService, CartService>();
         services.AddScoped<IUploadService, UploadService>();
 
         return services;
@@ -79,6 +79,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ArticleListViewModel>();
         services.AddScoped<ArticleEditorViewModel>();
         services.AddScoped<ArticleDetailsViewModel>();
+        services.AddScoped<ProductEditorViewModel>();
+        services.AddScoped<ShopViewModel>();
 
         return services;
     }
