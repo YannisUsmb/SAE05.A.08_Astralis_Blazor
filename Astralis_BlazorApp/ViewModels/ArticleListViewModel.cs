@@ -21,7 +21,6 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty] private int selectedTypeId = 0;
         [ObservableProperty] private bool isCommercialEditor;
-        [ObservableProperty] private bool isLoading;
 
         [ObservableProperty] private bool isLoading = true;
 
