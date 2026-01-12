@@ -50,14 +50,6 @@
             </select>
 
             <div class="d-flex gap-3 align-items-center">
-                <span class="text-white small">Prix :</span>
-                <input type="number" class="filter-input filter-input-sm" placeholder="Min"
-                       @bind="ViewModel.Filter.MinPrice" />
-                <span class="text-white">-</span>
-                <input type="number" class="filter-input filter-input-sm" placeholder="Max"
-                       @bind="ViewModel.Filter.MaxPrice" />
-
-            <div class="d-flex gap-3 align-items-center">
                 <button class="btn btn-astralis-outline btn-sm" @onclick="@(() => ViewModel.ApplyFilterCommand.ExecuteAsync(null))">
                     Appliquer les filtres
                 </button>
@@ -110,7 +102,7 @@
             {
                 <div class="detail-container">
                     <div class="d-flex flex-column align-items-center mb-4">
-                            <h2>@ViewModel.SelectedProductDetails.Label</h2>
+                        <h2>@ViewModel.SelectedProductDetails.Label</h2>
 
                         <div class="category-tooltip-container">
                             <span class="badge-type">@ViewModel.SelectedProductDetails.CategoryLabel</span>
@@ -119,9 +111,9 @@
                             {
                                 <div class="category-tooltip-text">
                                     @ViewModel.SelectedProductDetails.CategoryDescription
-                        </div>
+                                </div>
                             }
-                    </div>
+                        </div>
                     </div>
 
                     <div class="detail-image-div">
@@ -161,26 +153,22 @@
                                             <div>
                                                 <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">@related.Label</h3>
                                                 <h4 class="body-price" style="font-size: 1rem; color: #00d4ff;">@related.Price €</h4>
-                            </div>
+                                            </div>
                                             <button class="btn btn-sm btn-astralis-outline w-100 mt-2">
                                                 Voir la fiche
                                             </button>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="label">Disponibilité</span>
-                                <span class="value text-success">En Stock</span>
-                            </div>
+                                        </div>
+                                    </div>
                                 }
+                            </div>
                         </div>
-                    </div>
                     }
                     else if (IsLoadingRelated)
                     {
                         <div class="text-center mt-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
                             <span class="ms-2">Recherche d'équipements similaires...</span>
-                    </div>
+                        </div>
                     }
                 </div>
             }

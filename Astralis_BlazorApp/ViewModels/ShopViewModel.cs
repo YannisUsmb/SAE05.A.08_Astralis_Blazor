@@ -1,4 +1,4 @@
-using Astralis.Shared.DTOs;
+ï»¿using Astralis.Shared.DTOs;
 using Astralis_BlazorApp.Services;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,22 +9,18 @@ namespace Astralis_BlazorApp.ViewModels;
 
 public partial class ShopViewModel : ObservableObject
 {
-    // --- Services injectés ---
+    // --- Services injectÃ©s ---
     private readonly IProductService _productService;
     private readonly IProductCategoryService _typeService;
     private readonly ICartService _cartService;
-    
+
     // --- Gestion du Debounce (Recherche) ---
     private CancellationTokenSource? _searchCts;
 
-    // --- Collections de données ---
-    // --- Gestion du Debounce (Recherche) ---
-    private CancellationTokenSource? _searchCts;
-
-    // --- Collections de données ---
+    // --- Collections de donnï¿½es ---
     [ObservableProperty] private ObservableCollection<ProductListDto> products = new();
     [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
-    
+
     // --- Filtres et Tri ---
     [ObservableProperty] private ProductFilterDto filter = new();
     [ObservableProperty] private int selectedTypeId = 0;
@@ -35,13 +31,12 @@ public partial class ShopViewModel : ObservableObject
     [ObservableProperty] private int pageSize = 30;
     [ObservableProperty] private bool hasNextPage = true;
 
-    // --- États de l'interface ---
+    // --- Ã‰tats de l'interface ---
     [ObservableProperty] private bool isLoading;
-    [ObservableProperty] private bool is3DVisible;
     [ObservableProperty] private ProductListDto? selectedProduct;
     [ObservableProperty] private ProductDetailDto? selectedProductDetails;
-    
-    // --- PROPRIÉTÉ DE RECHERCHE (Implémentation Manuelle pour Debounce) ---
+
+    // --- PROPRIÃ‰TÃ‰ DE RECHERCHE (Implï¿½mentation Manuelle pour Debounce) ---
     private string _searchText = string.Empty;
 
     public string SearchText
@@ -55,7 +50,7 @@ public partial class ShopViewModel : ObservableObject
             }
         }
     }
-    
+
     // --- CONSTRUCTEUR ---
     public ShopViewModel(
         IProductService productService,
@@ -66,7 +61,7 @@ public partial class ShopViewModel : ObservableObject
         _typeService = typeService;
         _cartService = cartService;
     }
-    
+
     // --- LOGIQUE DE RECHERCHE ---
 
     private async void TriggerDebounceSearch(string text)
@@ -95,14 +90,14 @@ public partial class ShopViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            // 1. Chargement des catégories
+            // 1. Chargement des catï¿½gories
             var types = await _typeService.GetAllAsync();
             ProductCategories = new ObservableCollection<ProductCategoryDto>(types);
-            
+
             // 2. Chargement initial des produits
             await SearchDataAsync();
 
-            // 3. Chargement de l'état du panier (pour le badge)
+            // 3. Chargement de l'Ã©tat du panier (pour le badge)
             await _cartService.LoadCartAsync();
         }
         catch (Exception ex)
@@ -114,12 +109,12 @@ public partial class ShopViewModel : ObservableObject
 
     [RelayCommand]
     public async Task ApplyFilterAsync()
-        {
+    {
         CurrentPage = 1;
         await SearchDataAsync();
-        
+
     }
-    
+
     [RelayCommand]
     public async Task SearchDataAsync()
     {
@@ -133,8 +128,8 @@ public partial class ShopViewModel : ObservableObject
             var results = await _productService.SearchAsync(Filter);
 
             HasNextPage = results.Count == PageSize;
-            
-            // Tri côté client (si l'API ne le gère pas déjà)
+
+            // Tri cÃ´tÃ© client (si l'API ne le gï¿½re pas dï¿½jï¿½)
             IEnumerable<ProductListDto> sortedList = results;
             switch (SortBy)
             {
@@ -154,7 +149,7 @@ public partial class ShopViewModel : ObservableObject
             }
 
             Products = new ObservableCollection<ProductListDto>(sortedList);
-            SelectedProductDetails = null; // Reset détail si on cherche
+            SelectedProductDetails = null; // Reset dÃ©tail si on cherche
         }
         catch (Exception ex)
         {
@@ -167,11 +162,10 @@ public partial class ShopViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    public async Task ShowDetails(ProductListDto body)
+    public async Task OnFilterChanged()
     {
     }
-    
+
     [RelayCommand]
     public async Task ShowDetails(ProductListDto body)
     {
@@ -179,7 +173,7 @@ public partial class ShopViewModel : ObservableObject
 
         IsLoading = true;
         SelectedProduct = body;
-    
+
         try
         {
             var details = await _productService.GetByIdAsync(body.Id);
@@ -187,7 +181,7 @@ public partial class ShopViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur détails : {ex.Message}");
+            Console.WriteLine($"Erreur dï¿½tails : {ex.Message}");
             SelectedProductDetails = null;
         }
         finally
@@ -201,16 +195,6 @@ public partial class ShopViewModel : ObservableObject
     {
         SelectedProductDetails = null;
         SelectedProduct = null;
-    }
-
-    [RelayCommand]
-    public async Task NextPage()
-    {
-        if (HasNextPage)
-        {
-            CurrentPage++;
-            await SearchDataAsync();
-        }
     }
 
     [RelayCommand]
