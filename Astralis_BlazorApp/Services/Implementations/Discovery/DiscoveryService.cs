@@ -22,7 +22,7 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
 
     public async Task<DiscoveryDto?> CreateAsteroidAsync(DiscoveryAsteroidSubmissionDto submission)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Asteroids", submission);
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Asteroid", submission);
         response.EnsureSuccessStatusCode();
 
         DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
@@ -31,7 +31,7 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
 
     public async Task<DiscoveryDto?> CreatePlanetAsync(DiscoveryPlanetSubmissionDto submission)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Planets", submission);
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Planet", submission);
         response.EnsureSuccessStatusCode();
 
         DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
@@ -40,7 +40,7 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
 
     public async Task<DiscoveryDto?> CreateStarAsync(DiscoveryStarSubmissionDto submission)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Stars", submission);
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Star", submission);
         response.EnsureSuccessStatusCode();
 
         DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
@@ -49,7 +49,7 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
 
     public async Task<DiscoveryDto?> CreateCometAsync(DiscoveryCometSubmissionDto submission)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Comets", submission);
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Comet", submission);
         response.EnsureSuccessStatusCode();
 
         DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
@@ -58,11 +58,20 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
 
     public async Task<DiscoveryDto?> CreateGalaxyAsync(DiscoveryGalaxyQuasarSubmissionDto submission)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/GalaxyQuasars", submission);
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/GalaxyQuasar", submission);
         response.EnsureSuccessStatusCode();
 
         DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
         return createdEntity ?? throw new Exception("Error creating Galaxy discovery");
+    }
+    
+    public async Task<DiscoveryDto?> CreateSatelliteAsync(DiscoverySatelliteSubmissionDto submission)
+    {
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Satellite", submission);
+        response.EnsureSuccessStatusCode();
+
+        DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
+        return createdEntity ?? throw new Exception("Error creating Satellite discovery");
     }
 
     public async Task UpdateTitleAsync(int id, DiscoveryUpdateDto dto)

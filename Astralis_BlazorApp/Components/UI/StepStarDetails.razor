@@ -1,0 +1,108 @@
+@using Astralis.Shared.DTOs
+
+<div class="form-step">
+    <h3>Détails de l'étoile</h3>
+    
+    <EditForm Model="@Model" OnValidSubmit="HandleNext">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label>Titre de la découverte *</label>
+            <InputText @bind-Value="Model.Title" class="form-control" placeholder="Ex: Nova in Cassiopeia" />
+            <ValidationMessage For="@(() => Model.Title)" />
+        </div>
+
+        <h4>Caractéristiques de l'étoile</h4>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom *</label>
+                <InputText @bind-Value="Model.Details.Name" class="form-control" placeholder="Ex: Betelgeuse" />
+                <ValidationMessage For="@(() => Model.Details.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label>Alias (optionnel)</label>
+                <InputText @bind-Value="Model.Details.Alias" class="form-control" placeholder="Ex: Alpha Orionis" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Température (K)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Temperature" class="form-control" placeholder="Ex: 5778" />
+            </div>
+
+            <div class="form-group">
+                <label>Distance (AL)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Distance" class="form-control" placeholder="Ex: 642" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Rayon (R☉)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Radius" class="form-control" placeholder="Ex: 1.0" />
+            </div>
+            
+            <div class="form-group">
+                <label>Luminosité (L☉)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Luminosity" class="form-control" placeholder="Ex: 1.0" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Constellation</label>
+                <InputText @bind-Value="Model.Details.Constellation" class="form-control" placeholder="Ex: Orion" />
+            </div>
+            
+            <div class="form-group">
+                <label>Désignation</label>
+                <InputText @bind-Value="Model.Details.Designation" class="form-control" placeholder="Ex: HD 39801" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Désignation de Bayer</label>
+                <InputText @bind-Value="Model.Details.BayerDesignation" class="form-control" placeholder="Ex: α Ori" />
+            </div>
+            
+            <div class="form-group">
+                <label>Date d'approbation</label>
+                <InputDate TValue="DateOnly?" @bind-Value="Model.Details.ApprovalDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" @onclick="OnPrevious">
+                <i class="bi bi-arrow-left"></i> Précédent
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Suivant <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public DiscoveryStarSubmissionDto Model { get; set; } = new();
+    [Parameter] public EventCallback<DiscoveryStarSubmissionDto> ModelChanged { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Model.Details == null)
+        {
+            Model.Details = new StarCreateDto();
+        }
+    }
+
+    private async Task HandleNext()
+    {
+        await ModelChanged.InvokeAsync(Model);
+        await OnNext.InvokeAsync();
+    }
+}

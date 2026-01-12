@@ -1,0 +1,140 @@
+.form-step {
+    padding: 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.form-step h3 {
+    color: #fff;
+    font-family: "Orbitron", sans-serif;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+}
+
+.type-selection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.type-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.type-option:hover {
+    border-color: rgba(167, 109, 255, 0.5);
+    background: rgba(0, 0, 0, 0.3);
+    transform: translateX(5px);
+}
+
+.type-option.selected {
+    border-color: #a76dff;
+    background: rgba(167, 109, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(167, 109, 255, 0.2);
+}
+
+.type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.type-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.type-content i {
+    font-size: 2.5rem;
+    color: #a76dff;
+    flex-shrink: 0;
+}
+
+.type-option.selected i {
+    color: #b98fff;
+}
+
+.type-text {
+    flex: 1;
+}
+
+.type-text h4 {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.type-text p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.type-option.selected .type-text h4 {
+    color: #a76dff;
+}
+
+.type-option.selected .type-text p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Checkmark pour la sélection */
+.type-option::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.type-option.selected::after {
+    content: '✓';
+    background: linear-gradient(135deg, #a76dff 0%, #9d4edd 100%);
+    border-color: #a76dff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .type-content {
+        gap: 1rem;
+    }
+
+    .type-content i {
+        font-size: 2rem;
+    }
+
+    .type-text h4 {
+        font-size: 1.1rem;
+    }
+
+    .type-text p {
+        font-size: 0.85rem;
+    }
+}

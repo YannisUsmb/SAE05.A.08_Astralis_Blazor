@@ -12,6 +12,7 @@ public interface IDiscoveryService
     Task<DiscoveryDto?> CreateStarAsync(DiscoveryStarSubmissionDto submission);
     Task<DiscoveryDto?> CreateCometAsync(DiscoveryCometSubmissionDto submission);
     Task<DiscoveryDto?> CreateGalaxyAsync(DiscoveryGalaxyQuasarSubmissionDto submission);
+    Task<DiscoveryDto?> CreateSatelliteAsync(DiscoverySatelliteSubmissionDto submission);
     Task UpdateTitleAsync(int id, DiscoveryUpdateDto dto);
     Task ProposeAliasAsync(int id, DiscoveryAliasDto dto);
     Task ModerateStatusAsync(int id, DiscoveryModerationDto dto);

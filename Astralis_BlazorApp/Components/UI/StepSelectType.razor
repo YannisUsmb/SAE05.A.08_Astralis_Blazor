@@ -1,0 +1,89 @@
+<div class="form-step">
+    <h3>Quel type de corps céleste avez-vous découvert ?</h3>
+    
+    <div class="type-selection-list">
+        <label class="type-option @(SelectedType == 1 ? "selected" : "")" @onclick="() => SelectType(1)">
+            <input type="radio" name="celestialType" value="1" checked="@(SelectedType == 1)" />
+            <div class="type-content">
+                <i class="bi bi-star-fill"></i>
+                <div class="type-text">
+                    <h4>Étoile</h4>
+                    <p>Objet céleste lumineux</p>
+                </div>
+            </div>
+        </label>
+
+        <label class="type-option @(SelectedType == 2 ? "selected" : "")" @onclick="() => SelectType(2)">
+            <input type="radio" name="celestialType" value="2" checked="@(SelectedType == 2)" />
+            <div class="type-content">
+                <i class="bi bi-globe"></i>
+                <div class="type-text">
+                    <h4>Planète</h4>
+                    <p>Corps en orbite autour d'une étoile</p>
+                </div>
+            </div>
+        </label>
+
+        <label class="type-option @(SelectedType == 3 ? "selected" : "")" @onclick="() => SelectType(3)">
+            <input type="radio" name="celestialType" value="3" checked="@(SelectedType == 3)" />
+            <div class="type-content">
+                <i class="bi bi-circle"></i>
+                <div class="type-text">
+                    <h4>Astéroïde</h4>
+                    <p>Petit corps rocheux</p>
+                </div>
+            </div>
+        </label>
+
+        <label class="type-option @(SelectedType == 4 ? "selected" : "")" @onclick="() => SelectType(4)">
+            <input type="radio" name="celestialType" value="4" checked="@(SelectedType == 4)" />
+            <div class="type-content">
+                <i class="bi bi-droplet"></i>
+                <div class="type-text">
+                    <h4>Comète</h4>
+                    <p>Corps glacé avec queue</p>
+                </div>
+            </div>
+        </label>
+
+        <label class="type-option @(SelectedType == 5 ? "selected" : "")" @onclick="() => SelectType(5)">
+            <input type="radio" name="celestialType" value="5" checked="@(SelectedType == 5)" />
+            <div class="type-content">
+                <i class="bi bi-stars"></i>
+                <div class="type-text">
+                    <h4>Galaxie/Quasar</h4>
+                    <p>Système stellaire massif</p>
+                </div>
+            </div>
+        </label>
+
+        <label class="type-option @(SelectedType == 6 ? "selected" : "")" @onclick="() => SelectType(6)">
+            <input type="radio" name="celestialType" value="6" checked="@(SelectedType == 6)" />
+            <div class="type-content">
+                <i class="bi bi-moon"></i>
+                <div class="type-text">
+                    <h4>Satellite</h4>
+                    <p>Lune d'une planète</p>
+                </div>
+            </div>
+        </label>
+    </div>
+
+    <div class="form-navigation">
+        <button type="button" class="btn btn-primary" @onclick="OnNext" disabled="@(SelectedType == null)">
+            Suivant <i class="bi bi-arrow-right"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? SelectedType { get; set; }
+    [Parameter] public EventCallback<int?> SelectedTypeChanged { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+
+    private async Task SelectType(int type)
+    {
+        SelectedType = type;
+        await SelectedTypeChanged.InvokeAsync(type);
+    }
+}

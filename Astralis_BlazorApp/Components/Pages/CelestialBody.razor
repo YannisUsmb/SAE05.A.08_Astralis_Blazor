@@ -36,6 +36,29 @@
                 <option value="mass">Masse (Planètes)</option>
                 <option value="temperature">Température</option>
             </select>
+            
+            <AuthorizeView>
+                <Authorized>
+                    <button class="btn-new-discovery" @onclick="NavigateToDiscoveryForm">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <span>Ajouter une nouvelle découverte</span>
+                    </button>
+                </Authorized>
+            </AuthorizeView>
+            
+            @if (_showSuccessMessage)
+            {
+                <div class="alert alert-success alert-discovery-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>Découverte soumise avec succès !</strong>
+                        <p>Votre découverte sera examinée par un administrateur avant d'être publiée.</p>
+                    </div>
+                    <button class="btn-close-alert" @onclick="CloseSuccessMessage">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            }
         </div>
 
         @if (ViewModel.SelectedTypeId != 0)
@@ -765,7 +788,20 @@
     
     [SupplyParameterFromQuery(Name = "page")]
     public int? Page { get; set; }
+    
+    [SupplyParameterFromQuery(Name = "discoverySubmitted")]
+    public bool? DiscoverySubmitted { get; set; }
 
+    [SupplyParameterFromQuery(Name = "id")]
+    public int? SubmittedDiscoveryId { get; set; }
+    
+    private bool _showSuccessMessage = false;
+
+    private void NavigateToDiscoveryForm()
+    {
+        Navigation.NavigateTo("/decouverte/nouvelle");
+    }
+    
     protected override async Task OnInitializedAsync()
     {
         ViewModel.PropertyChanged += (s, e) => InvokeAsync(StateHasChanged);
@@ -798,5 +834,15 @@
         {
             await ViewModel.SearchDataAsync();
         }
+        
+        if (DiscoverySubmitted == true && SubmittedDiscoveryId.HasValue)
+        {
+            _showSuccessMessage = true;
+        }
+    }
+    
+    private void CloseSuccessMessage()
+    {
+        _showSuccessMessage = false;
     }
 }

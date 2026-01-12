@@ -1,0 +1,134 @@
+@using Astralis.Shared.DTOs
+
+<div class="form-step">
+    <h3>Révision de votre découverte</h3>
+    <p class="review-subtitle">Vérifiez les informations avant de soumettre</p>
+    
+    <div class="review-section">
+        <div class="review-header">
+            <i class="bi bi-info-circle"></i>
+            <h4>Type de corps céleste</h4>
+        </div>
+        <p class="review-value">@GetTypeName(SelectedType)</p>
+    </div>
+
+    @if (SelectedType == 1 && StarSubmission != null)
+    {
+        <div class="review-section">
+            <div class="review-header">
+                <i class="bi bi-star-fill"></i>
+                <h4>Détails de l'étoile</h4>
+            </div>
+            
+            <div class="review-grid">
+                <div class="review-item">
+                    <span class="review-label">Titre</span>
+                    <span class="review-value">@StarSubmission.Title</span>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(StarSubmission.Details.Name))
+                {
+                    <div class="review-item">
+                        <span class="review-label">Nom</span>
+                        <span class="review-value">@StarSubmission.Details.Name</span>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(StarSubmission.Details.Alias))
+                {
+                    <div class="review-item">
+                        <span class="review-label">Alias</span>
+                        <span class="review-value">@StarSubmission.Details.Alias</span>
+                    </div>
+                }
+                
+                @if (StarSubmission.Details.Temperature.HasValue)
+                {
+                    <div class="review-item">
+                        <span class="review-label">Température</span>
+                        <span class="review-value">@StarSubmission.Details.Temperature.Value K</span>
+                    </div>
+                }
+                
+                @if (StarSubmission.Details.Distance.HasValue)
+                {
+                    <div class="review-item">
+                        <span class="review-label">Distance</span>
+                        <span class="review-value">@StarSubmission.Details.Distance.Value AL</span>
+                    </div>
+                }
+                
+                @if (StarSubmission.Details.Radius.HasValue)
+                {
+                    <div class="review-item">
+                        <span class="review-label">Rayon</span>
+                        <span class="review-value">@StarSubmission.Details.Radius.Value R☉</span>
+                    </div>
+                }
+                
+                @if (StarSubmission.Details.Luminosity.HasValue)
+                {
+                    <div class="review-item">
+                        <span class="review-label">Luminosité</span>
+                        <span class="review-value">@StarSubmission.Details.Luminosity.Value L☉</span>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(StarSubmission.Details.Constellation))
+                {
+                    <div class="review-item">
+                        <span class="review-label">Constellation</span>
+                        <span class="review-value">@StarSubmission.Details.Constellation</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @* Ajoute les mêmes sections pour Planet, Asteroid, etc. si nécessaire *@
+
+    <div class="review-actions">
+        <button type="button" class="btn btn-secondary" @onclick="OnPrevious" disabled="@IsSubmitting">
+            <i class="bi bi-arrow-left"></i> Modifier
+        </button>
+        
+        <button type="button" class="btn btn-primary" @onclick="OnSubmit" disabled="@IsSubmitting">
+            @if (IsSubmitting)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <span>Soumission en cours...</span>
+            }
+            else
+            {
+                <span><i class="bi bi-send"></i> Soumettre la découverte</span>
+            }
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? SelectedType { get; set; }
+    [Parameter] public DiscoveryStarSubmissionDto? StarSubmission { get; set; }
+    [Parameter] public DiscoveryPlanetSubmissionDto? PlanetSubmission { get; set; }
+    [Parameter] public DiscoveryAsteroidSubmissionDto? AsteroidSubmission { get; set; }
+    [Parameter] public DiscoveryCometSubmissionDto? CometSubmission { get; set; }
+    [Parameter] public DiscoveryGalaxyQuasarSubmissionDto? GalaxySubmission { get; set; }
+    [Parameter] public DiscoverySatelliteSubmissionDto? SatelliteSubmission { get; set; }
+    [Parameter] public EventCallback OnSubmit { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+    [Parameter] public bool IsSubmitting { get; set; }
+
+    private string GetTypeName(int? type)
+    {
+        return type switch
+        {
+            1 => "Étoile",
+            2 => "Planète",
+            3 => "Astéroïde",
+            4 => "Comète",
+            5 => "Galaxie/Quasar",
+            6 => "Satellite",
+            _ => "Non spécifié"
+        };
+    }
+}

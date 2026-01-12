@@ -38,6 +38,7 @@ namespace Astralis_BlazorApp
             });
 
             builder.Services.AddBlazorBootstrap();
+            
 
             await builder.Build().RunAsync();
         }
