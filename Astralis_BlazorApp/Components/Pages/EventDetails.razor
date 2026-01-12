@@ -1,0 +1,90 @@
+﻿@page "/evenements/{Id:int}"
+@using Astralis.Shared.DTOs
+@inject EventDetailsViewModel ViewModel
+
+<PageTitle>@(ViewModel.SelectedEvent?.Title ?? "Événement") – Astralis</PageTitle>
+
+@if (ViewModel.IsLoading)
+{
+    <div class="content d-flex justify-content-center align-items-center" style="height: 60vh;">
+        <div class="spinner-border text-accent-purple" role="status"></div>
+    </div>
+}
+else if (ViewModel.SelectedEvent != null)
+{
+    <div class="event-details-container">
+
+        <div class="event-hero" style="background-image: url('@(ViewModel.SelectedEvent.PictureUrl ?? "/assets/images/placeholder-space.jpg")');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content content">
+                <span class="badge-type-hero">@ViewModel.SelectedEvent.EventTypeLabel</span>
+                <h1 class="display-3 fw-bold text-white mb-2">@ViewModel.SelectedEvent.Title</h1>
+                <div class="d-flex align-items-center justify-content-center gap-3 text-white-50">
+                    <span><i class="bi bi-calendar-event me-2"></i>@ViewModel.SelectedEvent.StartDate.ToString("dd MMMM yyyy")</span>
+                    <span>•</span>
+                    <span><i class="bi bi-geo-alt me-2"></i>@(ViewModel.SelectedEvent.Location ?? "En ligne / Non spécifié")</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content event-body-grid">
+
+            <div class="event-main-content glass-panel p-4">
+                <h3 class="font-orbitron text-accent-purple mb-4">À propos de l'événement</h3>
+                <div class="event-description text-justify">
+                    @((MarkupString)ViewModel.SelectedEvent.Description.Replace("\n", "<br>"))
+                </div>
+            </div>
+
+            <div class="event-sidebar">
+                <div class="glass-card p-4 text-center sticky-card">
+                    <h4 class="text-white font-orbitron mb-4">Détails pratiques</h4>
+
+                    <div class="info-row mb-3">
+                        <i class="bi bi-clock text-accent-blue fs-4 mb-2 d-block"></i>
+                        <span class="text-white fw-bold">@ViewModel.SelectedEvent.StartDate.ToString("HH:mm")</span>
+                        <span class="d-block text-white-50 small">Heure de début</span>
+                    </div>
+
+                    @if (ViewModel.SelectedEvent.EndDate.HasValue)
+                    {
+                        <div class="info-row mb-3">
+                            <i class="bi bi-hourglass-split text-accent-blue fs-4 mb-2 d-block"></i>
+                            <span class="text-white fw-bold">@ViewModel.SelectedEvent.EndDate.Value.ToString("HH:mm")</span>
+                            <span class="d-block text-white-50 small">Fin prévue</span>
+                        </div>
+                    }
+
+                    <hr class="border-white-10 my-4" />
+
+                    <div class="d-grid gap-3">
+                        <button class="btn btn-astralis-premium" @onclick="ViewModel.AddToCalendar">
+                            <i class="bi bi-calendar-plus me-2"></i> Ajouter au calendrier
+                        </button>
+
+                        <button class="btn btn-astralis-outline" @onclick="ViewModel.ToggleInterest">
+                            <i class="bi bi-star me-2"></i> Ça m'intéresse
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(ViewModel.SelectedEvent.Link))
+                        {
+                            <a href="@ViewModel.SelectedEvent.Link" target="_blank" class="btn btn-link text-white-50 text-decoration-none">
+                                <i class="bi bi-box-arrow-up-right me-2"></i> Lien externe
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ViewModel.InitializeAsync(Id);
+    }
+}
