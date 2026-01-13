@@ -500,7 +500,7 @@ body {
 .filters {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-evenly;
     gap: 1rem;
     margin-bottom: 3rem;
 }
