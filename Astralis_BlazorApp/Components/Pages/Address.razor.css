@@ -1,0 +1,110 @@
+.text-accent-blue {
+    color: #00d4ff !important;
+}
+
+.text-accent-purple {
+    color: #9d4edd !important;
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.border-white-10 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+    .icon-circle.text-accent-blue {
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.1);
+    }
+
+    .icon-circle.text-accent-purple {
+        box-shadow: 0 0 15px rgba(157, 78, 221, 0.1);
+    }
+
+.btn-icon-edit {
+    background: transparent;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+    .btn-icon-edit:hover {
+        color: white !important;
+        transform: scale(1.1);
+    }
+
+.form-control-astralis {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+    .form-control-astralis:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #9d4edd;
+        color: white;
+        box-shadow: 0 0 0 0.25rem rgba(157, 78, 221, 0.25);
+    }
+
+    .form-control-astralis::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+.form-select.form-control-astralis {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+    .form-select.form-control-astralis option {
+        background-color: #1a1a2e;
+        color: white;
+    }
+
+.btn-astralis-premium {
+    background: linear-gradient(90deg, #9d4edd, #6c5ce7);
+    border: none;
+    color: white;
+    transition: filter 0.2s ease;
+}
+
+    .btn-astralis-premium:hover {
+        filter: brightness(1.1);
+        color: white;
+    }
+.hover-danger:hover {
+    color: #dc3545 !important;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+.ls-1 {
+    letter-spacing: 1px;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

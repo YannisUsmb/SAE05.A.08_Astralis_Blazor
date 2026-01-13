@@ -3,7 +3,7 @@
     public static class AppRoutes
     {
         public const string Home = "/";
-
+        public const string Addresses = "/parametres/adresses";
         public const string Articles = "/articles";
         public const string Audios = "/audios";
         public const string Connexion = "/connexion";
