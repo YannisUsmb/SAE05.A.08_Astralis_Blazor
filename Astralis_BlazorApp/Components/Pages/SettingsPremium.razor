@@ -1,0 +1,67 @@
+﻿@page "/parametres/premium"
+@layout SettingsLayout
+@using Astralis_BlazorApp.ViewModels
+@inject PremiumViewModel ViewModel
+@inject NavigationManager Navigation
+@using Astralis_BlazorApp.Components.Layout
+
+<PageTitle>Mon Abonnement - Paramètres</PageTitle>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="text-white m-0 fw-light">Mon <span class="fw-bold">Abonnement</span></h3>
+</div>
+
+@if (ViewModel.IsLoading)
+{
+    <div class="spinner-border text-primary" role="status"></div>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card bg-dark text-white border-0 shadow-sm p-4" style="background: rgba(20, 20, 35, 0.6) !important; border: 1px solid rgba(255,255,255,0.05) !important;">
+
+                <div class="d-flex align-items-center mb-4">
+                    <div class="rounded-circle bg-success bg-opacity-25 p-3 me-3 text-success">
+                        <i class="bi bi-patch-check-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="m-0">Membre Astralis Premium</h4>
+                        <small class="text-white-50">Compte actif et opérationnel</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info bg-opacity-10 border-0 text-info d-flex align-items-center">
+                    <i class="bi bi-info-circle me-3 fs-4"></i>
+                    <div>
+                        Votre accès aux fréquences <strong>Audio SpatialPRO</strong> et aux archives classifiées est déverrouillé.
+                    </div>
+                </div>
+
+                <hr class="border-secondary opacity-25 my-4" />
+
+                <h5 class="mb-3">Gestion de la facturation</h5>
+                <p class="text-white-50 small mb-4">
+                    Vous pouvez modifier votre moyen de paiement, télécharger vos factures ou annuler votre abonnement directement via notre partenaire sécurisé Stripe.
+                </p>
+
+                <button class="btn btn-outline-light d-flex align-items-center gap-2" @onclick="ViewModel.GoToStripePortal">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    Accéder au portail client Stripe
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+
+        if (!ViewModel.IsUserPremium && !ViewModel.IsLoading)
+        {
+            Navigation.NavigateTo("/premium");
+        }
+    }
+}

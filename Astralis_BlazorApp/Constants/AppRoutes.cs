@@ -14,5 +14,6 @@
         public const string Account = "/parametres/compte";
         public const string Premium = "/premium";
         public const string Shop = "/boutique";
+        public const string PremiumSubscribed = "/parametres/premium";
     }
 }
