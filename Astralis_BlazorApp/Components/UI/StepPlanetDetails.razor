@@ -1,0 +1,125 @@
+@using Astralis.Shared.DTOs
+
+<div class="form-step">
+    <h3>Détails de la planète</h3>
+    
+    <EditForm Model="@Model" OnValidSubmit="HandleNext">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label>Titre de la découverte *</label>
+            <InputText @bind-Value="Model.Title" class="form-control" placeholder="Ex: Nouvelle exoplanète dans Kepler-442" />
+            <ValidationMessage For="@(() => Model.Title)" />
+        </div>
+
+        <h4>Caractéristiques de la planète</h4>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom *</label>
+                <InputText @bind-Value="Model.Details.Name" class="form-control" placeholder="Ex: Kepler-442b" />
+                <ValidationMessage For="@(() => Model.Details.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label>Alias (optionnel)</label>
+                <InputText @bind-Value="Model.Details.Alias" class="form-control" placeholder="Ex: KOI-4742.01" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Masse (M⊕)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Mass" class="form-control" placeholder="Ex: 2.34" />
+            </div>
+
+            <div class="form-group">
+                <label>Rayon (R⊕)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Radius" class="form-control" placeholder="Ex: 1.34" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Distance (AL)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Distance" class="form-control" placeholder="Ex: 112.4" />
+            </div>
+            
+            <div class="form-group">
+                <label>Température</label>
+                <InputText @bind-Value="Model.Details.Temperature" class="form-control" placeholder="Ex: 233 K" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Période orbitale</label>
+                <InputText @bind-Value="Model.Details.OrbitalPeriod" class="form-control" placeholder="Ex: 112.3 jours" />
+            </div>
+            
+            <div class="form-group">
+                <label>Excentricité</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Eccentricity" class="form-control" placeholder="Ex: 0.04" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Magnitude stellaire</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.StellarMagnitude" class="form-control" placeholder="Ex: 8.2" />
+            </div>
+            
+            <div class="form-group">
+                <label>Année de découverte</label>
+                <InputNumber TValue="int?" @bind-Value="Model.Details.DiscoveryYear" class="form-control" placeholder="Ex: 2024" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Température étoile hôte</label>
+                <InputText @bind-Value="Model.Details.HostStarTemperature" class="form-control" placeholder="Ex: 4402 K" />
+            </div>
+            
+            <div class="form-group">
+                <label>Masse étoile hôte</label>
+                <InputText @bind-Value="Model.Details.HostStarMass" class="form-control" placeholder="Ex: 0.61 M☉" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Remarques</label>
+            <InputTextArea @bind-Value="Model.Details.Remark" class="form-control" rows="3" placeholder="Informations supplémentaires..." />
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" @onclick="OnPrevious">
+                <i class="bi bi-arrow-left"></i> Précédent
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Suivant <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public DiscoveryPlanetSubmissionDto Model { get; set; } = new();
+    [Parameter] public EventCallback<DiscoveryPlanetSubmissionDto> ModelChanged { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Model.Details == null)
+        {
+            Model.Details = new PlanetCreateDto();
+        }
+    }
+
+    private async Task HandleNext()
+    {
+        await ModelChanged.InvokeAsync(Model);
+        await OnNext.InvokeAsync();
+    }
+}
