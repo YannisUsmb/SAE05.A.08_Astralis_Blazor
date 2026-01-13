@@ -1,8 +1,10 @@
 ﻿using Astralis.Shared.DTOs;
+using Astralis_BlazorApp.Extensions;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.ObjectModel;
 
@@ -12,6 +14,9 @@ namespace Astralis_BlazorApp.ViewModels
     {
         private readonly IEventService _eventService;
         private readonly IEventTypeService _eventTypeService;
+        private readonly IEventInterestService _interestService;
+        private readonly AuthenticationStateProvider _authStateProvider;
+        private readonly IUserService _userService;
         private readonly NavigationManager _navigation;
 
         [ObservableProperty] private ObservableCollection<EventDto> events = new();
@@ -41,10 +46,16 @@ namespace Astralis_BlazorApp.ViewModels
         public EventViewModel(
             IEventService eventService,
             IEventTypeService eventTypeService,
+            IEventInterestService interestService,
+            AuthenticationStateProvider authStateProvider,
+            IUserService userService,
             NavigationManager navigation)
         {
             _eventService = eventService;
             _eventTypeService = eventTypeService;
+            _interestService = interestService;
+            _authStateProvider = authStateProvider;
+            _userService = userService;
             _navigation = navigation;
 
             _debounceTimer = new System.Timers.Timer(500);
@@ -136,6 +147,54 @@ namespace Astralis_BlazorApp.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task ToggleInterestAsync(EventDto evt)
+        {
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            if (!authState.User.Identity?.IsAuthenticated ?? true)
+            {
+                _navigation.NavigateToLogin(_navigation.Uri);
+                return;
+            }
+
+            var userIdStr = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out int userId)) return;
+
+            bool wasInterested = evt.IsInterested;
+            evt.IsInterested = !evt.IsInterested;
+
+            OnPropertyChanged(nameof(Events));
+
+            if (evt.IsInterested)
+                evt.InterestCount++;
+            else
+                evt.InterestCount--;
+
+            try
+            {
+                if (wasInterested)
+                {
+                    await _interestService.DeleteAsync(evt.Id, userId);
+                }
+                else
+                {
+                    await _interestService.AddAsync(new EventInterestDto { EventId = evt.Id, UserId = userId });
+                }
+            }
+            catch (Exception)
+            {
+                evt.IsInterested = wasInterested;
+                if (evt.IsInterested)
+                    evt.InterestCount++;
+                else
+                    evt.InterestCount--;
+
+                OnPropertyChanged(nameof(Events));
+
+                Console.WriteLine("Erreur lors de la mise à jour du favori.");
             }
         }
 

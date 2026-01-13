@@ -122,3 +122,8 @@
         color: #000;
         transform: scale(1.1);
     }
+
+    .btn-icon-interest.active {
+        border-color: #ffd700;
+        background: rgba(255, 215, 0, 0.1);
+    }

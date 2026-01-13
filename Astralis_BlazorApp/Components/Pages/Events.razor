@@ -133,9 +133,15 @@
                             </div>
                             <div class="event-card-footer mt-3 d-flex justify-content-between align-items-center">
                                 <span class="text-accent-purple small fw-bold">Voir les détails <i class="bi bi-arrow-right"></i></span>
-                                <button class="btn-icon-interest info-tooltip-wrapper" @onclick:stopPropagation="true">
-                                    <i class="bi bi-star"></i>
-                                    <span class="custom-tooltip">Ça m'intéresse</span>
+                                <button class="btn-icon-interest info-tooltip-wrapper @(evt.IsInterested ? "active" : "")"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => ViewModel.ToggleInterestAsync(evt)">
+
+                                    <i class="bi @(evt.IsInterested ? "bi-star-fill text-warning" : "bi-star")"></i>
+
+                                    <span class="custom-tooltip">
+                                        @(evt.IsInterested ? "Ne plus suivre" : "Ça m'intéresse")
+                                    </span>
                                 </button>
                             </div>
                         </div>

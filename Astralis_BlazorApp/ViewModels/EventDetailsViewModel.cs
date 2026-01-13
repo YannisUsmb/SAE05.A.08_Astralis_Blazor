@@ -2,6 +2,7 @@
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -11,6 +12,8 @@ namespace Astralis_BlazorApp.ViewModels
     public partial class EventDetailsViewModel : ObservableObject
     {
         private readonly IEventService _eventService;
+        private readonly IEventInterestService _interestService;
+        private readonly AuthenticationStateProvider _authStateProvider;
         private readonly NavigationManager _navigation;
         private readonly IJSRuntime _jsRuntime;
 
@@ -22,10 +25,14 @@ namespace Astralis_BlazorApp.ViewModels
 
         public EventDetailsViewModel(
             IEventService eventService,
+            IEventInterestService interestService,
+            AuthenticationStateProvider authStateProvider,
             NavigationManager navigation,
             IJSRuntime jsRuntime)
         {
             _eventService = eventService;
+            _interestService = interestService;
+            _authStateProvider = authStateProvider;
             _navigation = navigation;
             _jsRuntime = jsRuntime;
         }
@@ -59,9 +66,40 @@ namespace Astralis_BlazorApp.ViewModels
             await _jsRuntime.InvokeVoidAsync("downloadFile", fileName, "text/calendar", icsContent);
         }
 
-        public void ToggleInterest()
+        public async Task ToggleInterest()
         {
-            Console.WriteLine("Toggle intérêt...");
+            if (SelectedEvent == null) return;
+
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            if (!authState.User.Identity?.IsAuthenticated ?? true)
+            {
+                return;
+            }
+
+            var userIdStr = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out int userId)) return;
+
+            bool wasInterested = SelectedEvent.IsInterested;
+            SelectedEvent.IsInterested = !SelectedEvent.IsInterested;
+
+            OnPropertyChanged(nameof(SelectedEvent));
+
+            try
+            {
+                if (wasInterested)
+                {
+                    await _interestService.DeleteAsync(SelectedEvent.Id, userId);
+                }
+                else
+                {
+                    await _interestService.AddAsync(new EventInterestDto { EventId = SelectedEvent.Id, UserId = userId });
+                }
+            }
+            catch
+            {
+                SelectedEvent.IsInterested = wasInterested;
+                OnPropertyChanged(nameof(SelectedEvent));
+            }
         }
 
         private string GenerateIcsContent(EventDto evt)

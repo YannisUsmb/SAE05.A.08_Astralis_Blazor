@@ -62,8 +62,16 @@ else if (ViewModel.SelectedEvent != null)
                             <i class="bi bi-calendar-plus me-2"></i> Ajouter au calendrier
                         </button>
 
-                        <button class="btn btn-astralis-outline" @onclick="ViewModel.ToggleInterest">
-                            <i class="bi bi-star me-2"></i> Ça m'intéresse
+                        <button class="btn @(ViewModel.SelectedEvent.IsInterested ? "btn-astralis-premium" : "btn-astralis-outline")" 
+                                @onclick="ViewModel.ToggleInterest">
+                            @if (ViewModel.SelectedEvent.IsInterested)
+                            {
+                                <i class="bi bi-star-fill me-2"></i> <span>Intéressé(e)</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star me-2"></i> <span>Ça m'intéresse</span>
+                            }
                         </button>
 
                         @if (!string.IsNullOrEmpty(ViewModel.SelectedEvent.Link))
