@@ -7,4 +7,5 @@ public interface ICityService
     Task<CityDto?> GetByIdAsync(int id);
     Task<List<CityDto>> GetAllAsync();
     Task<CityDto?> AddAsync(CityCreateDto dto);
+    Task<List<CityDto>> SearchAsync(string term);
 }

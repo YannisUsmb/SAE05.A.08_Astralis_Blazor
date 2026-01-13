@@ -41,7 +41,7 @@
                 <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
                     <button class="btn btn-sm btn-icon text-white-50 hover-danger"
                             title="Supprimer"
-                            @onclick='() => ViewModel.DeleteAddressCommand.Execute("Delivery")'>
+                            @onclick='async () => await ViewModel.DeleteAddress("Delivery")'>
                         <i class="bi bi-trash-fill"></i>
                     </button>
                     <button class="btn btn-sm btn-icon text-white"
@@ -82,26 +82,36 @@
                         <div class="col-4">
                             <label class="form-label text-white-50 small">N°</label>
                             <InputText @bind-Value="ViewModel.DeliveryForm.StreetNumber" class="form-control form-control-dark" placeholder="10" />
+                            <ValidationMessage For="@(() => ViewModel.DeliveryForm.StreetNumber)" />
                         </div>
                         <div class="col-8">
                             <label class="form-label text-white-50 small">Voie</label>
                             <InputText @bind-Value="ViewModel.DeliveryForm.StreetAddress" class="form-control form-control-dark" placeholder="Rue..." />
+                            <ValidationMessage For="@(() => ViewModel.DeliveryForm.StreetAddress)" />
                         </div>
 
-                        <div class="col-12 position-relative">
-                            <label class="form-label text-white-50 small">Ville ou Code Postal</label>
-                            <input type="text" class="form-control form-control-dark" placeholder="Rechercher..."
+                        <div class="col-md-6 position-relative">
+                            <label class="form-label text-white-50">Ville / Code Postal</label>
+
+                            <input type="text"
+                                   class="form-control form-control-astralis @(context.GetValidationMessages(() => ViewModel.DeliveryForm.CityId).Any() ? "is-invalid" : "")"
+                                   placeholder="Tapez le nom ou le code postal..."
                                    value="@ViewModel.DeliveryCitySearch"
-                                   @oninput="(e) => ViewModel.SearchDeliveryCity(e.Value?.ToString() ?? string.Empty)" />
+                                   @oninput="(e) => ViewModel.SearchDeliveryCityCommand.Execute(e.Value?.ToString())"
+                                   onkeydown="if(event.key === 'Enter'){event.preventDefault();}" />
+
+                            <ValidationMessage For="@(() => ViewModel.DeliveryForm.CityId)" />
 
                             @if (ViewModel.DeliveryCitySuggestions.Any())
                             {
-                                <ul class="list-group position-absolute w-100 mt-1 shadow city-dropdown">
+                                <ul class="list-group position-absolute w-100 mt-1 shadow city-dropdown" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
                                     @foreach (var city in ViewModel.DeliveryCitySuggestions)
                                     {
                                         <li class="list-group-item list-group-item-action bg-dark text-white border-white-10"
-                                            @onclick="() => ViewModel.SelectDeliveryCity(city)" style="cursor: pointer;">
-                                            <span>@city.Name</span> <small class="text-white-50">(@city.PostCode)</small>
+                                            @onclick="() => ViewModel.SelectDeliveryCityCommand.Execute(city)"
+                                            style="cursor: pointer;">
+                                            <span class="fw-bold">@city.Name</span>
+                                            <small class="text-white-50 ms-2">(@city.PostCode)</small>
                                         </li>
                                     }
                                 </ul>
@@ -132,7 +142,7 @@
                 <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
                     <button class="btn btn-sm btn-icon text-white-50 hover-danger"
                             title="Supprimer"
-                            @onclick='() => ViewModel.DeleteAddressCommand.Execute("Billing")'>
+                            @onclick='async () => await ViewModel.DeleteAddress("Billing")'>
                         <i class="bi bi-trash-fill"></i>
                     </button>
                     <button class="btn btn-sm btn-icon text-white"
@@ -173,26 +183,36 @@
                         <div class="col-4">
                             <label class="form-label text-white-50 small">N°</label>
                             <InputText @bind-Value="ViewModel.BillingForm.StreetNumber" class="form-control form-control-dark" placeholder="10" />
+                            <ValidationMessage For="@(() => ViewModel.BillingForm.StreetNumber)" />
                         </div>
                         <div class="col-8">
                             <label class="form-label text-white-50 small">Voie</label>
                             <InputText @bind-Value="ViewModel.BillingForm.StreetAddress" class="form-control form-control-dark" placeholder="Rue..." />
+                            <ValidationMessage For="@(() => ViewModel.BillingForm.StreetAddress)" />
                         </div>
 
-                        <div class="col-12 position-relative">
-                            <label class="form-label text-white-50 small">Ville ou Code Postal</label>
-                            <input type="text" class="form-control form-control-dark" placeholder="Rechercher..."
+                        <div class="col-md-6 position-relative">
+                            <label class="form-label text-white-50">Ville / Code Postal</label>
+
+                            <input type="text"
+                                   class="form-control form-control-astralis @(context.GetValidationMessages(() => ViewModel.BillingForm.CityId).Any() ? "is-invalid" : "")"
+                                   placeholder="Tapez le nom ou le code postal..."
                                    value="@ViewModel.BillingCitySearch"
-                                   @oninput="(e) => ViewModel.SearchBillingCity(e.Value?.ToString() ?? string.Empty)" />
+                                   @oninput="(e) => ViewModel.SearchBillingCityCommand.Execute(e.Value?.ToString())"
+                                   onkeydown="if(event.key === 'Enter'){event.preventDefault();}" />
+
+                            <ValidationMessage For="@(() => ViewModel.BillingForm.CityId)" />
 
                             @if (ViewModel.BillingCitySuggestions.Any())
                             {
-                                <ul class="list-group position-absolute w-100 mt-1 shadow city-dropdown">
+                                <ul class="list-group position-absolute w-100 mt-1 shadow city-dropdown" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
                                     @foreach (var city in ViewModel.BillingCitySuggestions)
                                     {
                                         <li class="list-group-item list-group-item-action bg-dark text-white border-white-10"
-                                            @onclick="() => ViewModel.SelectBillingCity(city)" style="cursor: pointer;">
-                                            <span>@city.Name</span> <small class="text-white-50">(@city.PostCode)</small>
+                                            @onclick="() => ViewModel.SelectBillingCityCommand.Execute(city)"
+                                            style="cursor: pointer;">
+                                            <span class="fw-bold">@city.Name</span>
+                                            <small class="text-white-50 ms-2">(@city.PostCode)</small>
                                         </li>
                                     }
                                 </ul>
