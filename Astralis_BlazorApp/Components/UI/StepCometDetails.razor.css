@@ -1,0 +1,115 @@
+.form-step {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-step h3 {
+    color: #fff;
+    font-family: "Orbitron", sans-serif;
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+.form-step h4 {
+    color: #a76dff;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 2rem 0 1.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(167, 109, 255, 0.2);
+    font-family: "Orbitron", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    color: #b8b8d4;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.3px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:hover {
+    border-color: rgba(167, 109, 255, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #a76dff;
+    box-shadow: 0 0 0 3px rgba(167, 109, 255, 0.1);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+/* Effet subtil quand un champ est rempli */
+.form-control:not(:placeholder-shown):valid {
+    border-color: rgba(81, 207, 102, 0.3);
+}
+
+/* Label qui devient violet au focus */
+.form-group:focus-within label {
+    color: #a76dff;
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.validation-message {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.validation-message::before {
+    content: "⚠";
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-step {
+        padding: 1.5rem 1rem;
+    }
+}

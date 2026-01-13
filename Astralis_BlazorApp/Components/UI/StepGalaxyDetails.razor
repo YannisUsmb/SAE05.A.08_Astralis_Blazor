@@ -1,0 +1,96 @@
+@using Astralis.Shared.DTOs
+
+<div class="form-step">
+    <h3>Détails de la galaxie / quasar</h3>
+    
+    <EditForm Model="@Model" OnValidSubmit="HandleNext">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label>Titre de la découverte *</label>
+            <InputText @bind-Value="Model.Title" class="form-control" placeholder="Ex: Nouveau quasar à haut redshift" />
+            <ValidationMessage For="@(() => Model.Title)" />
+        </div>
+
+        <h4>Caractéristiques de la galaxie / quasar</h4>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom *</label>
+                <InputText @bind-Value="Model.Details.Name" class="form-control" placeholder="Ex: SDSS J1030+0524" />
+                <ValidationMessage For="@(() => Model.Details.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label>Alias (optionnel)</label>
+                <InputText @bind-Value="Model.Details.Alias" class="form-control" placeholder="Ex: QSO B1026+0524" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Ascension droite (°)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.RightAscension" class="form-control" placeholder="Ex: 157.5" />
+            </div>
+
+            <div class="form-group">
+                <label>Déclinaison (°)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Declination" class="form-control" placeholder="Ex: 5.4" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Redshift</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Redshift" class="form-control" placeholder="Ex: 6.31" />
+            </div>
+            
+            <div class="form-group">
+                <label>Magnitude R</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.RMagnitude" class="form-control" placeholder="Ex: 19.7" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date julienne modifiée d'observation</label>
+                <InputNumber TValue="int?" @bind-Value="Model.Details.ModifiedJulianDateObservation" class="form-control" placeholder="Ex: 51234" />
+            </div>
+            
+            <div class="form-group">
+                <label>Référence</label>
+                <InputText @bind-Value="Model.Details.Reference" class="form-control" placeholder="Ex: SDSS, NED" />
+            </div>
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" @onclick="OnPrevious">
+                <i class="bi bi-arrow-left"></i> Précédent
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Suivant <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public DiscoveryGalaxyQuasarSubmissionDto Model { get; set; } = new();
+    [Parameter] public EventCallback<DiscoveryGalaxyQuasarSubmissionDto> ModelChanged { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Model.Details == null)
+        {
+            Model.Details = new GalaxyQuasarCreateDto();
+        }
+    }
+
+    private async Task HandleNext()
+    {
+        await ModelChanged.InvokeAsync(Model);
+        await OnNext.InvokeAsync();
+    }
+}

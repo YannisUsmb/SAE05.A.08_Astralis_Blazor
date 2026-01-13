@@ -1,0 +1,79 @@
+@using Astralis.Shared.DTOs
+
+<div class="form-step">
+    <h3>Détails du satellite</h3>
+    
+    <EditForm Model="@Model" OnValidSubmit="HandleNext">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label>Titre de la découverte *</label>
+            <InputText @bind-Value="Model.Title" class="form-control" placeholder="Ex: Nouvelle lune de Jupiter" />
+            <ValidationMessage For="@(() => Model.Title)" />
+        </div>
+
+        <h4>Caractéristiques du satellite</h4>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom *</label>
+                <InputText @bind-Value="Model.Details.Name" class="form-control" placeholder="Ex: S/2024 J1" />
+                <ValidationMessage For="@(() => Model.Details.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label>Alias (optionnel)</label>
+                <InputText @bind-Value="Model.Details.Alias" class="form-control" placeholder="Ex: Europa II" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Rayon (km)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Radius" class="form-control" placeholder="Ex: 1560.8" />
+            </div>
+
+            <div class="form-group">
+                <label>Gravité (m/s²)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Gravity" class="form-control" placeholder="Ex: 1.314" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Densité (g/cm³)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Density" class="form-control" placeholder="Ex: 3.01" />
+            </div>
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" @onclick="OnPrevious">
+                <i class="bi bi-arrow-left"></i> Précédent
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Suivant <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public DiscoverySatelliteSubmissionDto Model { get; set; } = new();
+    [Parameter] public EventCallback<DiscoverySatelliteSubmissionDto> ModelChanged { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Model.Details == null)
+        {
+            Model.Details = new SatelliteCreateDto();
+        }
+    }
+
+    private async Task HandleNext()
+    {
+        await ModelChanged.InvokeAsync(Model);
+        await OnNext.InvokeAsync();
+    }
+}
