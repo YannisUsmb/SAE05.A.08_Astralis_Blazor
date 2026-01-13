@@ -1,0 +1,108 @@
+@using Astralis.Shared.DTOs
+
+<div class="form-step">
+    <h3>Détails de la comète</h3>
+    
+    <EditForm Model="@Model" OnValidSubmit="HandleNext">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label>Titre de la découverte *</label>
+            <InputText @bind-Value="Model.Title" class="form-control" placeholder="Ex: Nouvelle comète périodique" />
+            <ValidationMessage For="@(() => Model.Title)" />
+        </div>
+
+        <h4>Caractéristiques de la comète</h4>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom *</label>
+                <InputText @bind-Value="Model.Details.Name" class="form-control" placeholder="Ex: C/2024 A1" />
+                <ValidationMessage For="@(() => Model.Details.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label>Alias (optionnel)</label>
+                <InputText @bind-Value="Model.Details.Alias" class="form-control" placeholder="Ex: Comète Dupont" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Excentricité orbitale</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.OrbitalEccentricity" class="form-control" placeholder="Ex: 0.967" />
+            </div>
+
+            <div class="form-group">
+                <label>Inclinaison orbitale (°)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.OrbitalInclinationDegrees" class="form-control" placeholder="Ex: 162.3" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Distance périhélie (UA)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.PerihelionDistanceAU" class="form-control" placeholder="Ex: 0.586" />
+            </div>
+            
+            <div class="form-group">
+                <label>Distance aphélie (UA)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.AphelionDistanceAU" class="form-control" placeholder="Ex: 35.1" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Période orbitale (années)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.OrbitalPeriodYears" class="form-control" placeholder="Ex: 75.3" />
+            </div>
+            
+            <div class="form-group">
+                <label>Longitude nœud ascendant (°)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.AscendingNodeLongitudeDegrees" class="form-control" placeholder="Ex: 58.42" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>MOID (UA)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.MinimumOrbitIntersectionDistanceAU" class="form-control" placeholder="Ex: 0.0934" />
+            </div>
+            
+            <div class="form-group">
+                <label>Référence</label>
+                <InputText @bind-Value="Model.Details.Reference" class="form-control" placeholder="Ex: MPC, JPL" />
+            </div>
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" @onclick="OnPrevious">
+                <i class="bi bi-arrow-left"></i> Précédent
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Suivant <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public DiscoveryCometSubmissionDto Model { get; set; } = new();
+    [Parameter] public EventCallback<DiscoveryCometSubmissionDto> ModelChanged { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Model.Details == null)
+        {
+            Model.Details = new CometCreateDto();
+        }
+    }
+
+    private async Task HandleNext()
+    {
+        await ModelChanged.InvokeAsync(Model);
+        await OnNext.InvokeAsync();
+    }
+}

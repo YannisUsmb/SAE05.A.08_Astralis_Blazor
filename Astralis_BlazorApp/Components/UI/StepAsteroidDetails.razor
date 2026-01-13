@@ -1,0 +1,135 @@
+@using Astralis.Shared.DTOs
+
+<div class="form-step">
+    <h3>Détails de l'astéroïde</h3>
+    
+    <EditForm Model="@Model" OnValidSubmit="HandleNext">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label>Titre de la découverte *</label>
+            <InputText @bind-Value="Model.Title" class="form-control" placeholder="Ex: Nouvel astéroïde géocroiseur" />
+            <ValidationMessage For="@(() => Model.Title)" />
+        </div>
+
+        <h4>Caractéristiques de l'astéroïde</h4>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom *</label>
+                <InputText @bind-Value="Model.Details.Name" class="form-control" placeholder="Ex: 2024 AB1" />
+                <ValidationMessage For="@(() => Model.Details.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label>Alias (optionnel)</label>
+                <InputText @bind-Value="Model.Details.Alias" class="form-control" placeholder="Ex: Apophis" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Diamètre min (km)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.DiameterMinKm" class="form-control" placeholder="Ex: 0.5" />
+            </div>
+
+            <div class="form-group">
+                <label>Diamètre max (km)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.DiameterMaxKm" class="form-control" placeholder="Ex: 1.2" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Magnitude absolue</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.AbsoluteMagnitude" class="form-control" placeholder="Ex: 19.7" />
+            </div>
+            
+            <div class="form-group">
+                <label>Demi-grand axe (UA)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.SemiMajorAxis" class="form-control" placeholder="Ex: 2.76" />
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Inclinaison (°)</label>
+                <InputNumber TValue="decimal?" @bind-Value="Model.Details.Inclination" class="form-control" placeholder="Ex: 10.59" />
+            </div>
+            
+            <div class="form-group">
+                <label>Potentiellement dangereux</label>
+                <InputSelect TValue="string" Value="@GetHazardousValue()" ValueChanged="SetHazardousValue" ValueExpression="@(() => _hazardousString)" class="form-control">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="true">Oui</option>
+                    <option value="false">Non</option>
+                </InputSelect>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date de calcul de l'orbite</label>
+                <InputDate TValue="DateTime?" @bind-Value="Model.Details.OrbitDeterminationDate" class="form-control" />
+            </div>
+            
+            <div class="form-group">
+                <label>Date première observation</label>
+                <InputDate TValue="DateTime?" @bind-Value="Model.Details.FirstObservationDate" class="form-control"/>
+            </div>
+
+            <div class="form-group">
+                <label>Date dernière observation</label>
+                <InputDate TValue="DateTime?" @bind-Value="Model.Details.LastObservationDate" class="form-control"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Référence</label>
+            <InputText @bind-Value="Model.Details.Reference" class="form-control" placeholder="Ex: MPC 12345" />
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" @onclick="OnPrevious">
+                <i class="bi bi-arrow-left"></i> Précédent
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Suivant <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public DiscoveryAsteroidSubmissionDto Model { get; set; } = new();
+    [Parameter] public EventCallback<DiscoveryAsteroidSubmissionDto> ModelChanged { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+    private string _hazardousString = "";
+
+    protected override void OnInitialized()
+    {
+        if (Model.Details == null)
+        {
+            Model.Details = new AsteroidCreateDto();
+        }
+        _hazardousString = Model.Details.IsPotentiallyHazardous?.ToString().ToLower() ?? "";
+    }
+    
+    private string GetHazardousValue()
+    {
+        return Model.Details.IsPotentiallyHazardous?.ToString().ToLower() ?? "";
+    }
+    
+    private void SetHazardousValue(string value)
+    {
+        _hazardousString = value;
+        Model.Details.IsPotentiallyHazardous = string.IsNullOrEmpty(value) ? null : bool.Parse(value);
+    }
+
+    private async Task HandleNext()
+    {
+        await ModelChanged.InvokeAsync(Model);
+        await OnNext.InvokeAsync();
+    }
+}
