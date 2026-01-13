@@ -6,4 +6,5 @@ public interface IEventTypeService
 {
     Task<EventTypeDto?> GetByIdAsync(int id);
     Task<List<EventTypeDto>> GetAllAsync();
+    Task<EventTypeDto> AddAsync(EventTypeCreateDto dto);
 }

@@ -7,6 +7,39 @@
 
 <div class="content-wrapper position-relative">
 
+    @if (ViewModel.IsTypeModalOpen)
+    {
+        <div class="modal-backdrop-custom">
+            <div class="modal-glass-content animate-fade-in">
+                <h4 class="text-white font-orbitron mb-3">Nouveau Type d'Événement</h4>
+
+                <div class="mb-3">
+                    <label class="text-white-50 small mb-1 required-label">Libellé</label>
+                    <input type="text" class="form-control-astralis"
+                           @bind="ViewModel.NewTypeName"
+                           placeholder="Ex: Éclipse, Lancement..." />
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-white-50 small mb-1 required-label">Description</label>
+                    <textarea class="form-control-astralis" rows="3"
+                              @bind="ViewModel.NewTypeDescription"
+                              placeholder="Description courte du type..."></textarea>
+                </div>
+
+                @if (!string.IsNullOrEmpty(ViewModel.TypeCreationError))
+                {
+                    <div class="text-danger small mb-3">@ViewModel.TypeCreationError</div>
+                }
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-sm btn-outline-light" @onclick="ViewModel.CloseCreateTypeModal">Annuler</button>
+                    <button class="btn btn-sm btn-astralis-premium" @onclick="ViewModel.ConfirmCreateTypeAsync">Créer</button>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="font-orbitron text-white m-0">
             @(ViewModel.IsEditMode ? "Modification" : "Création") d'un événement
@@ -23,109 +56,161 @@
         </div>
     }
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="glass-panel p-4 mb-4">
+    <EditForm Model="ViewModel.EventModel" OnValidSubmit="ViewModel.SaveAsync">
+        <DataAnnotationsValidator />
 
-                <div class="mb-3">
-                    <label class="form-label text-white-50">Titre de l'événement <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control-astralis" @bind="ViewModel.EventModel.Title" placeholder="Ex: Observation des Perséides" />
-                </div>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="glass-panel p-4 mb-4">
 
-                <div class="mb-3">
-                    <label class="form-label text-white-50">Description</label>
-                    <textarea class="form-control-astralis" rows="6" @bind="ViewModel.EventModel.Description" placeholder="Détails de l'événement..."></textarea>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white-50">Début <span class="text-danger">*</span></label>
-                        <input type="datetime-local" class="form-control-astralis"
-                               @bind="ViewModel.EventModel.StartDate"
-                               @bind:format="yyyy-MM-ddTHH:mm" />
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 required-label">Titre de l'événement</label>
+                        <InputText class="form-control-astralis" @bind-Value="ViewModel.EventModel.Title" placeholder="Ex: Observation des Perséides" />
+                        <ValidationMessage For="@(() => ViewModel.EventModel.Title)" class="text-danger small mt-1" />
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white-50">Fin (Optionnel)</label>
-                        <input type="datetime-local" class="form-control-astralis"
-                               @bind="ViewModel.EventModel.EndDate"
-                               @bind:format="yyyy-MM-ddTHH:mm" />
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white-50">Lieu</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark-glass border-white-10 text-white"><i class="bi bi-geo-alt"></i></span>
-                            <input type="text" class="form-control-astralis" @bind="ViewModel.EventModel.Location" placeholder="Ex: Paris, Observatoire..." />
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 required-label">Description</label>
+                        <InputTextArea class="form-control-astralis" rows="6" @bind-Value="ViewModel.EventModel.Description" placeholder="Détails de l'événement..." />
+                        <ValidationMessage For="@(() => ViewModel.EventModel.Description)" class="text-danger small mt-1" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-white-50 required-label">Début</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" class="form-control-astralis"
+                                       @bind-Value="ViewModel.EventModel.StartDate" />
+                            <ValidationMessage For="@(() => ViewModel.EventModel.StartDate)" class="text-danger small mt-1" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-white-50">Fin (Optionnel)</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" class="form-control-astralis"
+                                       @bind-Value="ViewModel.EventModel.EndDate" />
+                            <ValidationMessage For="@(() => ViewModel.EventModel.EndDate)" class="text-danger small mt-1" />
                         </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white-50">Lien externe</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark-glass border-white-10 text-white"><i class="bi bi-link-45deg"></i></span>
-                            <input type="text" class="form-control-astralis" @bind="ViewModel.EventModel.Link" placeholder="https://..." />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-white-50">Lieu</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark-glass border-white-10 text-white"><i class="bi bi-geo-alt"></i></span>
+                                <InputText class="form-control-astralis" @bind-Value="ViewModel.EventModel.Location" placeholder="Ex: Paris, Observatoire..." />
+                            </div>
+                            <ValidationMessage For="@(() => ViewModel.EventModel.Location)" class="text-danger small mt-1" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-white-50">Lien externe</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark-glass border-white-10 text-white"><i class="bi bi-link-45deg"></i></span>
+                                <InputText class="form-control-astralis" @bind-Value="ViewModel.EventModel.Link" placeholder="https://..." />
+                            </div>
+                            <ValidationMessage For="@(() => ViewModel.EventModel.Link)" class="text-danger small mt-1" />
                         </div>
                     </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="glass-panel p-4 mb-4" style="overflow: visible;z-index: 100; position: relative;">
+                    <h5 class="text-white font-orbitron mb-3 required-label">Catégorie</h5>
+
+                    <div class="dropdown position-relative">
+                        <button type="button"
+                                class="form-control-astralis d-flex justify-content-between align-items-center text-start w-100"
+                                @onclick="() => ViewModel.IsTypeDropdownOpen = !ViewModel.IsTypeDropdownOpen">
+                            <span class="text-truncate">
+                                @(ViewModel.EventTypes.FirstOrDefault(t => t.Id == ViewModel.EventModel.EventTypeId)?.Label ?? "Choisir un type...")
+                            </span>
+                            <i class="bi bi-chevron-down small text-white-50"></i>
+                        </button>
+
+                        @if (ViewModel.IsTypeDropdownOpen)
+                        {
+                            <div class="dropdown-menu-glass show p-0 animate-fade-in" style="width: 100%; max-height: 300px; overflow: hidden; display: flex; flex-direction: column;">
+
+                                <div class="p-2 border-bottom border-white-10 bg-dark-glass">
+                                    <input type="text" class="form-control-astralis form-control-sm"
+                                           placeholder="Chercher..."
+                                           @bind="ViewModel.TypeSearchTerm"
+                                           @bind:event="oninput"
+                                           autoFocus />
+                                </div>
+
+                                <div style="overflow-y: auto;">
+                                    @if (!string.IsNullOrWhiteSpace(ViewModel.TypeSearchTerm))
+                                    {
+                                        <button type="button" class="dropdown-item text-accent-purple border-bottom border-white-10 py-2"
+                                                @onclick="ViewModel.OpenCreateTypeModalFromSearch">
+                                            <i class="bi bi-plus-circle me-2"></i> Créer "<strong>@ViewModel.TypeSearchTerm</strong>"
+                                        </button>
+                                    }
+
+                                    @foreach (var type in ViewModel.FilteredEventTypes)
+                                    {
+                                        <button type="button" class="dropdown-item text-white-50 py-2 @(type.Id == ViewModel.EventModel.EventTypeId ? "active-type" : "")"
+                                                @onclick="() => ViewModel.SelectType(type.Id)">
+                                            @type.Label
+                                        </button>
+                                    }
+
+                                    @if (!ViewModel.FilteredEventTypes.Any() && string.IsNullOrWhiteSpace(ViewModel.TypeSearchTerm))
+                                    {
+                                        <div class="p-2 text-center text-white-50 small">Aucun type disponible</div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="menu-overlay" @onclick="() => ViewModel.IsTypeDropdownOpen = false" style="z-index: 1049;"></div>
+                        }
+                    </div>
+                    <ValidationMessage For="@(() => ViewModel.EventModel.EventTypeId)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="glass-panel p-4 mb-4">
+                    <h5 class="text-white font-orbitron mb-3">Image de couverture</h5>
+
+                    <div class="cover-upload-area mb-3">
+                        @if (!string.IsNullOrEmpty(ViewModel.CurrentImageUrl))
+                        {
+                            <img src="@ViewModel.CurrentImageUrl" class="img-fluid rounded w-100" style="max-height: 200px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="text-center py-4 text-white-50 border border-dashed border-white-10 rounded">
+                                <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                <span>Aucune image</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mb-2">
+                        <InputFile OnChange="@(async e => await ViewModel.UploadImageAsync(e.File))" class="form-control form-control-sm bg-dark text-white border-secondary" accept=".jpg,.jpeg,.png,.webp" />
+                    </div>
+                    <ValidationMessage For="@(() => ViewModel.EventModel.PictureUrl)" class="text-danger small mt-1" />
+
+                    @if (ViewModel.IsUploadingImage)
+                    {
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent-purple" style="width: 100%"></div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-astralis-premium btn-lg" disabled="@ViewModel.IsSubmitting">
+                        @if (ViewModel.IsSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="bi bi-check-lg me-2"></i> @(ViewModel.IsEditMode ? "Enregistrer" : "Publier")
+                    </button>
                 </div>
 
             </div>
         </div>
-
-        <div class="col-lg-4">
-
-            <div class="glass-panel p-4 mb-4">
-                <h5 class="text-white font-orbitron mb-3">Catégorie</h5>
-                <select class="form-control-astralis form-select-astralis" @bind="ViewModel.EventModel.EventTypeId">
-                    <option value="0" disabled selected>Choisir un type...</option>
-                    @foreach (var type in ViewModel.EventTypes)
-                    {
-                        <option value="@type.Id">@type.Label</option>
-                    }
-                </select>
-            </div>
-
-            <div class="glass-panel p-4 mb-4">
-                <h5 class="text-white font-orbitron mb-3">Image de couverture</h5>
-
-                <div class="cover-upload-area mb-3">
-                    @if (!string.IsNullOrEmpty(ViewModel.CurrentImageUrl))
-                    {
-                        <img src="@ViewModel.CurrentImageUrl" class="img-fluid rounded w-100" style="max-height: 200px; object-fit: cover;" />
-                    }
-                    else
-                    {
-                        <div class="text-center py-4 text-white-50 border border-dashed border-white-10 rounded">
-                            <i class="bi bi-image fs-1 d-block mb-2"></i>
-                            <span>Aucune image</span>
-                        </div>
-                    }
-                </div>
-
-                <div class="mb-2">
-                    <InputFile OnChange="@(async e => await ViewModel.UploadImageAsync(e.File))" class="form-control form-control-sm bg-dark text-white border-secondary" accept=".jpg,.jpeg,.png,.webp" />
-                </div>
-
-                @if (ViewModel.IsUploadingImage)
-                {
-                    <div class="progress" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent-purple" style="width: 100%"></div>
-                    </div>
-                }
-            </div>
-
-            <div class="d-grid gap-2">
-                <button class="btn btn-astralis-premium btn-lg" @onclick="ViewModel.SaveAsync" disabled="@ViewModel.IsSubmitting">
-                    @if (ViewModel.IsSubmitting)
-                    {
-                        <span class="spinner-border spinner-border-sm me-2"></span>
-                    }
-                    <i class="bi bi-check-lg me-2"></i> @(ViewModel.IsEditMode ? "Enregistrer" : "Publier")
-                </button>
-            </div>
-
-        </div>
-    </div>
+    </EditForm>
 </div>
 
 @code {

@@ -332,6 +332,34 @@ body {
     margin: 0.5rem 0;
 }
 
+.dropdown-item {
+    cursor: pointer;
+    transition: background 0.2s;
+    background: transparent;
+    border: none;
+    text-align: left;
+    width: 100%;
+}
+
+    .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white !important;
+    }
+
+.active-type {
+    background: rgba(157, 78, 221, 0.2);
+    color: #a76dff !important;
+    font-weight: bold;
+}
+
+.text-accent-purple {
+    color: #a76dff !important;
+}
+
+    .text-accent-purple:hover {
+        background: rgba(157, 78, 221, 0.15);
+    }
+
 @keyframes fadeInDown {
     from {
         opacity: 0;

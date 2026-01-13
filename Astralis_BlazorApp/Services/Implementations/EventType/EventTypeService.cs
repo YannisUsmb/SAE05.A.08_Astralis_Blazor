@@ -19,4 +19,12 @@ public class EventTypeService(HttpClient httpClient) : IEventTypeService
         List<EventTypeDto>? galaxyQuasarClasses = await httpClient.GetFromJsonAsync<List<EventTypeDto>>($"{Controller}");
         return galaxyQuasarClasses ?? new List<EventTypeDto>();
     }
+
+    public async Task<EventTypeDto> AddAsync(EventTypeCreateDto dto)
+    {
+        var response = await httpClient.PostAsJsonAsync(Controller, dto);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<EventTypeDto>()
+               ?? throw new Exception("Erreur lors de la création du type.");
+    }
 }

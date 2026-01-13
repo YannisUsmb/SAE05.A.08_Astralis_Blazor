@@ -22,6 +22,7 @@
         border-color: #9d4edd;
         box-shadow: 0 0 0 0.25rem rgba(157, 78, 221, 0.25);
         color: #fff;
+        outline: none;
     }
 
     .form-control-astralis::placeholder {
@@ -40,4 +41,49 @@ input[type="file"]::file-selector-button {
     background-color: #333;
     color: white;
     border: 1px solid #555;
+    margin-right: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.required-label::after {
+    content: " *";
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-glass-content {
+    background: rgba(20, 20, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }

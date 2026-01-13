@@ -20,13 +20,24 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty] private EventCreateDto eventModel = new();
         [ObservableProperty] private List<EventTypeDto> eventTypes = new();
 
+        [ObservableProperty] private string typeSearchTerm = "";
+        [ObservableProperty] private bool isTypeDropdownOpen;
+
+        public IEnumerable<EventTypeDto> FilteredEventTypes => string.IsNullOrWhiteSpace(TypeSearchTerm)
+            ? EventTypes
+            : EventTypes.Where(t => t.Label.Contains(TypeSearchTerm, StringComparison.OrdinalIgnoreCase));
+
         [ObservableProperty] private bool isEditMode;
         [ObservableProperty] private int? eventId;
         [ObservableProperty] private bool isSubmitting;
         [ObservableProperty] private string? errorMessage;
         [ObservableProperty] private bool isUploadingImage;
-
         [ObservableProperty] private string? currentImageUrl;
+
+        [ObservableProperty] private bool isTypeModalOpen;
+        [ObservableProperty] private string newTypeName = "";
+        [ObservableProperty] private string newTypeDescription = ""; 
+        [ObservableProperty] private string? typeCreationError;
 
         public EventEditorViewModel(
             IEventService eventService,
@@ -46,29 +57,10 @@ namespace Astralis_BlazorApp.ViewModels
         {
             var authState = await _authStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
+            if (!user.Identity?.IsAuthenticated ?? true) { _navigation.NavigateTo("/connexion"); return; }
+            if (!user.IsInRole("Admin") && !user.IsInRole("Rédacteur Commercial")) { _navigation.NavigateTo("/evenements"); return; }
 
-            if (!user.Identity?.IsAuthenticated ?? true)
-            {
-                _navigation.NavigateTo("/connexion");
-                return;
-            }
-
-            bool canEdit = user.IsInRole("Admin") || user.IsInRole("Rédacteur Commercial");
-            if (!canEdit)
-            {
-                _navigation.NavigateTo("/evenements");
-                return;
-            }
-
-            try
-            {
-                EventTypes = await _eventTypeService.GetAllAsync();
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = "Impossible de charger les types d'événements.";
-                Console.WriteLine(ex);
-            }
+            await LoadEventTypesAsync();
 
             if (id.HasValue && id.Value > 0)
             {
@@ -81,10 +73,87 @@ namespace Astralis_BlazorApp.ViewModels
                 IsEditMode = false;
                 EventModel = new EventCreateDto
                 {
-                    StartDate = DateTime.Now.AddDays(1),
-                    EndDate = DateTime.Now.AddDays(1).AddHours(2)
+                    StartDate = DateTime.UtcNow.AddDays(1),
+                    EndDate = DateTime.UtcNow.AddDays(1).AddHours(2)
                 };
             }
+        }
+
+        private async Task LoadEventTypesAsync()
+        {
+            try
+            {
+                var types = await _eventTypeService.GetAllAsync();
+                EventTypes = types.OrderBy(t => t.Label).ToList();
+            }
+            catch (Exception) { ErrorMessage = "Impossible de charger les types."; }
+        }
+
+        public void OpenCreateTypeModalFromSearch()
+        {
+            NewTypeName = TypeSearchTerm;
+            NewTypeDescription = "";
+            TypeCreationError = null;
+            IsTypeDropdownOpen = false;
+            IsTypeModalOpen = true;
+        }
+
+        public void CloseCreateTypeModal()
+        {
+            IsTypeModalOpen = false;
+            NewTypeName = "";
+            NewTypeDescription = "";
+        }
+
+        public async Task ConfirmCreateTypeAsync()
+        {
+            if (string.IsNullOrWhiteSpace(NewTypeName))
+            {
+                TypeCreationError = "Le nom est obligatoire.";
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(NewTypeDescription))
+            {
+                TypeCreationError = "La description est obligatoire.";
+                return;
+            }
+
+            if (EventTypes.Any(t => t.Label.Equals(NewTypeName.Trim(), StringComparison.OrdinalIgnoreCase)))
+            {
+                TypeCreationError = "Ce type existe déjà.";
+                return;
+            }
+
+            try
+            {
+                // Création avec Description
+                var dto = new EventTypeCreateDto
+                {
+                    Label = NewTypeName.Trim(),
+                    Description = NewTypeDescription.Trim()
+                };
+
+                var createdType = await _eventTypeService.AddAsync(dto);
+
+                EventTypes.Add(createdType);
+                EventTypes = EventTypes.OrderBy(t => t.Label).ToList();
+
+                EventModel.EventTypeId = createdType.Id;
+                TypeSearchTerm = "";
+
+                CloseCreateTypeModal();
+            }
+            catch (Exception ex)
+            {
+                TypeCreationError = $"Erreur : {ex.Message}";
+            }
+        }
+
+        public void SelectType(int typeId)
+        {
+            EventModel.EventTypeId = typeId;
+            IsTypeDropdownOpen = false;
+            TypeSearchTerm = "";
         }
 
         private async Task LoadEventForEdit(int id)
@@ -98,8 +167,8 @@ namespace Astralis_BlazorApp.ViewModels
                     {
                         Title = evtDto.Title,
                         Description = evtDto.Description,
-                        StartDate = evtDto.StartDate,
-                        EndDate = evtDto.EndDate,
+                        StartDate = evtDto.StartDate.ToLocalTime(),
+                        EndDate = evtDto.EndDate?.ToLocalTime(),
                         Location = evtDto.Location,
                         Link = evtDto.Link,
                         PictureUrl = evtDto.PictureUrl,
@@ -117,7 +186,6 @@ namespace Astralis_BlazorApp.ViewModels
         public async Task UploadImageAsync(IBrowserFile file)
         {
             if (file == null) return;
-
             IsUploadingImage = true;
             ErrorMessage = null;
 
@@ -128,7 +196,6 @@ namespace Astralis_BlazorApp.ViewModels
                     ErrorMessage = "L'image est trop volumineuse (Max 5MB).";
                     return;
                 }
-
                 string uploadedUrl = await _uploadService.UploadImageAsync(file, UploadCategory.Events);
                 if (!string.IsNullOrEmpty(uploadedUrl))
                 {
@@ -149,22 +216,6 @@ namespace Astralis_BlazorApp.ViewModels
         [RelayCommand]
         public async Task SaveAsync()
         {
-            if (string.IsNullOrWhiteSpace(EventModel.Title))
-            {
-                ErrorMessage = "Le titre est obligatoire.";
-                return;
-            }
-            if (EventModel.EventTypeId == 0)
-            {
-                ErrorMessage = "Veuillez sélectionner un type d'événement.";
-                return;
-            }
-            if (EventModel.EndDate < EventModel.StartDate)
-            {
-                ErrorMessage = "La date de fin ne peut pas être avant la date de début.";
-                return;
-            }
-
             IsSubmitting = true;
             ErrorMessage = null;
 
@@ -183,21 +234,14 @@ namespace Astralis_BlazorApp.ViewModels
                         PictureUrl = EventModel.PictureUrl,
                         EventTypeId = EventModel.EventTypeId
                     };
-
                     await _eventService.UpdateAsync(EventId.Value, updateDto);
                     _navigation.NavigateTo($"/evenements/{EventId.Value}");
                 }
                 else
                 {
                     var createdEvent = await _eventService.AddAsync(EventModel);
-                    if (createdEvent != null)
-                    {
-                        _navigation.NavigateTo($"/evenements/{createdEvent.Id}");
-                    }
-                    else
-                    {
-                        _navigation.NavigateTo("/evenements");
-                    }
+                    if (createdEvent != null) _navigation.NavigateTo($"/evenements/{createdEvent.Id}");
+                    else _navigation.NavigateTo("/evenements");
                 }
             }
             catch (Exception ex)
@@ -210,9 +254,6 @@ namespace Astralis_BlazorApp.ViewModels
             }
         }
 
-        public void Cancel()
-        {
-            _navigation.NavigateTo("/evenements");
-        }
+        public void Cancel() => _navigation.NavigateTo("/evenements");
     }
 }
