@@ -46,18 +46,18 @@
                 case 2: // Planet
                     <StepPlanetDetails @bind-Model="_planetSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
                     break;
-                @* case 3: // Asteroid *@
-                @*     <StepAsteroidDetails @bind-Model="_asteroidSubmission" OnNext="NextStep" OnPrevious="PreviousStep" /> *@
-                @*     break; *@
-                @* case 4: // Comet *@
-                @*     <StepCometDetails @bind-Model="_cometSubmission" OnNext="NextStep" OnPrevious="PreviousStep" /> *@
-                @*     break; *@
-                @* case 5: // Galaxy/Quasar *@
-                @*     <StepGalaxyDetails @bind-Model="_galaxySubmission" OnNext="NextStep" OnPrevious="PreviousStep" /> *@
-                @*     break; *@
-                @* case 6: // Satellite *@
-                @*     <StepSatelliteDetails @bind-Model="_satelliteSubmission" OnNext="NextStep" OnPrevious="PreviousStep" /> *@
-                @*     break; *@
+                case 3: // Asteroid
+                    <StepAsteroidDetails @bind-Model="_asteroidSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                    break;
+                case 4: // Comet
+                    <StepCometDetails @bind-Model="_cometSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                    break;
+                case 5: // Galaxy/Quasar
+                    <StepGalaxyDetails @bind-Model="_galaxySubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                    break;
+                case 6: // Satellite
+                    <StepSatelliteDetails @bind-Model="_satelliteSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                    break;
             }
         }
         else if (_currentStep == 3)
