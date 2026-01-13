@@ -1,0 +1,138 @@
+﻿@page "/admin/evenements/nouveau"
+@page "/admin/evenements/edition/{Id:int}"
+@using Astralis_BlazorApp.ViewModels
+@inject EventEditorViewModel ViewModel
+
+<PageTitle>@(ViewModel.IsEditMode ? "Modifier un événement" : "Nouvel événement") – Astralis</PageTitle>
+
+<div class="content-wrapper position-relative">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="font-orbitron text-white m-0">
+            @(ViewModel.IsEditMode ? "Modification" : "Création") d'un événement
+        </h1>
+        <button class="btn btn-outline-light btn-sm" @onclick="ViewModel.Cancel">
+            <i class="bi bi-x-lg me-1"></i> Annuler
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+    {
+        <div class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewModel.ErrorMessage
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="glass-panel p-4 mb-4">
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50">Titre de l'événement <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control-astralis" @bind="ViewModel.EventModel.Title" placeholder="Ex: Observation des Perséides" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50">Description</label>
+                    <textarea class="form-control-astralis" rows="6" @bind="ViewModel.EventModel.Description" placeholder="Détails de l'événement..."></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white-50">Début <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control-astralis"
+                               @bind="ViewModel.EventModel.StartDate"
+                               @bind:format="yyyy-MM-ddTHH:mm" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white-50">Fin (Optionnel)</label>
+                        <input type="datetime-local" class="form-control-astralis"
+                               @bind="ViewModel.EventModel.EndDate"
+                               @bind:format="yyyy-MM-ddTHH:mm" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white-50">Lieu</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark-glass border-white-10 text-white"><i class="bi bi-geo-alt"></i></span>
+                            <input type="text" class="form-control-astralis" @bind="ViewModel.EventModel.Location" placeholder="Ex: Paris, Observatoire..." />
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white-50">Lien externe</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark-glass border-white-10 text-white"><i class="bi bi-link-45deg"></i></span>
+                            <input type="text" class="form-control-astralis" @bind="ViewModel.EventModel.Link" placeholder="https://..." />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="glass-panel p-4 mb-4">
+                <h5 class="text-white font-orbitron mb-3">Catégorie</h5>
+                <select class="form-control-astralis form-select-astralis" @bind="ViewModel.EventModel.EventTypeId">
+                    <option value="0" disabled selected>Choisir un type...</option>
+                    @foreach (var type in ViewModel.EventTypes)
+                    {
+                        <option value="@type.Id">@type.Label</option>
+                    }
+                </select>
+            </div>
+
+            <div class="glass-panel p-4 mb-4">
+                <h5 class="text-white font-orbitron mb-3">Image de couverture</h5>
+
+                <div class="cover-upload-area mb-3">
+                    @if (!string.IsNullOrEmpty(ViewModel.CurrentImageUrl))
+                    {
+                        <img src="@ViewModel.CurrentImageUrl" class="img-fluid rounded w-100" style="max-height: 200px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-white-50 border border-dashed border-white-10 rounded">
+                            <i class="bi bi-image fs-1 d-block mb-2"></i>
+                            <span>Aucune image</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="mb-2">
+                    <InputFile OnChange="@(async e => await ViewModel.UploadImageAsync(e.File))" class="form-control form-control-sm bg-dark text-white border-secondary" accept=".jpg,.jpeg,.png,.webp" />
+                </div>
+
+                @if (ViewModel.IsUploadingImage)
+                {
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent-purple" style="width: 100%"></div>
+                    </div>
+                }
+            </div>
+
+            <div class="d-grid gap-2">
+                <button class="btn btn-astralis-premium btn-lg" @onclick="ViewModel.SaveAsync" disabled="@ViewModel.IsSubmitting">
+                    @if (ViewModel.IsSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bi bi-check-lg me-2"></i> @(ViewModel.IsEditMode ? "Enregistrer" : "Publier")
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ViewModel.InitializeAsync(Id);
+    }
+}

@@ -1,0 +1,43 @@
+﻿.glass-panel {
+    background: rgba(20, 20, 40, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.form-control-astralis,
+.form-select-astralis {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    transition: all 0.3s ease;
+}
+
+    .form-control-astralis:focus,
+    .form-select-astralis:focus {
+        background: rgba(0, 0, 0, 0.4);
+        border-color: #9d4edd;
+        box-shadow: 0 0 0 0.25rem rgba(157, 78, 221, 0.25);
+        color: #fff;
+    }
+
+    .form-control-astralis::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+.input-group-text.bg-dark-glass {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+
+input[type="file"]::file-selector-button {
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+}
