@@ -1,4 +1,80 @@
-﻿
+﻿/* Style du bouton croix rouge sur la carte */
+.delete-btn {
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+    .delete-btn:hover {
+        transform: scale(1.1) rotate(90deg); /* Petite rotation sympa au survol */
+        background-color: #c82333;
+    }
+
+/* --- MODALE PERSONNALISÉE --- */
+
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7); /* Fond sombre semi-transparent */
+    backdrop-filter: blur(5px); /* Effet de flou sur l'arrière-plan */
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content-custom {
+    background: rgba(20, 20, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    color: white;
+}
+
+.modal-header-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+    .modal-header-custom h3 {
+        margin: 0;
+        font-family: "Orbitron", sans-serif;
+        color: #fff;
+    }
+
+.product-name-highlight {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ff6b6b; /* Rouge clair pour le nom du produit */
+    margin: 1rem 0;
+    font-family: "Orbitron", sans-serif;
+}
+
+.modal-actions-custom {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+    .modal-actions-custom .btn {
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+    }
 .shop-header {
     display: flex;
     justify-content: space-between;

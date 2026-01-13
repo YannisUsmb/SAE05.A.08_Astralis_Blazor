@@ -23,8 +23,8 @@ namespace Astralis_BlazorApp.ViewModels
         [ObservableProperty] private ObservableCollection<ProductCategoryDto> productCategories = new();
 
         [ObservableProperty] private ProductFilterDto filter = new();
-
-        // --- FILTRES ---
+        [ObservableProperty] private bool showDeleteConfirmation;
+        [ObservableProperty] private ProductListDto? productToDelete;
         [ObservableProperty] private int selectedTypeId = 0;
         [ObservableProperty] private string sortBy = "name";
         [ObservableProperty] private decimal? minPrice;
@@ -48,7 +48,6 @@ namespace Astralis_BlazorApp.ViewModels
             {
                 if (SetProperty(ref _searchText, value))
                 {
-                    // Déclenche la recherche avec délai lors de la frappe
                     TriggerDebounceSearch(value);
                 }
             }
@@ -77,7 +76,7 @@ namespace Astralis_BlazorApp.ViewModels
 
             try
             {
-                await Task.Delay(500, token); // Pause de 500ms
+                await Task.Delay(500, token);
                 if (!token.IsCancellationRequested)
                 {
                     await ApplyFilterAsync();
@@ -112,7 +111,6 @@ namespace Astralis_BlazorApp.ViewModels
         [RelayCommand]
         public async Task ApplyFilterAsync()
         {
-            // Reset page 1 dès qu'un filtre change
             CurrentPage = 1;
             await SearchDataAsync();
         }
@@ -133,7 +131,6 @@ namespace Astralis_BlazorApp.ViewModels
 
                 HasNextPage = results.Count() == PageSize;
 
-                // Tri côté client (rapide)
                 IEnumerable<ProductListDto> sortedList = results;
                 switch (SortBy)
                 {
@@ -144,7 +141,7 @@ namespace Astralis_BlazorApp.ViewModels
                 }
 
                 Products = new ObservableCollection<ProductListDto>(sortedList);
-                SelectedProductDetails = null; // Reset détail si on re-filtre
+                SelectedProductDetails = null;
             }
             catch (Exception ex)
             {
@@ -209,7 +206,45 @@ namespace Astralis_BlazorApp.ViewModels
                 Console.WriteLine($"Erreur ajout panier : {ex.Message}");
             }
         }
+        public void RequestDelete(ProductListDto product)
+        {
+            ProductToDelete = product;
+            ShowDeleteConfirmation = true;
+        }
 
+        public void CancelDelete()
+        {
+            ShowDeleteConfirmation = false;
+            ProductToDelete = null;
+        }
+
+        public async Task ConfirmDeleteAsync()
+        {
+            if (ProductToDelete == null) return;
+
+            try
+            {
+                await _productService.DeleteAsync(ProductToDelete.Id);
+
+                var productInList = Products.FirstOrDefault(p => p.Id == ProductToDelete.Id);
+                if (productInList != null)
+                {
+                    Products.Remove(productInList);
+                }
+
+                if (SelectedProductDetails?.Id == ProductToDelete.Id)
+                {
+                    SelectedProductDetails = null;
+                }
+
+                ShowDeleteConfirmation = false;
+                ProductToDelete = null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur suppression : {ex.Message}");
+            }
+        }
         public void NavigateToCreate()
         {
             _navigation.NavigateTo("/admin/produits/creer");

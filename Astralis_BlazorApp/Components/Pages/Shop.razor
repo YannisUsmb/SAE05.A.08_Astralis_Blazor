@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        @* GRILLE *@
+        @* GRILLE PRINCIPALE *@
         <div class="bodies-grid">
             @if (ViewModel.IsLoading)
             {
@@ -97,12 +97,21 @@
 
                         @if (ViewModel.IsCommercialEditor)
                         {
+                            @* BOUTON MODIFIER (Crayon) *@
                             <a href="/admin/produits/modifier/@product.Id"
                                class="btn btn-warning btn-sm position-absolute top-0 end-0 m-2 shadow-sm"
                                style="z-index: 10; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
                                @onclick:stopPropagation="true">
                                 <i class="bi bi-pencil-fill text-dark"></i>
                             </a>
+
+                            @* BOUTON SUPPRIMER (Croix Rouge) - AJOUTÉ ICI *@
+                            <button class="btn btn-danger btn-sm position-absolute top-0 start-0 m-2 shadow-sm delete-btn"
+                                    style="z-index: 10; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => ViewModel.RequestDelete(product)">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         }
 
                         <img src="@product.ProductPictureUrl" alt="@product.Label image" class="body-image" />
@@ -137,6 +146,7 @@
         </div>
     }
 
+    @* VUE DÉTAIL *@
     @if (ViewModel.SelectedProductDetails != null)
     {
         <div class="details-view animate-fade-in">
@@ -169,7 +179,6 @@
 
                     <div class="detail-image-div">
                         <img class="detail-image" src="@ViewModel.SelectedProductDetails.ProductPictureUrl" alt="@ViewModel.SelectedProductDetails.Label" />
-                        @* --- CHANGEMENT PRIX ICI --- *@
                         <h2 class="detail-price">@ViewModel.SelectedProductDetails.Price.ToString("N2") €</h2>
                     </div>
 
@@ -187,6 +196,14 @@
                             <a href="/admin/produits/modifier/@ViewModel.SelectedProductDetails.Id" class="btn btn-warning btn-lg text-white">
                                 <i class="bi bi-pencil-square me-2"></i> Modifier
                             </a>
+
+                            @* BOUTON SUPPRIMER DANS LE DÉTAIL *@
+                            <button class="btn btn-danger btn-sm position-absolute top-0 start-0 m-2 shadow-sm delete-btn"
+                                    style="z-index: 10; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => ViewModel.RequestDelete(ViewModel.SelectedProduct!)">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         }
 
                         <button class="btn btn-primary btn-lg" @onclick="AddToCartAndGoBack">
@@ -194,6 +211,7 @@
                         </button>
                     </div>
 
+                    @* PRODUITS LIÉS *@
                     @if (RelatedProducts != null && RelatedProducts.Any())
                     {
                         <div class="related-products mt-5 pt-4 border-top border-secondary">
@@ -204,22 +222,35 @@
                             <div class="bodies-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
                                 @foreach (var related in RelatedProducts)
                                 {
-                                    @* AJOUT : position-relative *@
                                     <div class="body-card related-card position-relative" @onclick="() => OpenDetails(related)" style="cursor: pointer;">
 
-                                        @* AJOUT : Bouton Modifier *@
                                         @if (ViewModel.IsCommercialEditor)
                                         {
+                                            @* Modifier (Produit lié) *@
                                             <a href="/admin/produits/modifier/@related.Id"
                                                class="btn btn-warning btn-sm position-absolute top-0 end-0 m-1 shadow-sm"
                                                style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
                                                @onclick:stopPropagation="true">
                                                 <i class="bi bi-pencil-fill text-dark" style="font-size: 0.8rem;"></i>
                                             </a>
+
+                                            @* Supprimer (Produit lié) - AJOUTÉ ICI *@
+                                            <button class="btn btn-danger btn-sm position-absolute top-0 start-0 m-1 shadow-sm delete-btn"
+                                                    style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
+                                                    @onclick:stopPropagation="true"
+                                                    @onclick="() => ViewModel.RequestDelete(related)">
+                                                <i class="bi bi-x-lg" style="font-size: 0.8rem;"></i>
+                                            </button>
                                         }
 
                                         <img src="@related.ProductPictureUrl" alt="@related.Label" class="body-image"
-                                             style="height: 150px; object-fit: contain; width: 100%;" />                                        
+                                             style="height: 150px; object-fit: contain; width: 100%;" />
+
+                                        @* Ajout d'infos basiques pour les produits liés *@
+                                        <div class="p-2 text-center">
+                                            <strong class="d-block text-truncate">@related.Label</strong>
+                                            <span class="text-info">@related.Price.ToString("N0") €</span>
+                                        </div>
                                     </div>
                                 }
                             </div>
@@ -237,6 +268,34 @@
         </div>
     }
 </div>
+
+@* MODALE DE CONFIRMATION (Toujours à la fin) *@
+@if (ViewModel.ShowDeleteConfirmation && ViewModel.ProductToDelete != null)
+{
+    <div class="modal-backdrop-custom">
+        <div class="modal-content-custom animate-fade-in">
+            <div class="modal-header-custom">
+                <i class="bi bi-exclamation-triangle-fill text-danger me-2" style="font-size: 1.5rem;"></i>
+                <h3>Confirmation</h3>
+            </div>
+
+            <div class="modal-body-custom">
+                <p>Êtes-vous sûr de vouloir supprimer le produit :</p>
+                <p class="product-name-highlight">@ViewModel.ProductToDelete.Label</p>
+                <p class="text-muted small">Cette action est irréversible.</p>
+            </div>
+
+            <div class="modal-actions-custom">
+                <button class="btn btn-secondary" @onclick="ViewModel.CancelDelete">
+                    Annuler
+                </button>
+                <button class="btn btn-danger" @onclick="ViewModel.ConfirmDeleteAsync">
+                    <i class="bi bi-trash-fill me-2"></i> Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private List<ProductListDto> RelatedProducts = new();
