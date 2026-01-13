@@ -57,10 +57,19 @@
                                             Connecté en tant que <br />
                                             <strong class="text-white">@context.User.Identity?.Name</strong>
                                         </div>
-
+                                        
                                         <NavLink href="@AppRoutes.Profile" class="dropdown-item-glass" @onclick="CloseMenu">
                                             <i class="bi bi-person-circle"></i> Mon Profil
                                         </NavLink>
+                                        
+                                        <AuthorizeView Roles="Admin">
+                                            <Authorized Context="adminContext">
+                                                <NavLink href="/admin/dashboard" class="dropdown-item-glass" @onclick="CloseMenu">
+                                                    <i class="bi bi-shield-lock-fill text-warning"></i> Administration
+                                                </NavLink>
+                                                <div class="dropdown-divider-glass"></div>
+                                            </Authorized>
+                                        </AuthorizeView>
 
                                         <NavLink href="@AppRoutes.Account" class="dropdown-item-glass" @onclick="CloseMenu">
                                             <i class="bi bi-gear-fill"></i> Paramètres
