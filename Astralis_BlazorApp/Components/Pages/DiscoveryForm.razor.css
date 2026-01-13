@@ -1,0 +1,136 @@
+.discovery-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.form-header h1 {
+    font-family: "Orbitron", sans-serif;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.stepper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.stepper::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    right: 40px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-circle {
+    background: linear-gradient(135deg, #a76dff 0%, #9d4edd 100%);
+    border-color: #a76dff;
+    color: white;
+    box-shadow: 0 4px 15px rgba(167, 109, 255, 0.4);
+}
+
+.step.completed .step-circle {
+    background: #51cf66;
+    border-color: #51cf66;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.step.active .step-label {
+    color: #a76dff;
+    font-weight: 600;
+}
+
+.type-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.type-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.type-card:hover {
+    border-color: rgba(167, 109, 255, 0.5);
+    transform: translateY(-5px);
+}
+
+.type-card.selected {
+    border-color: #a76dff;
+    background: rgba(167, 109, 255, 0.1);
+}
+
+.type-card i {
+    font-size: 3rem;
+    color: #a76dff;
+    margin-bottom: 1rem;
+}
+
+.type-card h4 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.type-card p {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.form-content {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    gap: 1rem;
+}
