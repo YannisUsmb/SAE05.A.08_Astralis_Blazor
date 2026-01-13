@@ -61,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<HttpResponseHandler>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<IUploadService, UploadService>();
+        services.AddScoped<IAdminService, AdminService>();
 
         return services;
     }
@@ -82,7 +83,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ArticleDetailsViewModel>();
         services.AddScoped<ProductEditorViewModel>();
         services.AddScoped<ShopViewModel>();
+        services.AddScoped<AdminDashboardViewModel>();
         services.AddScoped<AddressViewModel>();
+        services.AddScoped<PremiumViewModel>();
         return services;
     }
 }

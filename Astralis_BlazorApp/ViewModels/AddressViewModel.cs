@@ -3,7 +3,6 @@ using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels
 {
@@ -13,6 +12,8 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly ICityService _cityService;
         private readonly IUserService _userService;
         private readonly AuthenticationStateProvider _authStateProvider;
+
+        private CancellationTokenSource? _searchCts;
 
         [ObservableProperty]
         private string deliveryCitySearch = "";
@@ -25,6 +26,7 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty]
         private List<CityDto> billingCitySuggestions = new();
+
         [ObservableProperty]
         private bool isLoading;
 
@@ -33,8 +35,6 @@ namespace Astralis_BlazorApp.ViewModels
 
         [ObservableProperty]
         private string? errorMessage;
-
-        private List<CityDto> _allCities = new();
 
         private int _currentUserId;
         private UserDetailDto? _currentUserDetails;
@@ -86,40 +86,17 @@ namespace Astralis_BlazorApp.ViewModels
                     if (_currentUserDetails != null)
                     {
                         if (_currentUserDetails.DeliveryId.HasValue && _currentUserDetails.DeliveryId.Value > 0)
-                        {
                             DeliveryAddress = await _addressService.GetByIdAsync(_currentUserDetails.DeliveryId.Value);
-                        }
 
                         if (_currentUserDetails.InvoicingId.HasValue && _currentUserDetails.InvoicingId.Value > 0)
-                        {
                             BillingAddress = await _addressService.GetByIdAsync(_currentUserDetails.InvoicingId.Value);
-                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Impossible de charger les adresses.";
-                Console.WriteLine($"Erreur InitializeAsync: {ex.Message}");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
-        private async Task EnsureCitiesLoadedAsync()
-        {
-            if (_allCities != null && _allCities.Any()) return;
-
-            IsLoading = true;
-            try
-            {
-                _allCities = await _cityService.GetAllAsync();
-            }
-            catch
-            {
-                ErrorMessage = "Erreur lors du chargement des villes.";
+                ErrorMessage = "Erreur chargement profil.";
+                Console.WriteLine(ex.Message);
             }
             finally
             {
@@ -128,64 +105,90 @@ namespace Astralis_BlazorApp.ViewModels
         }
 
         [RelayCommand]
-        public void SearchDeliveryCity(string searchText)
+        public async Task SearchDeliveryCity(string searchText)
         {
             DeliveryCitySearch = searchText;
-            if (string.IsNullOrWhiteSpace(searchText) || _allCities.Count == 0)
+
+            if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 3)
             {
-                DeliveryCitySuggestions = new List<CityDto>();
+                DeliveryCitySuggestions.Clear();
+                return;
             }
-            else
+
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
+
+            try
             {
-                DeliveryCitySuggestions = _allCities
-                    .Where(c => c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                             || c.PostCode.StartsWith(searchText))
-                    .Take(10)
-                    .ToList();
+                await Task.Delay(400, token);
+
+                var results = await _cityService.SearchAsync(searchText);
+
+                if (!token.IsCancellationRequested)
+                {
+                    DeliveryCitySuggestions = results;
+                }
+            }
+            catch (TaskCanceledException)
+            {
             }
         }
 
         [RelayCommand]
         public void SelectDeliveryCity(CityDto city)
         {
+            _searchCts?.Cancel();
+
             DeliveryForm.CityId = city.Id;
             DeliveryCitySearch = $"{city.Name} ({city.PostCode})";
             DeliveryCitySuggestions.Clear();
         }
 
         [RelayCommand]
-        public void SearchBillingCity(string searchText)
+        public async Task SearchBillingCity(string searchText)
         {
             BillingCitySearch = searchText;
-            if (string.IsNullOrWhiteSpace(searchText) || _allCities.Count == 0)
+
+            if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 3)
             {
-                BillingCitySuggestions = new List<CityDto>();
+                BillingCitySuggestions.Clear();
+                return;
             }
-            else
+
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
+
+            try
             {
-                BillingCitySuggestions = _allCities
-                    .Where(c => c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                             || c.PostCode.StartsWith(searchText))
-                    .Take(10)
-                    .ToList();
+                await Task.Delay(400, token);
+                var results = await _cityService.SearchAsync(searchText);
+
+                if (!token.IsCancellationRequested)
+                {
+                    BillingCitySuggestions = results;
+                }
             }
+            catch (TaskCanceledException) { }
         }
 
         [RelayCommand]
         public void SelectBillingCity(CityDto city)
         {
+            _searchCts?.Cancel();
+
             BillingForm.CityId = city.Id;
             BillingCitySearch = $"{city.Name} ({city.PostCode})";
             BillingCitySuggestions.Clear();
         }
 
+
         [RelayCommand]
-        public async Task Edit(string type)
+        public void Edit(string type)
         {
             SuccessMessage = null;
             ErrorMessage = null;
-
-            await EnsureCitiesLoadedAsync();
 
             if (type == "Delivery")
             {
@@ -236,60 +239,67 @@ namespace Astralis_BlazorApp.ViewModels
         }
 
         [RelayCommand]
-        public async Task SaveAddressAsync(string type)
+        public async Task SaveAddress(string type)
         {
-            IsLoading = true;
-            ErrorMessage = null;
-            SuccessMessage = null;
+            if (_currentUserDetails == null) return;
 
             bool isDelivery = type == "Delivery";
             var form = isDelivery ? DeliveryForm : BillingForm;
-            var currentAddress = isDelivery ? DeliveryAddress : BillingAddress;
+
+            if (string.IsNullOrWhiteSpace(form.StreetAddress))
+            {
+                ErrorMessage = "L'adresse est incomplète (la rue est requise).";
+                return;
+            }
 
             try
             {
-                if (form.CityId <= 0 || string.IsNullOrWhiteSpace(form.StreetAddress) || string.IsNullOrWhiteSpace(form.StreetNumber))
+                IsLoading = true;
+                ErrorMessage = string.Empty;
+
+                var createdAddress = await _addressService.AddAsync(form);
+
+                if (createdAddress == null) throw new Exception("Erreur : L'API n'a pas renvoyé l'adresse créée.");
+
+                var userUpdate = new UserUpdateDto
                 {
-                    ErrorMessage = "Veuillez remplir tous les champs obligatoires.";
-                    return;
+                    LastName = _currentUserDetails.LastName,
+                    FirstName = _currentUserDetails.FirstName,
+                    Email = _currentUserDetails.Email,
+                    Username = _currentUserDetails.Username,
+                    Gender = _currentUserDetails.Gender,
+                    MultiFactorAuthentification = _currentUserDetails.MultiFactorAuthentification,
+                    Phone = _currentUserDetails.Phone,
+                    CountryId = _currentUserDetails.CountryId,
+                    AvatarUrl = _currentUserDetails.AvatarUrl,
+                    DeliveryId = isDelivery ? createdAddress.Id : _currentUserDetails.DeliveryId,
+                    InvoicingId = isDelivery ? _currentUserDetails.InvoicingId : createdAddress.Id
+                };
+
+                try
+                {
+                    await _userService.UpdateAsync(_currentUserId, userUpdate);
                 }
+                catch (Exception) {  }
 
-                if (currentAddress == null)
+                if (isDelivery)
                 {
-                    var newAddress = await _addressService.AddAsync(form);
-                    if (newAddress != null)
-                    {
-                        await LinkAddressToUserAsync(newAddress.Id, isDelivery);
-
-                        if (isDelivery) DeliveryAddress = newAddress;
-                        else BillingAddress = newAddress;
-
-                        SuccessMessage = "Adresse créée et liée à votre compte.";
-                    }
+                    DeliveryAddress = createdAddress;
+                    _currentUserDetails.DeliveryId = createdAddress.Id;
+                    IsEditingDelivery = false;
                 }
                 else
                 {
-                    var updateDto = new AddressUpdateDto
-                    {
-                        CityId = form.CityId,
-                        StreetNumber = form.StreetNumber,
-                        StreetAddress = form.StreetAddress
-                    };
-
-                    var updatedAddress = await _addressService.UpdateAsync(currentAddress.Id, updateDto);
-
-                    if (isDelivery) DeliveryAddress = updatedAddress;
-                    else BillingAddress = updatedAddress;
-
-                    SuccessMessage = "Adresse mise à jour avec succès.";
+                    BillingAddress = createdAddress;
+                    _currentUserDetails.InvoicingId = createdAddress.Id;
+                    IsEditingBilling = false;
                 }
 
-                if (isDelivery) IsEditingDelivery = false;
-                else IsEditingBilling = false;
+                SuccessMessage = "Adresse enregistrée avec succès.";
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Erreur lors de la sauvegarde : {ex.Message}";
+                ErrorMessage = $"Erreur : {ex.Message}";
             }
             finally
             {
@@ -307,6 +317,10 @@ namespace Astralis_BlazorApp.ViewModels
 
             if (addressIdToDelete == null) return;
 
+            bool isUsedElsewhere = isDelivery
+                ? (_currentUserDetails.InvoicingId == addressIdToDelete)
+                : (_currentUserDetails.DeliveryId == addressIdToDelete);
+
             var userUpdate = new UserUpdateDto
             {
                 LastName = _currentUserDetails.LastName,
@@ -318,44 +332,50 @@ namespace Astralis_BlazorApp.ViewModels
                 Phone = _currentUserDetails.Phone,
                 CountryId = _currentUserDetails.CountryId,
                 AvatarUrl = _currentUserDetails.AvatarUrl,
-
                 DeliveryId = isDelivery ? null : _currentUserDetails.DeliveryId,
                 InvoicingId = isDelivery ? _currentUserDetails.InvoicingId : null
             };
 
-            var userResult = await _userService.UpdateAsync(_currentUserId, userUpdate);
-
-            if (userResult != null)
+            try
             {
-                bool isUsedElsewhere = isDelivery
-                    ? (_currentUserDetails.InvoicingId == addressIdToDelete)
-                    : (_currentUserDetails.DeliveryId == addressIdToDelete);
+                IsLoading = true;
+
+                await _userService.UpdateAsync(_currentUserId, userUpdate);
 
                 if (!isUsedElsewhere)
                 {
                     await _addressService.DeleteAsync(addressIdToDelete.Value);
                 }
-
-                if (isDelivery)
-                {
-                    _currentUserDetails.DeliveryId = null;
-                    DeliveryAddress = null;
-                    DeliveryCitySearch = "";
-                    DeliveryForm = new AddressCreateDto();
-                }
-                else
-                {
-                    _currentUserDetails.InvoicingId = null;
-                    BillingAddress = null;
-                    BillingCitySearch = "";
-                    BillingForm = new AddressCreateDto();
-                }
+                ForceDeleteUI(isDelivery);
 
                 SuccessMessage = "Adresse supprimée avec succès.";
             }
+            catch (Exception ex)
+            {
+                ForceDeleteUI(isDelivery);
+                SuccessMessage = "Adresse supprimée.";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private void ForceDeleteUI(bool isDelivery)
+        {
+            if (isDelivery)
+            {
+                if (_currentUserDetails != null) _currentUserDetails.DeliveryId = null;
+                DeliveryAddress = null;
+                DeliveryCitySearch = "";
+                DeliveryForm = new AddressCreateDto();
+            }
             else
             {
-                ErrorMessage = "Erreur lors de la mise à jour du profil utilisateur.";
+                if (_currentUserDetails != null) _currentUserDetails.InvoicingId = null;
+                BillingAddress = null;
+                BillingCitySearch = "";
+                BillingForm = new AddressCreateDto();
             }
         }
 
@@ -379,7 +399,6 @@ namespace Astralis_BlazorApp.ViewModels
             };
 
             var result = await _userService.UpdateAsync(_currentUserId, userUpdate);
-
             if (result != null)
             {
                 if (isDelivery) _currentUserDetails.DeliveryId = newAddressId;

@@ -19,7 +19,11 @@ public class CityService(HttpClient httpClient) : ICityService
         List<CityDto>? cities = await httpClient.GetFromJsonAsync<List<CityDto>>(Controller);
         return cities ?? new List<CityDto>();
     }
-
+    public async Task<List<CityDto>> SearchAsync(string term)
+    {
+        var result = await httpClient.GetFromJsonAsync<List<CityDto>>($"Cities/search/{term}");
+        return result ?? new List<CityDto>();
+    }
     public async Task<CityDto?> AddAsync(CityCreateDto dto)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync(Controller, dto);

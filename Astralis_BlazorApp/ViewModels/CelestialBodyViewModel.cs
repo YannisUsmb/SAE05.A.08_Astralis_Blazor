@@ -4,6 +4,8 @@ using Astralis.Shared.DTOs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization; 
+using Astralis_BlazorApp.Extensions;
 
 namespace Astralis_BlazorApp.ViewModels;
 
@@ -12,10 +14,13 @@ public partial class CelestialBodyViewModel : ObservableObject
     private readonly ICelestialBodyService _bodyService;
     private readonly ICelestialBodyTypeService _typeService;
     private readonly NavigationManager _navigationManager;
+    private readonly AuthenticationStateProvider _authStateProvider;
 
     [ObservableProperty] private ObservableCollection<CelestialBodyListDto> celestialBodies = new();
     [ObservableProperty] private ObservableCollection<CelestialBodyTypeDto> celestialBodyTypes = new();
     [ObservableProperty] private ObservableCollection<CelestialBodySubtypeDto> celestialSubtypes = new();
+    
+    [ObservableProperty] private bool isAuthenticated;
 
     [ObservableProperty] private CelestialBodyFilterDto filter = new();
 
@@ -34,11 +39,12 @@ public partial class CelestialBodyViewModel : ObservableObject
 
     [ObservableProperty] private CelestialBodyDetailDto? selectedBodyDetails;
 
-    public CelestialBodyViewModel(ICelestialBodyService bodyService, ICelestialBodyTypeService typeService, NavigationManager navigationManager)
+    public CelestialBodyViewModel(ICelestialBodyService bodyService, ICelestialBodyTypeService typeService, NavigationManager navigationManager, AuthenticationStateProvider authStateProvider)
     {
         _bodyService = bodyService;
         _typeService = typeService;
         _navigationManager = navigationManager;
+        _authStateProvider = authStateProvider;
     }
 
     [RelayCommand]
@@ -47,6 +53,9 @@ public partial class CelestialBodyViewModel : ObservableObject
         IsLoading = true;
         try
         {
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            IsAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+            
             var types = await _typeService.GetAllAsync();
             CelestialBodyTypes = new ObservableCollection<CelestialBodyTypeDto>(types);
         }
@@ -147,6 +156,18 @@ public partial class CelestialBodyViewModel : ObservableObject
 
         await OnFilterChanged();
     }
+    
+    [RelayCommand]
+    public void NavigateToDiscoveryForm()
+    {
+        if (!IsAuthenticated)
+        {
+            _navigationManager.NavigateToLogin("/decouverte/nouvelle");
+            return;
+        }
+
+        _navigationManager.NavigateTo("/decouverte/nouvelle");
+    }
 
     public async Task OnFilterChanged()
     {
@@ -154,6 +175,7 @@ public partial class CelestialBodyViewModel : ObservableObject
         await SearchDataAsync();
     }
 
+    
     [RelayCommand]
     public async Task ShowDetails(CelestialBodyListDto body)
     {
@@ -203,20 +225,11 @@ public partial class CelestialBodyViewModel : ObservableObject
         var queryParams = new List<string>();
 
         if (bodyId.HasValue)
-            queryParams.Add($"id={bodyId.Value}");
+            queryParams.Add($"{bodyId.Value}");
 
         if (!string.IsNullOrEmpty(Filter.SearchText))
             queryParams.Add($"search={Uri.EscapeDataString(Filter.SearchText)}");
-
-        if (SelectedTypeId != 0)
-            queryParams.Add($"type={SelectedTypeId}");
-
-        if (SelectedSubtypeId != 0)
-            queryParams.Add($"subtype={SelectedSubtypeId}");
-
-        if (!string.IsNullOrEmpty(SortBy))
-            queryParams.Add($"sort={SortBy}");
-
+        
         if (CurrentPage > 1)
             queryParams.Add($"page={CurrentPage}");
 

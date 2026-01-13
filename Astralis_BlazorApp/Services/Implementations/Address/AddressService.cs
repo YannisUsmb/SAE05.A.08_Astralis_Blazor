@@ -27,16 +27,21 @@ public class AddressService(HttpClient httpClient) : IAddressService
         AddressDto? createdAddress = await response.Content.ReadFromJsonAsync<AddressDto>();
         return createdAddress ?? throw new Exception("Unable to add address");
     }
-    
+
     public async Task<AddressDto?> UpdateAsync(int id, AddressUpdateDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
         response.EnsureSuccessStatusCode();
 
-        AddressDto? updatedAddress = await response.Content.ReadFromJsonAsync<AddressDto>();
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+            return await GetByIdAsync(id);
+        }
+
+        var updatedAddress = await response.Content.ReadFromJsonAsync<AddressDto>();
         return updatedAddress ?? throw new Exception("Unable to update address");
     }
-    
+
     public async Task<AddressDto?> DeleteAsync(int id)
     {
         HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}");
