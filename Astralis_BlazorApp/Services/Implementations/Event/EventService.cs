@@ -41,20 +41,14 @@ public class EventService(HttpClient httpClient) : IEventService
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<List<EventDto>> SearchAsync(EventFilterDto filter, int pageNumber, int pageSize, string sortBy)
+    public async Task<PagedResultDto<EventDto>> SearchAsync(EventFilterDto filter)
     {
         string queryString = ToQueryString(filter);
 
-        string paginationParams = $"pageNumber={pageNumber}&pageSize={pageSize}&sortBy={Uri.EscapeDataString(sortBy)}";
+        string url = $"{Controller}/Search?{queryString}";
 
-        string fullQuery = string.IsNullOrEmpty(queryString)
-            ? paginationParams
-            : $"{queryString}&{paginationParams}";
-
-        string url = $"{Controller}/search?{fullQuery}";
-
-        List<EventDto>? events = await httpClient.GetFromJsonAsync<List<EventDto>>(url);
-        return events ?? new List<EventDto>();
+        var result = await httpClient.GetFromJsonAsync<PagedResultDto<EventDto>>(url);
+        return result ?? new PagedResultDto<EventDto>();
     }
 
     private string ToQueryString(EventFilterDto filter)
@@ -78,6 +72,12 @@ public class EventService(HttpClient httpClient) : IEventService
 
         if (filter.MaxEndDate.HasValue)
             parameters.Add($"maxEndDate={Uri.EscapeDataString(filter.MaxEndDate.Value.ToString("O"))}");
+
+        parameters.Add($"pageNumber={filter.PageNumber}");
+        parameters.Add($"pageSize={filter.PageSize}");
+
+        if (!string.IsNullOrEmpty(filter.SortBy))
+            parameters.Add($"sortBy={Uri.EscapeDataString(filter.SortBy)}");
 
         return string.Join("&", parameters);
     }

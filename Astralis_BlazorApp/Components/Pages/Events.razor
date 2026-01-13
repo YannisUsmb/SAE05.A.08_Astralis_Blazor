@@ -2,26 +2,99 @@
 @inject EventViewModel ViewModel
 @inject NavigationManager Navigation
 @using Astralis.Shared.DTOs
+@implements IDisposable
 
 <PageTitle>Événements – Astralis</PageTitle>
 
 <div class="content">
     <section class="header text-center mb-5">
         <h1 class="font-orbitron display-4 mb-3">L'Agenda Cosmique</h1>
-        <p class="text-white-50">Conférences, éclipses, lancements... Ne ratez aucun rendez-vous avec l'univers.</p>
+        <p class="text-white-50">Conférences, éclipses, lancements... Ne ratez aucun rendez-vous.</p>
 
-        <div class="filters justify-content-center mt-4">
-            <input type="text" class="search-input" placeholder="Rechercher..."
-                   @bind="ViewModel.SearchText"
-                   @bind:event="oninput"
-                   @onkeyup="ViewModel.OnFilterChanged" />
+        <div class="filters-container">
 
-            <select class="filter-select" @bind="ViewModel.SortBy" @bind:after="ViewModel.OnFilterChanged">
+            <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
+                   value="@ViewModel.SearchText"
+                   @oninput="ViewModel.OnSearchInput" />
+
+            <div class="dropdown position-relative">
+
+                <button class="filter-input d-flex justify-content-between align-items-center text-start"
+                        type="button"
+                        @onclick="() => _isTypeDropdownOpen = !_isTypeDropdownOpen"
+                        style="min-width: 240px; cursor: pointer;">
+                    <span class="text-truncate me-2">
+                        @GetSelectedTypesLabel()
+                    </span>
+                    <i class="bi bi-chevron-down small text-white-50"></i>
+                </button>
+
+                @if (_isTypeDropdownOpen)
+                {
+                    <div class="dropdown-menu-glass show p-0 animate-fade-in" style="width: 100%; max-height: 350px; overflow: hidden; display: flex; flex-direction: column;">
+
+                        <div class="p-2 border-bottom border-white-10 bg-dark-glass">
+                            <input type="text"
+                                   class="form-control-astralis form-control-sm"
+                                   placeholder="Filtrer les types..."
+                                   @bind="ViewModel.TypeSearchTerm"
+                                   @bind:event="oninput"
+                                   @onclick:stopPropagation
+                                   autoFocus />
+                        </div>
+
+                        <div class="p-2" style="overflow-y: auto;">
+
+                            @if (string.IsNullOrWhiteSpace(ViewModel.TypeSearchTerm))
+                            {
+                                <div class="form-check mb-1" @onclick:stopPropagation>
+                                    <input class="form-check-input" type="checkbox" id="type-all"
+                                           checked="@(!ViewModel.SelectedTypeIds.Any())"
+                                           @onchange="@(() => ViewModel.ToggleEventType(0))"
+                                           style="cursor: pointer;">
+                                    <label class="form-check-label text-white small cursor-pointer" for="type-all" style="width: 100%;">
+                                        Tous les types
+                                    </label>
+                                </div>
+                                <hr class="dropdown-divider-glass my-1">
+                            }
+
+                            @foreach (var type in ViewModel.FilteredEventTypes)
+                            {
+                                <div class="form-check mb-1" @onclick:stopPropagation>
+                                    <input class="form-check-input" type="checkbox" id="type-@type.Id"
+                                           checked="@(ViewModel.SelectedTypeIds.Contains(type.Id))"
+                                           @onchange="@(() => ViewModel.ToggleEventType(type.Id))"
+                                           style="cursor: pointer;">
+                                    <label class="form-check-label text-white small cursor-pointer" for="type-@type.Id" style="width: 100%;">
+                                        @type.Label
+                                    </label>
+                                </div>
+                            }
+
+                            @if (!ViewModel.FilteredEventTypes.Any())
+                            {
+                                <div class="text-center py-2 text-white-50 small fst-italic">
+                                    Aucun résultat
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="menu-overlay" @onclick="() => _isTypeDropdownOpen = false" style="z-index: 1049;"></div>
+                }
+            </div>
+
+            <select class="filter-input" value="@ViewModel.SortBy" @onchange="ViewModel.OnSortChanged">
                 <option value="date_asc"> Date (Prochains)</option>
+                <option value="date_desc"> Date (Récents)</option>
                 <option value="type"> Type</option>
                 <option value="alpha_asc"> A-Z</option>
             </select>
+
         </div>
+
+        <p class="mt-3 text-white-50 small">@ViewModel.EventCountMessage</p>
     </section>
 
     <section class="events-grid-wrapper">
@@ -35,7 +108,7 @@
         {
             <div class="text-center py-5 text-white-50">
                 <i class="bi bi-telescope fs-1 d-block mb-3"></i>
-                Aucun événement ne correspond à votre recherche.
+                Aucun événement ne correspond à vos critères.
             </div>
         }
         else
@@ -44,7 +117,6 @@
                 @foreach (var evt in ViewModel.Events)
                 {
                     <div class="event-card-modern" @onclick="() => NavigateToDetails(evt.Id)">
-
                         <div class="event-card-image" style="background-image: url('@(evt.PictureUrl ?? "/assets/images/placeholder-space.jpg")');">
                             <div class="event-date-badge">
                                 <span class="day">@evt.StartDate.Day</span>
@@ -55,15 +127,12 @@
 
                         <div class="event-card-body">
                             <h3 class="event-title text-truncate" title="@evt.Title">@evt.Title</h3>
-
                             <div class="event-meta">
                                 <span><i class="bi bi-clock me-1"></i> @evt.StartDate.ToString("HH:mm")</span>
                                 <span class="text-truncate"><i class="bi bi-geo-alt me-1"></i> @(evt.Location ?? "En ligne")</span>
                             </div>
-
                             <div class="event-card-footer mt-3 d-flex justify-content-between align-items-center">
                                 <span class="text-accent-purple small fw-bold">Voir les détails <i class="bi bi-arrow-right"></i></span>
-
                                 <button class="btn-icon-interest info-tooltip-wrapper" @onclick:stopPropagation="true">
                                     <i class="bi bi-star"></i>
                                     <span class="custom-tooltip">Ça m'intéresse</span>
@@ -76,24 +145,68 @@
         }
     </section>
 
-    @if (!ViewModel.IsLoading && ViewModel.Events.Count > 0)
+    @if (!ViewModel.IsLoading && ViewModel.TotalPages > 1)
     {
-        <div class="pagination-container mt-5">
-            <button class="btn btn-astralis-outline" @onclick="ViewModel.PreviousPage" disabled="@(ViewModel.CurrentPage == 1)">Précédent</button>
-            <span class="page-info text-white mx-3">Page @ViewModel.CurrentPage</span>
-            <button class="btn btn-astralis-outline" @onclick="ViewModel.NextPage" disabled="@(!ViewModel.HasNextPage)">Suivant</button>
+        <div class="d-flex justify-content-center align-items-center gap-2 mt-5">
+            <button class="btn btn-outline-light btn-sm"
+                    disabled="@(!ViewModel.HasPreviousPage)"
+                    @onclick="() => ViewModel.ChangePage(ViewModel.CurrentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            @for (int i = 1; i <= ViewModel.TotalPages; i++)
+            {
+                var pageIndex = i;
+                <button class="btn btn-sm @(ViewModel.CurrentPage == pageIndex ? "btn-astralis-premium" : "btn-outline-light")"
+                        @onclick="() => ViewModel.ChangePage(pageIndex)">
+                    @pageIndex
+                </button>
+            }
+
+            <button class="btn btn-outline-light btn-sm"
+                    disabled="@(!ViewModel.HasNextPage)"
+                    @onclick="() => ViewModel.ChangePage(ViewModel.CurrentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
         </div>
     }
 </div>
 
 @code {
+    private bool _isTypeDropdownOpen = false;
+
     protected override async Task OnInitializedAsync()
     {
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         await ViewModel.InitializeAsync();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
     }
 
     private void NavigateToDetails(int id)
     {
         Navigation.NavigateTo($"/evenements/{id}");
+    }
+
+    private string GetSelectedTypesLabel()
+    {
+        if (!ViewModel.SelectedTypeIds.Any())
+            return "Tous les types";
+
+        if (ViewModel.SelectedTypeIds.Count == 1)
+        {
+            var type = ViewModel.EventTypes.FirstOrDefault(t => t.Id == ViewModel.SelectedTypeIds.First());
+            return type?.Label ?? "1 type sélectionné";
+        }
+
+        return $"{ViewModel.SelectedTypeIds.Count} types sélectionnés";
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
 }
