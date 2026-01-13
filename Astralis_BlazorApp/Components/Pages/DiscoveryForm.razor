@@ -43,9 +43,9 @@
                 case 1: // Star
                     <StepStarDetails @bind-Model="_starSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
                     break;
-                @* case 2: // Planet *@
-                @*     <StepPlanetDetails @bind-Model="_planetSubmission" OnNext="NextStep" OnPrevious="PreviousStep" /> *@
-                @*     break; *@
+                case 2: // Planet
+                    <StepPlanetDetails @bind-Model="_planetSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                    break;
                 @* case 3: // Asteroid *@
                 @*     <StepAsteroidDetails @bind-Model="_asteroidSubmission" OnNext="NextStep" OnPrevious="PreviousStep" /> *@
                 @*     break; *@
@@ -133,7 +133,7 @@
 
             if (result != null)
             {
-                Navigation.NavigateTo($"/corps-celestes?discoverySubmitted=true&id={result.Id}");
+                Navigation.NavigateTo($"/corps-celestes");
             }
             else
             {
