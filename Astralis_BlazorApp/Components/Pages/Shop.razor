@@ -16,7 +16,6 @@
 
     @if (ViewModel.SelectedProductDetails == null)
     {
-        @* HEADER *@
         <div class="page-header position-relative d-flex justify-content-center align-items-center mb-4">
             <h1 class="m-0">Boutique Astralis</h1>
             <button class="btn btn-primary position-absolute end-0" @onclick='() => Navigation.NavigateTo("/panier")'>
@@ -32,7 +31,6 @@
 
         <p class="page-description">Équipements, modules et ressources pour vos voyages interstellaires</p>
 
-        @* BARRE DE FILTRES AUTOMATIQUES *@
         <div class="filters-container d-flex flex-wrap align-items-center gap-2">
 
             <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
@@ -79,7 +77,6 @@
             </div>
         </div>
 
-        @* GRILLE PRINCIPALE *@
         <div class="bodies-grid">
             @if (ViewModel.IsLoading)
             {
@@ -97,7 +94,6 @@
 
                         @if (ViewModel.IsCommercialEditor)
                         {
-                            @* BOUTON MODIFIER (Crayon) *@
                             <a href="/admin/produits/modifier/@product.Id"
                                class="btn btn-warning btn-sm position-absolute top-0 end-0 m-2 shadow-sm"
                                style="z-index: 10; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
@@ -105,7 +101,6 @@
                                 <i class="bi bi-pencil-fill text-dark"></i>
                             </a>
 
-                            @* BOUTON SUPPRIMER (Croix Rouge) - AJOUTÉ ICI *@
                             <button class="btn btn-danger btn-sm position-absolute top-0 start-0 m-2 shadow-sm delete-btn"
                                     style="z-index: 10; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
                                     @onclick:stopPropagation="true"
@@ -130,7 +125,6 @@
             }
         </div>
 
-        @* PAGINATION *@
         <div class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-5">
             <button class="btn btn-astralis-outline"
                     disabled="@(ViewModel.CurrentPage <= 1)"
@@ -146,7 +140,6 @@
         </div>
     }
 
-    @* VUE DÉTAIL *@
     @if (ViewModel.SelectedProductDetails != null)
     {
         <div class="details-view animate-fade-in">
@@ -197,7 +190,6 @@
                                 <i class="bi bi-pencil-square me-2"></i> Modifier
                             </a>
 
-                            @* BOUTON SUPPRIMER DANS LE DÉTAIL *@
                             <button class="btn btn-danger btn-sm position-absolute top-0 start-0 m-2 shadow-sm delete-btn"
                                     style="z-index: 10; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
                                     @onclick:stopPropagation="true"
@@ -211,7 +203,6 @@
                         </button>
                     </div>
 
-                    @* PRODUITS LIÉS *@
                     @if (RelatedProducts != null && RelatedProducts.Any())
                     {
                         <div class="related-products mt-5 pt-4 border-top border-secondary">
@@ -226,7 +217,6 @@
 
                                         @if (ViewModel.IsCommercialEditor)
                                         {
-                                            @* Modifier (Produit lié) *@
                                             <a href="/admin/produits/modifier/@related.Id"
                                                class="btn btn-warning btn-sm position-absolute top-0 end-0 m-1 shadow-sm"
                                                style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
@@ -234,7 +224,6 @@
                                                 <i class="bi bi-pencil-fill text-dark" style="font-size: 0.8rem;"></i>
                                             </a>
 
-                                            @* Supprimer (Produit lié) - AJOUTÉ ICI *@
                                             <button class="btn btn-danger btn-sm position-absolute top-0 start-0 m-1 shadow-sm delete-btn"
                                                     style="z-index: 10; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
                                                     @onclick:stopPropagation="true"
@@ -246,7 +235,6 @@
                                         <img src="@related.ProductPictureUrl" alt="@related.Label" class="body-image"
                                              style="height: 150px; object-fit: contain; width: 100%;" />
 
-                                        @* Ajout d'infos basiques pour les produits liés *@
                                         <div class="p-2 text-center">
                                             <strong class="d-block text-truncate">@related.Label</strong>
                                             <span class="text-info">@related.Price.ToString("N0") €</span>
@@ -269,7 +257,6 @@
     }
 </div>
 
-@* MODALE DE CONFIRMATION (Toujours à la fin) *@
 @if (ViewModel.ShowDeleteConfirmation && ViewModel.ProductToDelete != null)
 {
     <div class="modal-backdrop-custom">

@@ -1,5 +1,4 @@
-﻿/* Style du bouton croix rouge sur la carte */
-.delete-btn {
+﻿.delete-btn {
     border-radius: 50%;
     width: 35px;
     height: 35px;
@@ -11,11 +10,10 @@
 }
 
     .delete-btn:hover {
-        transform: scale(1.1) rotate(90deg); /* Petite rotation sympa au survol */
+        transform: scale(1.1) rotate(90deg);
         background-color: #c82333;
     }
 
-/* --- MODALE PERSONNALISÉE --- */
 
 .modal-backdrop-custom {
     position: fixed;
@@ -23,8 +21,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.7); /* Fond sombre semi-transparent */
-    backdrop-filter: blur(5px); /* Effet de flou sur l'arrière-plan */
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -59,7 +57,7 @@
 .product-name-highlight {
     font-size: 1.4rem;
     font-weight: bold;
-    color: #ff6b6b; /* Rouge clair pour le nom du produit */
+    color: #ff6b6b;
     margin: 1rem 0;
     font-family: "Orbitron", sans-serif;
 }
