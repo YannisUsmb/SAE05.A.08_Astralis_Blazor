@@ -74,6 +74,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<SignUpViewModel>();
         services.AddScoped<EventViewModel>();
         services.AddScoped<EventDetailsViewModel>();
+        services.AddScoped<EventEditorViewModel>();
         services.AddScoped<AccountViewModel>();
         services.AddScoped<ProfileViewModel>();
         services.AddScoped<ArticleListViewModel>();

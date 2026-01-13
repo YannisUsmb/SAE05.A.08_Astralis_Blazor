@@ -4,6 +4,23 @@
 
 <PageTitle>@(ViewModel.SelectedEvent?.Title ?? "Événement") – Astralis</PageTitle>
 
+@if (ViewModel.IsDeleteModalOpen && ViewModel.SelectedEvent != null)
+{
+    <div class="modal-backdrop-custom" @onclick="ViewModel.CloseDeleteModal">
+        <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
+            <div class="text-center mb-4">
+                <div class="mb-3"><i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i></div>
+                <h4 class="text-white font-orbitron">Supprimer l'événement ?</h4>
+                <p class="text-white-50">Cette action est définitive.</p>
+            </div>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-outline-light px-4" @onclick="ViewModel.CloseDeleteModal">Annuler</button>
+                <button class="btn btn-danger px-4" @onclick="ViewModel.ConfirmDeleteAsync">Supprimer</button>
+            </div>
+        </div>
+    </div>
+}
+
 @if (ViewModel.IsLoading)
 {
     <div class="content d-flex justify-content-center align-items-center" style="height: 60vh;">
@@ -38,6 +55,19 @@ else if (ViewModel.SelectedEvent != null)
 
             <div class="event-sidebar">
                 <div class="glass-card p-4 text-center sticky-card">
+
+                    @if (ViewModel.CanManage)
+                    {
+                        <div class="mb-4 pb-3 border-bottom border-white-10 d-flex justify-content-center gap-2">
+                            <button class="btn btn-sm btn-outline-light" @onclick="ViewModel.NavigateToEdit">
+                                <i class="bi bi-pencil me-1"></i> Modifier
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="ViewModel.OpenDeleteModal">
+                                <i class="bi bi-trash me-1"></i> Supprimer
+                            </button>
+                        </div>
+                    }
+
                     <h4 class="text-white font-orbitron mb-4">Détails pratiques</h4>
 
                     <div class="info-row mb-3">
@@ -62,8 +92,15 @@ else if (ViewModel.SelectedEvent != null)
                             <i class="bi bi-calendar-plus me-2"></i> Ajouter au calendrier
                         </button>
 
-                        <button class="btn btn-astralis-outline" @onclick="ViewModel.ToggleInterest">
-                            <i class="bi bi-star me-2"></i> Ça m'intéresse
+                        <button class="btn @(ViewModel.SelectedEvent.IsInterested ? "btn-astralis-premium" : "btn-astralis-outline")" @onclick="ViewModel.ToggleInterest">
+                            @if (ViewModel.SelectedEvent.IsInterested)
+                            {
+                                <span><i class="bi bi-star-fill me-2"></i> Intéressé(e)</span>
+                            }
+                            else
+                            {
+                                <span><i class="bi bi-star me-2"></i> Ça m'intéresse</span>
+                            }
                         </button>
 
                         @if (!string.IsNullOrEmpty(ViewModel.SelectedEvent.Link))
