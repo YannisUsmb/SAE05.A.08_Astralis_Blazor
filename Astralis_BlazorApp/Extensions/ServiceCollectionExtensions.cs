@@ -84,7 +84,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ProductEditorViewModel>();
         services.AddScoped<ShopViewModel>();
         services.AddScoped<AdminDashboardViewModel>();
-
+        services.AddScoped<AddressViewModel>();
         return services;
     }
 }
