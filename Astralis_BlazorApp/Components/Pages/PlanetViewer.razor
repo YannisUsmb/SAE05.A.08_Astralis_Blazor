@@ -1,0 +1,66 @@
+﻿@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<div id="@_containerId" class="planet-viewer-container"></div>
+
+@code {
+    [Parameter] public int CelestialBodyId { get; set; }
+    [Parameter] public int? PlanetTypeId { get; set; }
+
+    private string _containerId = $"planet-viewer-{Guid.NewGuid():N}";
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _viewerInstance;
+    private bool _initialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            try
+            {
+                Console.WriteLine($"🚀 Initializing viewer for container: {_containerId}");
+
+                // Import du module JS
+                _module = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                    "import", "./js/planet-viewer.js");
+
+                // Création de l'instance viewer
+                _viewerInstance = await _module.InvokeAsync<IJSObjectReference>(
+                    "createViewer",
+                    _containerId,
+                    CelestialBodyId,
+                    PlanetTypeId ?? 5
+                );
+
+                _initialized = true;
+                Console.WriteLine("✅ Viewer initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error initializing viewer: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_viewerInstance != null)
+            {
+                await _viewerInstance.InvokeVoidAsync("dispose");
+                await _viewerInstance.DisposeAsync();
+            }
+
+            if (_module != null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error disposing viewer: {ex.Message}");
+        }
+    }
+}

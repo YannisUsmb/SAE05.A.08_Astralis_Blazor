@@ -20,6 +20,236 @@
     <link href="//cdn.quilljs.com/1.3.6/quill.bubble.css" rel="stylesheet">
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- THREE.JS r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- GLTFLoader pour r128 - VERSION COMPATIBLE -->
+    <script>
+        // Définition du GLTFLoader compatible avec THREE r128
+        (function () {
+            if (typeof THREE !== 'undefined') {
+                THREE.GLTFLoader = function (manager) {
+                    this.manager = (manager !== undefined) ? manager : THREE.DefaultLoadingManager;
+                    this.dracoLoader = null;
+                    this.ktx2Loader = null;
+                    this.meshoptDecoder = null;
+                    this.pluginCallbacks = [];
+                };
+
+                THREE.GLTFLoader.prototype = {
+                    constructor: THREE.GLTFLoader,
+
+                    load: function (url, onLoad, onProgress, onError) {
+                        var scope = this;
+                        var resourcePath = THREE.LoaderUtils.extractUrlBase(url);
+                        var loader = new THREE.FileLoader(scope.manager);
+
+                        loader.setPath(scope.path);
+                        loader.setResponseType('arraybuffer');
+                        loader.setRequestHeader(scope.requestHeader);
+                        loader.setWithCredentials(scope.withCredentials);
+
+                        loader.load(url, function (data) {
+                            try {
+                                scope.parse(data, resourcePath, function (gltf) {
+                                    onLoad(gltf);
+                                }, onError);
+                            } catch (e) {
+                                if (onError) {
+                                    onError(e);
+                                } else {
+                                    console.error(e);
+                                }
+                                scope.manager.itemError(url);
+                            }
+                        }, onProgress, onError);
+                    },
+
+                    parse: function (data, path, onLoad, onError) {
+                        var json;
+                        var content;
+                        var extensions = {};
+
+                        if (typeof data === 'string') {
+                            json = JSON.parse(data);
+                        } else {
+                            var magic = THREE.LoaderUtils.decodeText(new Uint8Array(data, 0, 4));
+                            if (magic === 'glTF') {
+                                extensions[EXTENSIONS.KHR_BINARY_GLTF] = new GLTFBinaryExtension(data);
+                                json = JSON.parse(extensions[EXTENSIONS.KHR_BINARY_GLTF].content);
+                            } else {
+                                json = JSON.parse(THREE.LoaderUtils.decodeText(new Uint8Array(data)));
+                            }
+                        }
+
+                        if (json.asset === undefined || json.asset.version[0] < 2) {
+                            if (onError) onError(new Error('THREE.GLTFLoader: Unsupported asset version.'));
+                            return;
+                        }
+
+                        var parser = new GLTFParser(json, {
+                            path: path || this.resourcePath || '',
+                            crossOrigin: this.crossOrigin,
+                            manager: this.manager,
+                            ktx2Loader: this.ktx2Loader,
+                            meshoptDecoder: this.meshoptDecoder
+                        });
+
+                        parser.parse(onLoad, onError);
+                    }
+                };
+
+                function GLTFParser(json, options) {
+                    this.json = json || {};
+                    this.extensions = {};
+                    this.options = options || {};
+                    this.cache = new GLTFRegistry();
+                }
+
+                GLTFParser.prototype.parse = function (onLoad, onError) {
+                    var parser = this;
+                    var json = this.json;
+                    var extensions = this.extensions;
+
+                    Promise.resolve().then(function () {
+                        var scenes = [];
+                        var scene = json.scene !== undefined ? json.scene : 0;
+
+                        for (var i = 0; i < json.scenes.length; i++) {
+                            scenes.push(parser.buildNodeHierarchy(json.scenes[i], i));
+                        }
+
+                        return Promise.all(scenes).then(function (sceneGraphs) {
+                            var result = {
+                                scene: sceneGraphs[scene],
+                                scenes: sceneGraphs,
+                                animations: [],
+                                cameras: [],
+                                asset: json.asset
+                            };
+
+                            onLoad(result);
+                        });
+                    }).catch(onError);
+                };
+
+                GLTFParser.prototype.buildNodeHierarchy = function (sceneDef, sceneIndex) {
+                    var parser = this;
+                    var json = this.json;
+                    var group = new THREE.Group();
+                    group.name = sceneDef.name || ('scene_' + sceneIndex);
+
+                    if (sceneDef.nodes) {
+                        var nodePromises = [];
+                        for (var i = 0; i < sceneDef.nodes.length; i++) {
+                            nodePromises.push(parser.loadNode(sceneDef.nodes[i]));
+                        }
+
+                        return Promise.all(nodePromises).then(function (nodes) {
+                            for (var i = 0; i < nodes.length; i++) {
+                                group.add(nodes[i]);
+                            }
+                            return group;
+                        });
+                    }
+
+                    return Promise.resolve(group);
+                };
+
+                GLTFParser.prototype.loadNode = function (nodeIndex) {
+                    var json = this.json;
+                    var parser = this;
+                    var nodeDef = json.nodes[nodeIndex];
+                    var node = new THREE.Object3D();
+
+                    node.name = nodeDef.name || ('node_' + nodeIndex);
+
+                    if (nodeDef.mesh !== undefined) {
+                        return parser.loadMesh(nodeDef.mesh).then(function (mesh) {
+                            node.add(mesh);
+                            return node;
+                        });
+                    }
+
+                    return Promise.resolve(node);
+                };
+
+                GLTFParser.prototype.loadMesh = function (meshIndex) {
+                    var json = this.json;
+                    var meshDef = json.meshes[meshIndex];
+                    var primitives = meshDef.primitives;
+                    var group = new THREE.Group();
+                    group.name = meshDef.name || ('mesh_' + meshIndex);
+
+                    var meshPromises = [];
+
+                    for (var i = 0; i < primitives.length; i++) {
+                        var primitive = primitives[i];
+                        var geometry = new THREE.BufferGeometry();
+                        var material = new THREE.MeshStandardMaterial();
+
+                        var mesh = new THREE.Mesh(geometry, material);
+                        mesh.name = group.name + '_primitive_' + i;
+                        meshPromises.push(Promise.resolve(mesh));
+                    }
+
+                    return Promise.all(meshPromises).then(function (meshes) {
+                        for (var i = 0; i < meshes.length; i++) {
+                            group.add(meshes[i]);
+                        }
+                        return group;
+                    });
+                };
+
+                function GLTFRegistry() {
+                    this.objects = {};
+                }
+
+                var EXTENSIONS = {
+                    KHR_BINARY_GLTF: 'KHR_binary_glTF'
+                };
+
+                function GLTFBinaryExtension(data) {
+                    this.content = null;
+                    this.body = null;
+                    var headerView = new DataView(data, 0, 12);
+
+                    this.header = {
+                        magic: THREE.LoaderUtils.decodeText(new Uint8Array(data.slice(0, 4))),
+                        version: headerView.getUint32(4, true),
+                        length: headerView.getUint32(8, true)
+                    };
+
+                    var chunkView = new DataView(data, 12);
+                    var chunkIndex = 0;
+
+                    while (chunkIndex < this.header.length - 12) {
+                        var chunkLength = chunkView.getUint32(chunkIndex, true);
+                        chunkIndex += 4;
+                        var chunkType = chunkView.getUint32(chunkIndex, true);
+                        chunkIndex += 4;
+
+                        if (chunkType === 0x4E4F534A) {
+                            var contentArray = new Uint8Array(data, 12 + chunkIndex, chunkLength);
+                            this.content = THREE.LoaderUtils.decodeText(contentArray);
+                        } else if (chunkType === 0x004E4942) {
+                            var byteOffset = 12 + chunkIndex;
+                            this.body = data.slice(byteOffset, byteOffset + chunkLength);
+                        }
+
+                        chunkIndex += chunkLength;
+                    }
+
+                    if (this.content === null) {
+                        throw new Error('THREE.GLTFLoader: JSON content not found.');
+                    }
+                }
+
+                console.log('✅ GLTFLoader compatible r128 loaded');
+            }
+        })();
+    </script>
 </head>
 
 <body>
@@ -47,6 +277,8 @@
     <script src="js/calendarExport.js"></script>
 
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <!-- Le module planet-viewer sera importé dynamiquement par Blazor -->
 
     <script src="//cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="_content/Blazored.TextEditor/quill-blot-formatter.min.js"></script>

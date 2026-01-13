@@ -300,7 +300,6 @@
                 <div class="detail-layout">
                     <div class="detail-info-panel">
                         <div class="detail-header">
-                            <h2>@ViewModel.SelectedBodyDetails.Name</h2>
                             @if (!string.IsNullOrEmpty(ViewModel.SelectedBodyDetails.Alias))
                             {
                                 <p class="alias">@ViewModel.SelectedBodyDetails.Alias</p>
@@ -751,13 +750,23 @@
                     </div>
 
                     <div class="detail-3d-panel">
-                        <div class="model-3d-placeholder">
-                            <div class="placeholder-content">
-                                <i class="bi bi-globe placeholder-icon"></i>
-                                <p>Modèle 3D à venir</p>
+                        @if (ShouldShow3D())
+                        {
+                            <PlanetViewer 
+                                CelestialBodyId="@ViewModel.SelectedBodyDetails.Id"
+                                PlanetTypeId="@GetPlanetTypeId()" />
+                        }
+                        else
+                        {
+                            <div class="model-3d-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="bi bi-globe placeholder-icon"></i>
+                                    <p>Modèle 3D disponible uniquement pour les planètes et satellites</p>
+                                </div>
                             </div>
-                        </div>
+                        }
                     </div>
+
                 </div>
             }
             else
@@ -844,5 +853,30 @@
     private void CloseSuccessMessage()
     {
         _showSuccessMessage = false;
+    }
+
+    private bool ShouldShow3D()
+    {
+        if (ViewModel.SelectedBodyDetails == null) return false;
+
+        return ViewModel.SelectedBodyDetails.CelestialBodyTypeId == 2 ||
+               ViewModel.SelectedBodyDetails.CelestialBodyTypeId == 6;
+    }
+
+    private int GetPlanetTypeId()
+    {
+        if (ViewModel.SelectedBodyDetails == null) return 5;
+
+        if (ViewModel.SelectedBodyDetails.Planet != null)
+        {
+            return ViewModel.SelectedBodyDetails.Planet.PlanetTypeId;
+        }
+
+        if (ViewModel.SelectedBodyDetails.Satellite != null)
+        {
+            return 4;
+        }
+
+        return 5;
     }
 }

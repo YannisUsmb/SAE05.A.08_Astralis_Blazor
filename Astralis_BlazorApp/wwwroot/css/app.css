@@ -1452,3 +1452,89 @@ body {
         background-attachment: scroll;
     }
 }
+
+
+/* ============================================
+   PLANET VIEWER STYLES
+   ============================================ */
+
+/* app.css */
+
+.planet-viewer-container {
+    width: 100%;
+    min-height: 400px;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, rgba(30, 20, 60, 0.3), rgba(5, 5, 15, 0.9));
+}
+
+    /* LE LOADER */
+    .planet-viewer-container::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 50px;
+        height: 50px;
+        margin: -25px 0 0 -25px;
+        border: 3px solid rgba(167, 109, 255, 0.2);
+        border-top-color: #a76dff;
+        border-radius: 50%;
+        animation: planet-loader-spin 1s linear infinite;
+        z-index: 10; /* Z-Index élevé */
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    /* QUAND CHARGÉ : On cache le loader */
+    .planet-viewer-container.loaded::before {
+        opacity: 0;
+        display: none;
+    }
+
+    /* LE CANVAS (La 3D) */
+    .planet-viewer-container canvas {
+        display: block;
+        width: 100% !important;
+        height: 100% !important;
+        /* IMPORTANT : Forcer le canvas au dessus du fond mais sous le loader (au début) */
+        position: relative;
+        z-index: 1;
+        /* Animation d'apparition */
+        opacity: 0;
+        transition: opacity 1s ease;
+    }
+
+    /* QUAND CHARGÉ : On affiche le canvas */
+    .planet-viewer-container.loaded canvas {
+        opacity: 1;
+    }
+
+@keyframes planet-loader-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.planet-viewer-container::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: linear-gradient(45deg, rgba(157, 78, 221, 0.1), rgba(127, 90, 240, 0.1), rgba(167, 109, 255, 0.1) );
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.planet-viewer-container:hover::after {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .planet-viewer-container {
+        min-height: 300px;
+    }
+}
