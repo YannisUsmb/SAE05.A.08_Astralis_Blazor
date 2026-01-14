@@ -44,50 +44,6 @@
                                 </NotAuthorized>
                             </AuthorizeView>
 
-                            <div class="user-menu-container" @onclick:stopPropagation="true" @onclick="ToggleUserMenu">
-                                <img src="@GetUserProfileImage(context.User)"
-                                     class="rounded-circle user-avatar"
-                                     alt="Profil"
-                                     onerror="this.onerror=null;this.src='@GetDefaultAvatarUrl(context.User)';" />
-
-                                @if (_isUserMenuOpen)
-                                {
-                                    <div class="dropdown-menu-glass">
-                                        <div class="px-3 py-2 text-white-50 small border-bottom border-white-10 mb-1">
-                                            Connecté en tant que <br />
-                                            <strong class="text-white">@context.User.Identity?.Name</strong>
-                                        </div>
-                                        
-                                        <NavLink href="@AppRoutes.Profile" class="dropdown-item-glass" @onclick="CloseMenu">
-                                            <i class="bi bi-person-circle"></i> Mon Profil
-                                        </NavLink>
-                                        
-                                        <AuthorizeView Roles="Admin">
-                                            <Authorized Context="adminContext">
-                                                <NavLink href="/admin/dashboard" class="dropdown-item-glass" @onclick="CloseMenu">
-                                                    <i class="bi bi-shield-lock-fill text-warning"></i> Administration
-                                                </NavLink>
-                                                <div class="dropdown-divider-glass"></div>
-                                            </Authorized>
-                                        </AuthorizeView>
-
-                                        <NavLink href="@AppRoutes.Account" class="dropdown-item-glass" @onclick="CloseMenu">
-                                            <i class="bi bi-gear-fill"></i> Paramètres
-                                        </NavLink>
-
-                                        <NavLink href="/parametres?section=favorites" class="dropdown-item-glass" @onclick="CloseMenu">
-                                            <i class="bi bi-heart-fill text-accent-purple"></i> Mes Favoris
-                                        </NavLink>
-
-                                        <div class="dropdown-divider-glass"></div>
-
-                                        <button class="dropdown-item-glass text-danger" @onclick="LogoutAndClose">
-                                            <i class="bi bi-box-arrow-right"></i> Déconnexion
-                                        </button>
-                                    </div>
-                                }
-                            </div>
-
                             <div class="notification-wrapper position-relative" @onclick:stopPropagation>
                                 <button class="btn btn-icon-glass position-relative" @onclick="ViewModel.ToggleNotificationDropdown">
                                     <i class="bi bi-bell-fill"></i>
@@ -186,6 +142,50 @@
                                                 </div>
                                             }
                                         </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="user-menu-container" @onclick:stopPropagation="true" @onclick="ToggleUserMenu">
+                                <img src="@GetUserProfileImage(context.User)"
+                                     class="rounded-circle user-avatar"
+                                     alt="Profil"
+                                     onerror="this.onerror=null;this.src='@GetDefaultAvatarUrl(context.User)';" />
+
+                                @if (_isUserMenuOpen)
+                                {
+                                    <div class="dropdown-menu-glass">
+                                        <div class="px-3 py-2 text-white-50 small border-bottom border-white-10 mb-1">
+                                            Connecté en tant que <br />
+                                            <strong class="text-white">@context.User.Identity?.Name</strong>
+                                        </div>
+                                        
+                                        <NavLink href="@AppRoutes.Profile" class="dropdown-item-glass" @onclick="CloseMenu">
+                                            <i class="bi bi-person-circle"></i> Mon Profil
+                                        </NavLink>
+                                        
+                                        <AuthorizeView Roles="Admin">
+                                            <Authorized Context="adminContext">
+                                                <NavLink href="/admin/dashboard" class="dropdown-item-glass" @onclick="CloseMenu">
+                                                    <i class="bi bi-shield-lock-fill text-warning"></i> Administration
+                                                </NavLink>
+                                                <div class="dropdown-divider-glass"></div>
+                                            </Authorized>
+                                        </AuthorizeView>
+
+                                        <NavLink href="@AppRoutes.Account" class="dropdown-item-glass" @onclick="CloseMenu">
+                                            <i class="bi bi-gear-fill"></i> Paramètres
+                                        </NavLink>
+
+                                        <NavLink href="/parametres?section=favorites" class="dropdown-item-glass" @onclick="CloseMenu">
+                                            <i class="bi bi-heart-fill text-accent-purple"></i> Mes Favoris
+                                        </NavLink>
+
+                                        <div class="dropdown-divider-glass"></div>
+
+                                        <button class="dropdown-item-glass text-danger" @onclick="LogoutAndClose">
+                                            <i class="bi bi-box-arrow-right"></i> Déconnexion
+                                        </button>
                                     </div>
                                 }
                             </div>
