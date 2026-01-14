@@ -34,8 +34,12 @@ public partial class AdminDashboardViewModel : ObservableObject
         IsLoading = true;
         try
         {
+            PendingDiscoveries.Clear();
             var result = await _adminService.GetPendingDiscoveriesAsync();
-            PendingDiscoveries = new ObservableCollection<DiscoveryDto>(result);
+            foreach (var item in result)
+            {
+                PendingDiscoveries.Add(item);
+            }
         }
         finally
         {
@@ -46,11 +50,14 @@ public partial class AdminDashboardViewModel : ObservableObject
     [RelayCommand]
     public async Task ApproveDiscovery(int id)
     {
-        IsLoading = true;
+        var itemToRemove = PendingDiscoveries.FirstOrDefault(d => d.Id == id);
         try 
         {
             await _adminService.ApproveDiscoveryAsync(id);
-            await LoadDiscoveriesAsync(); 
+            if (itemToRemove != null)
+            {
+                PendingDiscoveries.Remove(itemToRemove);
+            }
         }
         catch (Exception ex)
         {
@@ -79,12 +86,17 @@ public partial class AdminDashboardViewModel : ObservableObject
     {
         if (SelectedDiscoveryId == null || string.IsNullOrWhiteSpace(RejectionReason)) return;
 
-        IsLoading = true;
+        var itemToRemove = PendingDiscoveries.FirstOrDefault(d => d.Id == SelectedDiscoveryId);
         try
         {
             await _adminService.RejectDiscoveryAsync(SelectedDiscoveryId.Value, RejectionReason);
             IsRejectModalOpen = false;
-            await LoadDiscoveriesAsync();
+            if (itemToRemove != null)
+            {
+                PendingDiscoveries.Remove(itemToRemove);
+            }
+            SelectedDiscoveryId = null;
+            RejectionReason = "";
         }
         catch (Exception ex)
         {
