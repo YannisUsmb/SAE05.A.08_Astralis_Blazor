@@ -2,6 +2,7 @@
 @using Astralis.Shared.DTOs
 @using Astralis.Shared.Enums
 @inject SignUpViewModel ViewModel
+@inject IConfiguration Configuration
 @inject IJSRuntime JS
 
 <PageTitle>Inscription – Astralis</PageTitle>
@@ -206,7 +207,7 @@
             {
                 var dotNetReference = DotNetObjectReference.Create(this);
 
-                string clientId = "472091593732-pggcg9c8ohdnaqard33pi7rf10249b5d.apps.googleusercontent.com";
+                string clientId = Configuration["Google:ClientId"]!;
 
                 await JS.InvokeVoidAsync("googleAuth.initialize", dotNetReference, clientId);
                 await JS.InvokeVoidAsync("googleAuth.renderButton", "google-btn-container");
