@@ -88,4 +88,9 @@ public class CelestialBodyService(HttpClient httpClient) : ICelestialBodyService
         }
     }
     
+    public async Task<List<DetectionMethodDto>> GetDetectionMethodsAsync()
+    {
+        List<DetectionMethodDto>? methods = await httpClient.GetFromJsonAsync<List<DetectionMethodDto>>("Discoveries/DetectionMethods");
+        return methods ?? new List<DetectionMethodDto>();
+    }
 }

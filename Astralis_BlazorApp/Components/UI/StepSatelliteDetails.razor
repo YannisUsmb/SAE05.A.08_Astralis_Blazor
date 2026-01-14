@@ -1,4 +1,6 @@
 @using Astralis.Shared.DTOs
+@using Astralis_BlazorApp.Services.Interfaces
+@inject ICelestialBodyService CelestialBodyService
 
 <div class="form-step">
     <h3>Détails du satellite</h3>
@@ -14,6 +16,30 @@
 
         <h4>Caractéristiques du satellite</h4>
 
+        <div class="form-group">
+            <label>Planète Parente (Système Solaire) *</label>
+            @if (_parentPlanets == null)
+            {
+                <p class="text-muted small">Chargement des planètes...</p>
+            }
+            else
+            {
+                <InputSelect @bind-Value="Model.Details.PlanetId" class="form-control">
+                    <option value="0">-- Sélectionner la planète --</option>
+                    @foreach (var planet in _parentPlanets)
+                    {
+                        <option value="@planet.Id">@planet.Name</option>
+                    }
+                </InputSelect>
+                @if (Model.Details.PlanetId == 0 && _attemptedSubmit)
+                {
+                    <div class="text-danger small">La planète parente est obligatoire.</div>
+                }
+            }
+            <div class="form-text text-muted small">
+                Seules les planètes du système solaire sont affichées ici.
+            </div>
+        </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Nom *</label>
@@ -63,16 +89,41 @@
     [Parameter] public EventCallback OnNext { get; set; }
     [Parameter] public EventCallback OnPrevious { get; set; }
 
-    protected override void OnInitialized()
+    private List<CelestialBodyListDto>? _parentPlanets;
+    private bool _attemptedSubmit = false;
+    
+    private readonly List<string> _majorPlanets = new() 
+    { 
+        "Mercure", "Venus", "Terre", "Mars", "Jupiter", "Saturne", "Uranus", "Neptune", "Pluton",
+        "Mercury", "Earth", "Saturn", "Pluto"
+    };
+
+    protected override async Task OnInitializedAsync()
     {
-        if (Model.Details == null)
+        if (Model.Details == null) Model.Details = new SatelliteCreateDto();
+
+        try
         {
-            Model.Details = new SatelliteCreateDto();
+            var allBodies = await CelestialBodyService.GetAllAsync();
+            
+            _parentPlanets = allBodies
+                .Where(cb => 
+                    (cb.CelestialBodyTypeName.Contains("Planète") || cb.CelestialBodyTypeName.Contains("Planet")) 
+                    && _majorPlanets.Any(p => cb.Name.Contains(p, StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(cb => cb.Name)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erreur chargement planètes : " + ex.Message);
         }
     }
 
     private async Task HandleNext()
     {
+        _attemptedSubmit = true;
+        if (Model.Details.PlanetId == 0) return;
+
         await ModelChanged.InvokeAsync(Model);
         await OnNext.InvokeAsync();
     }

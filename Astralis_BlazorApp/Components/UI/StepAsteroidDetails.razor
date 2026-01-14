@@ -1,4 +1,6 @@
 @using Astralis.Shared.DTOs
+@using Astralis_BlazorApp.Services.Interfaces
+@inject ICelestialBodyService CelestialBodyService
 
 <div class="form-step">
     <h3>Détails de l'astéroïde</h3>
@@ -14,6 +16,23 @@
 
         <h4>Caractéristiques de l'astéroïde</h4>
 
+        <div class="form-group">
+            <label>Classe Orbitale *</label>
+            <InputSelect @bind-Value="Model.Details.OrbitalClassId" class="form-control">
+                <option value="0">-- Sélectionner --</option>
+                @if (_orbitalClasses != null)
+                {
+                    foreach (var type in _orbitalClasses)
+                    {
+                        <option value="@type.Id">@type.Label</option>
+                    }
+                }
+            </InputSelect>
+            @if (Model.Details.OrbitalClassId == 0 && _attemptedSubmit)
+            {
+                <div class="text-danger small">La classe orbitale est obligatoire.</div>
+            }
+        </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Nom *</label>
@@ -105,15 +124,26 @@
     [Parameter] public EventCallback<DiscoveryAsteroidSubmissionDto> ModelChanged { get; set; }
     [Parameter] public EventCallback OnNext { get; set; }
     [Parameter] public EventCallback OnPrevious { get; set; }
+    
     private string _hazardousString = "";
+    private List<CelestialBodySubtypeDto>? _orbitalClasses; // LISTE POUR LE SELECT
+    private bool _attemptedSubmit = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        if (Model.Details == null)
-        {
-            Model.Details = new AsteroidCreateDto();
-        }
+        if (Model.Details == null) Model.Details = new AsteroidCreateDto();
+        
         _hazardousString = Model.Details.IsPotentiallyHazardous?.ToString().ToLower() ?? "";
+
+        // CHARGEMENT DES CLASSES ORBITALES (ID 3 = Astéroïde)
+        try 
+        {
+            _orbitalClasses = await CelestialBodyService.GetSubtypesAsync(3);
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine("Error loading subtypes: " + ex.Message);
+        }
     }
     
     private string GetHazardousValue()
@@ -129,6 +159,9 @@
 
     private async Task HandleNext()
     {
+        _attemptedSubmit = true;
+        if (Model.Details.OrbitalClassId == 0) return;
+
         await ModelChanged.InvokeAsync(Model);
         await OnNext.InvokeAsync();
     }

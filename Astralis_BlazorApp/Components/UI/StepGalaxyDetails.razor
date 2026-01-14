@@ -1,4 +1,6 @@
 @using Astralis.Shared.DTOs
+@using Astralis_BlazorApp.Services.Interfaces
+@inject ICelestialBodyService CelestialBodyService
 
 <div class="form-step">
     <h3>Détails de la galaxie / quasar</h3>
@@ -14,6 +16,23 @@
 
         <h4>Caractéristiques de la galaxie / quasar</h4>
 
+        <div class="form-group">
+            <label>Type de Galaxie / Quasar *</label>
+            <InputSelect @bind-Value="Model.Details.GalaxyQuasarClassId" class="form-control">
+                <option value="0">-- Sélectionner --</option>
+                @if (_galaxyClasses != null)
+                {
+                    foreach (var type in _galaxyClasses)
+                    {
+                        <option value="@type.Id">@type.Label</option>
+                    }
+                }
+            </InputSelect>
+            @if (Model.Details.GalaxyQuasarClassId == 0 && _attemptedSubmit)
+            {
+                <div class="text-danger small">Le type est obligatoire.</div>
+            }
+        </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Nom *</label>
@@ -80,16 +99,33 @@
     [Parameter] public EventCallback OnNext { get; set; }
     [Parameter] public EventCallback OnPrevious { get; set; }
 
-    protected override void OnInitialized()
+    private List<CelestialBodySubtypeDto>? _galaxyClasses;
+    private bool _attemptedSubmit = false;
+
+    protected override async Task OnInitializedAsync()
     {
         if (Model.Details == null)
         {
             Model.Details = new GalaxyQuasarCreateDto();
         }
+
+        // Chargement des types de galaxies (ID 5 = Galaxie/Quasar)
+        try 
+        {
+            _galaxyClasses = await CelestialBodyService.GetSubtypesAsync(5);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("Erreur chargement types galaxies: " + ex.Message);
+        }
     }
 
     private async Task HandleNext()
     {
+        _attemptedSubmit = true;
+        
+        if (Model.Details.GalaxyQuasarClassId == 0) return;
+
         await ModelChanged.InvokeAsync(Model);
         await OnNext.InvokeAsync();
     }

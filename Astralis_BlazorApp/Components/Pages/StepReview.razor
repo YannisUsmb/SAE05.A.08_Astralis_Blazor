@@ -11,7 +11,7 @@
         </div>
         <p class="review-value">@GetTypeName(SelectedType)</p>
     </div>
-
+    
     @if (SelectedType == 1 && StarSubmission != null)
     {
         <div class="review-section">
@@ -19,73 +19,111 @@
                 <i class="bi bi-star-fill"></i>
                 <h4>Détails de l'étoile</h4>
             </div>
-            
             <div class="review-grid">
-                <div class="review-item">
-                    <span class="review-label">Titre</span>
-                    <span class="review-value">@StarSubmission.Title</span>
-                </div>
-                
-                @if (!string.IsNullOrEmpty(StarSubmission.Details.Name))
-                {
-                    <div class="review-item">
-                        <span class="review-label">Nom</span>
-                        <span class="review-value">@StarSubmission.Details.Name</span>
-                    </div>
-                }
-                
-                @if (!string.IsNullOrEmpty(StarSubmission.Details.Alias))
-                {
-                    <div class="review-item">
-                        <span class="review-label">Alias</span>
-                        <span class="review-value">@StarSubmission.Details.Alias</span>
-                    </div>
-                }
-                
-                @if (StarSubmission.Details.Temperature.HasValue)
-                {
-                    <div class="review-item">
-                        <span class="review-label">Température</span>
-                        <span class="review-value">@StarSubmission.Details.Temperature.Value K</span>
-                    </div>
-                }
-                
-                @if (StarSubmission.Details.Distance.HasValue)
-                {
-                    <div class="review-item">
-                        <span class="review-label">Distance</span>
-                        <span class="review-value">@StarSubmission.Details.Distance.Value AL</span>
-                    </div>
-                }
-                
-                @if (StarSubmission.Details.Radius.HasValue)
-                {
-                    <div class="review-item">
-                        <span class="review-label">Rayon</span>
-                        <span class="review-value">@StarSubmission.Details.Radius.Value R☉</span>
-                    </div>
-                }
-                
-                @if (StarSubmission.Details.Luminosity.HasValue)
-                {
-                    <div class="review-item">
-                        <span class="review-label">Luminosité</span>
-                        <span class="review-value">@StarSubmission.Details.Luminosity.Value L☉</span>
-                    </div>
-                }
-                
-                @if (!string.IsNullOrEmpty(StarSubmission.Details.Constellation))
-                {
-                    <div class="review-item">
-                        <span class="review-label">Constellation</span>
-                        <span class="review-value">@StarSubmission.Details.Constellation</span>
-                    </div>
+                <div class="review-item"><span class="review-label">Titre</span><span class="review-value">@StarSubmission.Title</span></div>
+                @if (!string.IsNullOrEmpty(StarSubmission.Details.Name)) { <div class="review-item"><span class="review-label">Nom</span><span class="review-value">@StarSubmission.Details.Name</span></div> }
+                @if (!string.IsNullOrEmpty(StarSubmission.Details.Alias)) { <div class="review-item"><span class="review-label">Alias</span><span class="review-value">@StarSubmission.Details.Alias</span></div> }
+                @if (StarSubmission.Details.Temperature.HasValue) { <div class="review-item"><span class="review-label">Température</span><span class="review-value">@StarSubmission.Details.Temperature.Value K</span></div> }
+                @if (StarSubmission.Details.Distance.HasValue) { <div class="review-item"><span class="review-label">Distance</span><span class="review-value">@StarSubmission.Details.Distance.Value AL</span></div> }
+                @if (StarSubmission.Details.Radius.HasValue) { <div class="review-item"><span class="review-label">Rayon</span><span class="review-value">@StarSubmission.Details.Radius.Value R☉</span></div> }
+                @if (StarSubmission.Details.Luminosity.HasValue) { <div class="review-item"><span class="review-label">Luminosité</span><span class="review-value">@StarSubmission.Details.Luminosity.Value L☉</span></div> }
+                @if (!string.IsNullOrEmpty(StarSubmission.Details.Constellation)) { <div class="review-item"><span class="review-label">Constellation</span><span class="review-value">@StarSubmission.Details.Constellation</span></div> }
+            </div>
+        </div>
+    }
+    
+    @if (SelectedType == 2 && PlanetSubmission != null)
+    {
+        <div class="review-section">
+            <div class="review-header">
+                <i class="bi bi-globe"></i>
+                <h4>Détails de la planète</h4>
+            </div>
+            <div class="review-grid">
+                <div class="review-item"><span class="review-label">Titre</span><span class="review-value">@PlanetSubmission.Title</span></div>
+                @if (!string.IsNullOrEmpty(PlanetSubmission.Details.Name)) { <div class="review-item"><span class="review-label">Nom</span><span class="review-value">@PlanetSubmission.Details.Name</span></div> }
+                @if (!string.IsNullOrEmpty(PlanetSubmission.Details.Alias)) { <div class="review-item"><span class="review-label">Alias</span><span class="review-value">@PlanetSubmission.Details.Alias</span></div> }
+                @if (PlanetSubmission.Details.Mass.HasValue) { <div class="review-item"><span class="review-label">Masse</span><span class="review-value">@PlanetSubmission.Details.Mass M⊕</span></div> }
+                @if (PlanetSubmission.Details.Radius.HasValue) { <div class="review-item"><span class="review-label">Rayon</span><span class="review-value">@PlanetSubmission.Details.Radius R⊕</span></div> }
+                @if (PlanetSubmission.Details.Distance.HasValue) { <div class="review-item"><span class="review-label">Distance</span><span class="review-value">@PlanetSubmission.Details.Distance AL</span></div> }
+                @if (!string.IsNullOrEmpty(PlanetSubmission.Details.Temperature)) { <div class="review-item"><span class="review-label">Température</span><span class="review-value">@PlanetSubmission.Details.Temperature</span></div> }
+                @if (!string.IsNullOrEmpty(PlanetSubmission.Details.OrbitalPeriod)) { <div class="review-item"><span class="review-label">Période</span><span class="review-value">@PlanetSubmission.Details.OrbitalPeriod</span></div> }
+            </div>
+        </div>
+    }
+    
+    @if (SelectedType == 3 && AsteroidSubmission != null)
+    {
+        <div class="review-section">
+            <div class="review-header">
+                <i class="bi bi-circle"></i>
+                <h4>Détails de l'astéroïde</h4>
+            </div>
+            <div class="review-grid">
+                <div class="review-item"><span class="review-label">Titre</span><span class="review-value">@AsteroidSubmission.Title</span></div>
+                @if (!string.IsNullOrEmpty(AsteroidSubmission.Details.Name)) { <div class="review-item"><span class="review-label">Nom</span><span class="review-value">@AsteroidSubmission.Details.Name</span></div> }
+                @if (!string.IsNullOrEmpty(AsteroidSubmission.Details.Alias)) { <div class="review-item"><span class="review-label">Alias</span><span class="review-value">@AsteroidSubmission.Details.Alias</span></div> }
+                @if (AsteroidSubmission.Details.DiameterMaxKm.HasValue) { <div class="review-item"><span class="review-label">Diamètre Max</span><span class="review-value">@AsteroidSubmission.Details.DiameterMaxKm km</span></div> }
+                @if (AsteroidSubmission.Details.AbsoluteMagnitude.HasValue) { <div class="review-item"><span class="review-label">Magnitude Abs.</span><span class="review-value">@AsteroidSubmission.Details.AbsoluteMagnitude</span></div> }
+                @if (AsteroidSubmission.Details.IsPotentiallyHazardous.HasValue) { 
+                    <div class="review-item"><span class="review-label">Dangereux</span><span class="review-value">@(AsteroidSubmission.Details.IsPotentiallyHazardous.Value ? "Oui" : "Non")</span></div> 
                 }
             </div>
         </div>
     }
-
-    @* Ajoute les mêmes sections pour Planet, Asteroid, etc. si nécessaire *@
+    
+    @if (SelectedType == 4 && CometSubmission != null)
+    {
+        <div class="review-section">
+            <div class="review-header">
+                <i class="bi bi-droplet"></i>
+                <h4>Détails de la comète</h4>
+            </div>
+            <div class="review-grid">
+                <div class="review-item"><span class="review-label">Titre</span><span class="review-value">@CometSubmission.Title</span></div>
+                @if (!string.IsNullOrEmpty(CometSubmission.Details.Name)) { <div class="review-item"><span class="review-label">Nom</span><span class="review-value">@CometSubmission.Details.Name</span></div> }
+                @if (!string.IsNullOrEmpty(CometSubmission.Details.Alias)) { <div class="review-item"><span class="review-label">Alias</span><span class="review-value">@CometSubmission.Details.Alias</span></div> }
+                @if (CometSubmission.Details.OrbitalPeriodYears.HasValue) { <div class="review-item"><span class="review-label">Période</span><span class="review-value">@CometSubmission.Details.OrbitalPeriodYears ans</span></div> }
+                @if (CometSubmission.Details.PerihelionDistanceAU.HasValue) { <div class="review-item"><span class="review-label">Périhélie</span><span class="review-value">@CometSubmission.Details.PerihelionDistanceAU UA</span></div> }
+            </div>
+        </div>
+    }
+    
+    @if (SelectedType == 5 && GalaxySubmission != null)
+    {
+        <div class="review-section">
+            <div class="review-header">
+                <i class="bi bi-stars"></i>
+                <h4>Détails de la galaxie</h4>
+            </div>
+            <div class="review-grid">
+                <div class="review-item"><span class="review-label">Titre</span><span class="review-value">@GalaxySubmission.Title</span></div>
+                @if (!string.IsNullOrEmpty(GalaxySubmission.Details.Name)) { <div class="review-item"><span class="review-label">Nom</span><span class="review-value">@GalaxySubmission.Details.Name</span></div> }
+                @if (!string.IsNullOrEmpty(GalaxySubmission.Details.Alias)) { <div class="review-item"><span class="review-label">Alias</span><span class="review-value">@GalaxySubmission.Details.Alias</span></div> }
+                @if (GalaxySubmission.Details.Redshift.HasValue) { <div class="review-item"><span class="review-label">Redshift</span><span class="review-value">@GalaxySubmission.Details.Redshift</span></div> }
+                @if (GalaxySubmission.Details.RightAscension.HasValue) { <div class="review-item"><span class="review-label">Ascension Dr.</span><span class="review-value">@GalaxySubmission.Details.RightAscension °</span></div> }
+                @if (GalaxySubmission.Details.Declination.HasValue) { <div class="review-item"><span class="review-label">Déclinaison</span><span class="review-value">@GalaxySubmission.Details.Declination °</span></div> }
+            </div>
+        </div>
+    }
+    
+    @if (SelectedType == 6 && SatelliteSubmission != null)
+    {
+        <div class="review-section">
+            <div class="review-header">
+                <i class="bi bi-moon"></i>
+                <h4>Détails du satellite</h4>
+            </div>
+            <div class="review-grid">
+                <div class="review-item"><span class="review-label">Titre</span><span class="review-value">@SatelliteSubmission.Title</span></div>
+                @if (!string.IsNullOrEmpty(SatelliteSubmission.Details.Name)) { <div class="review-item"><span class="review-label">Nom</span><span class="review-value">@SatelliteSubmission.Details.Name</span></div> }
+                @if (!string.IsNullOrEmpty(SatelliteSubmission.Details.Alias)) { <div class="review-item"><span class="review-label">Alias</span><span class="review-value">@SatelliteSubmission.Details.Alias</span></div> }
+                @if (SatelliteSubmission.Details.Radius.HasValue) { <div class="review-item"><span class="review-label">Rayon</span><span class="review-value">@SatelliteSubmission.Details.Radius km</span></div> }
+                @if (SatelliteSubmission.Details.Gravity.HasValue) { <div class="review-item"><span class="review-label">Gravité</span><span class="review-value">@SatelliteSubmission.Details.Gravity m/s²</span></div> }
+                @if (SatelliteSubmission.Details.Density.HasValue) { <div class="review-item"><span class="review-label">Densité</span><span class="review-value">@SatelliteSubmission.Details.Density g/cm³</span></div> }
+            </div>
+        </div>
+    }
 
     <div class="review-actions">
         <button type="button" class="btn btn-secondary" @onclick="OnPrevious" disabled="@IsSubmitting">
