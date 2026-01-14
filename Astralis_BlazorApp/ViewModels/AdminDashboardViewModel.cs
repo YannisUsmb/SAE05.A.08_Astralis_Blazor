@@ -34,6 +34,7 @@ public partial class AdminDashboardViewModel : ObservableObject
         IsLoading = true;
         try
         {
+            PendingDiscoveries.Clear();
             var result = await _adminService.GetPendingDiscoveriesAsync();
             PendingDiscoveries = new ObservableCollection<DiscoveryDto>(result);
         }

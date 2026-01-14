@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Admin")]
 @inject AdminDashboardViewModel ViewModel
+@implements IDisposable
 
 <PageTitle>Administration – Astralis</PageTitle>
 
@@ -60,7 +61,6 @@
                                     </div>
                                 </td>
                                 
-            
                                 <td class="text-end">
                                     <div class="btn-group">
                                         <a href="/corps-celestes?id=@discovery.CelestialBodyId" class="btn btn-sm btn-info" title="Voir les détails">
@@ -103,8 +103,9 @@
                 <div class="mb-3">
                     <label class="form-label text-white small">Motif du refus <span class="text-danger">*</span></label>
                     <textarea class="form-control-astralis" rows="4" 
-                              placeholder="Ex: Données incohérentes, doublon, contenu inapproprié..."
-                              @bind="ViewModel.RejectionReason"></textarea>
+                        placeholder="Ex: Données incohérentes, doublon..."
+                        @bind="ViewModel.RejectionReason"
+                        @bind:event="oninput"></textarea>
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0 gap-2">
@@ -122,6 +123,17 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         await ViewModel.InitializeAsync();
+    }
+    
+    private async void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
 }
