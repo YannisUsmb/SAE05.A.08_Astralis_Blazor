@@ -69,6 +69,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddViewModels(this IServiceCollection services)
     {
         services.AddScoped<MainLayoutViewModel>();
+        services.AddScoped<NotificationItemViewModel>();
         services.AddScoped<HomeViewModel>();
         services.AddScoped<CelestialBodyViewModel>();
         services.AddScoped<LoginViewModel>();
