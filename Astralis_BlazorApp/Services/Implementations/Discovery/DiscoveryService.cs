@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
@@ -20,70 +21,81 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
         return discoveries ?? new List<DiscoveryDto>();
     }
 
+    // --- CREATE ---
+
     public async Task<DiscoveryDto?> CreateAsteroidAsync(DiscoveryAsteroidSubmissionDto submission)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Asteroid", submission);
         response.EnsureSuccessStatusCode();
-
-        DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
-        return createdEntity ?? throw new Exception("Error creating Asteroid discovery");
+        return await response.Content.ReadFromJsonAsync<DiscoveryDto>();
     }
 
     public async Task<DiscoveryDto?> CreatePlanetAsync(DiscoveryPlanetSubmissionDto submission)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Planet", submission);
         response.EnsureSuccessStatusCode();
-
-        DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
-        return createdEntity ?? throw new Exception("Error creating Planet discovery");
+        return await response.Content.ReadFromJsonAsync<DiscoveryDto>();
     }
 
     public async Task<DiscoveryDto?> CreateStarAsync(DiscoveryStarSubmissionDto submission)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Star", submission);
         response.EnsureSuccessStatusCode();
-
-        DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
-        return createdEntity ?? throw new Exception("Error creating Star discovery");
+        return await response.Content.ReadFromJsonAsync<DiscoveryDto>();
     }
 
     public async Task<DiscoveryDto?> CreateCometAsync(DiscoveryCometSubmissionDto submission)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Comet", submission);
         response.EnsureSuccessStatusCode();
-
-        DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
-        return createdEntity ?? throw new Exception("Error creating Comet discovery");
+        return await response.Content.ReadFromJsonAsync<DiscoveryDto>();
     }
 
     public async Task<DiscoveryDto?> CreateGalaxyAsync(DiscoveryGalaxyQuasarSubmissionDto submission)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/GalaxyQuasar", submission);
         response.EnsureSuccessStatusCode();
-
-        DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
-        return createdEntity ?? throw new Exception("Error creating Galaxy discovery");
+        return await response.Content.ReadFromJsonAsync<DiscoveryDto>();
     }
     
     public async Task<DiscoveryDto?> CreateSatelliteAsync(DiscoverySatelliteSubmissionDto submission)
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{Controller}/Satellite", submission);
         response.EnsureSuccessStatusCode();
-
-        DiscoveryDto? createdEntity = await response.Content.ReadFromJsonAsync<DiscoveryDto>();
-        return createdEntity ?? throw new Exception("Error creating Satellite discovery");
+        return await response.Content.ReadFromJsonAsync<DiscoveryDto>();
     }
+
+    // --- UPDATES ---
 
     public async Task UpdateTitleAsync(int id, DiscoveryUpdateDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}", dto);
         response.EnsureSuccessStatusCode();
     }
-
-    public async Task ProposeAliasAsync(int id, DiscoveryAliasDto dto)
+    
+    public async Task<bool> ProposeAliasAsync(int id, DiscoveryAliasDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}/Alias", dto);
-        response.EnsureSuccessStatusCode();
+        
+        // If payment is required, throw an exception to notify the caller
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            throw new HttpRequestException("Payment Required", null, HttpStatusCode.PaymentRequired);
+        }
+
+        return response.IsSuccessStatusCode;
+    }
+    
+    public async Task<bool> RemoveAliasAsync(int id)
+    {
+        HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}/Alias");
+        return response.IsSuccessStatusCode;
+    }
+    
+    public async Task<bool> ModerateAliasAsync(int id, DiscoveryModerationDto dto)
+    {
+        HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}/Alias/Moderate", dto);
+        return response.IsSuccessStatusCode;
     }
 
     public async Task ModerateStatusAsync(int id, DiscoveryModerationDto dto)
@@ -116,7 +128,7 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
         return discoveries ?? new List<DiscoveryDto>();
     }
 
-    // --- HELPER (Construction manuelle QueryString) ---
+    // --- HELPER ---
 
     private string ToQueryString(DiscoveryFilterDto filter)
     {

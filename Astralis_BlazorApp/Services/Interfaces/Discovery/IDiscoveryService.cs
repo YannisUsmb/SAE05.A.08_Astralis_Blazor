@@ -14,7 +14,9 @@ public interface IDiscoveryService
     Task<DiscoveryDto?> CreateGalaxyAsync(DiscoveryGalaxyQuasarSubmissionDto submission);
     Task<DiscoveryDto?> CreateSatelliteAsync(DiscoverySatelliteSubmissionDto submission);
     Task UpdateTitleAsync(int id, DiscoveryUpdateDto dto);
-    Task ProposeAliasAsync(int id, DiscoveryAliasDto dto);
+    Task<bool> ProposeAliasAsync(int id, DiscoveryAliasDto dto);
+    Task<bool> RemoveAliasAsync(int id);
+    Task<bool> ModerateAliasAsync(int id, DiscoveryModerationDto dto);
     Task ModerateStatusAsync(int id, DiscoveryModerationDto dto);
     Task<DiscoveryDto?> DeleteAsync(int id);
 }
