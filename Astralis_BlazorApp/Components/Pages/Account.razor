@@ -146,11 +146,15 @@ else if (ViewModel.EditContext != null)
         </p>
 
         <div class="d-flex justify-content-end gap-3">
-            <button class="btn btn-outline-warning btn-sm text-warning-emphasis">
+            <button class="btn btn-outline-warning btn-sm text-warning-emphasis"
+                    @onclick="ViewModel.AnonymizeDataAsync"
+                    disabled="@ViewModel.IsLoading">
                 <i class="bi bi-incognito me-1"></i> Anonymiser mes données
             </button>
 
-            <button class="btn btn-outline-danger btn-sm">
+            <button class="btn btn-outline-danger btn-sm"
+                    @onclick="ViewModel.DeleteAccountAsync"
+                    disabled="@ViewModel.IsLoading">
                 <i class="bi bi-trash me-1"></i> Supprimer mon compte
             </button>
         </div>

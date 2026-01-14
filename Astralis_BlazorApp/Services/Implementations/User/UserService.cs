@@ -69,6 +69,12 @@ namespace Astralis_BlazorApp.Services.Implementations
             return deletedUser;
         }
 
+        public async Task<bool> AnonymizeAccountAsync(int id)
+        {
+            var response = await httpClient.PostAsync($"{Controller}/{id}/Anonymize", null);
+            return response.IsSuccessStatusCode;
+        }
+
         public async Task<bool> ChangePasswordAsync(int id, ChangePasswordDto dto)
         {
             HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}/ChangePassword", dto);

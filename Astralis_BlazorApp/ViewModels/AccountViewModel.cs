@@ -1,7 +1,9 @@
 ﻿using Astralis.Shared.DTOs;
+using Astralis_BlazorApp.Services.Implementations;
 using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -15,6 +17,8 @@ namespace Astralis_BlazorApp.ViewModels
         private readonly ICountryService _countryService;
         private readonly AuthenticationStateProvider _authStateProvider;
         private readonly IJSRuntime _jsRuntime;
+        private readonly IAuthService _authService;
+        private readonly NavigationManager _navigationManager;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsContactDirty))]
@@ -47,12 +51,21 @@ namespace Astralis_BlazorApp.ViewModels
             ContactData.Phone != _originalContactData.Phone ||
             ContactData.CountryId != _originalContactData.CountryId;
 
-        public AccountViewModel(IUserService userService, ICountryService countryService, AuthenticationStateProvider authStateProvider, IJSRuntime jsRuntime)
+        public AccountViewModel(
+            IUserService userService,
+            ICountryService countryService,
+            AuthenticationStateProvider authStateProvider,
+            IJSRuntime jsRuntime,
+            IAuthService authService,
+            NavigationManager navigationManager 
+            )
         {
             _userService = userService;
             _countryService = countryService;
             _authStateProvider = authStateProvider;
             _jsRuntime = jsRuntime;
+            _authService = authService;
+            _navigationManager = navigationManager;
         }
 
         public async Task LoadUserDataAsync()
@@ -340,6 +353,55 @@ namespace Astralis_BlazorApp.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = "Impossible de modifier le mot de passe.";
+            }
+        }
+
+        [RelayCommand]
+        public async Task AnonymizeDataAsync()
+        {
+            if (!await _jsRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir anonymiser vos données ? Votre compte restera actif mais vos infos personnelles seront remplacées."))
+                return;
+
+            IsLoading = true;
+            try
+            {
+                var success = await _userService.AnonymizeAccountAsync(_currentUserId);
+                if (success)
+                {
+                    await LoadUserDataAsync();
+                    SuccessMessage = "Vos données ont été anonymisées.";
+                }
+                else
+                {
+                    ErrorMessage = "Erreur lors de l'anonymisation.";
+                }
+            }
+            catch (Exception)
+            {
+                ErrorMessage = "Erreur technique.";
+            }
+            finally { IsLoading = false; }
+        }
+
+        [RelayCommand]
+        public async Task DeleteAccountAsync()
+        {
+            if (!await _jsRuntime.InvokeAsync<bool>("confirm", "ATTENTION : Cette action est irréversible. Supprimer votre compte ?"))
+                return;
+
+            IsLoading = true;
+            try
+            {
+                await _userService.DeleteAsync(_currentUserId);
+
+                // Déconnexion et redirection
+                await _authService.Logout();
+                _navigationManager.NavigateTo("/", forceLoad: true);
+            }
+            catch (Exception)
+            {
+                ErrorMessage = "Erreur lors de la suppression.";
+                IsLoading = false;
             }
         }
     }
