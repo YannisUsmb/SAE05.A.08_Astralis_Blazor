@@ -87,6 +87,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<AdminDashboardViewModel>();
         services.AddScoped<AddressViewModel>();
         services.AddScoped<PremiumViewModel>();
+        services.AddScoped<PreferencesViewModel>();
+
         return services;
     }
 }
