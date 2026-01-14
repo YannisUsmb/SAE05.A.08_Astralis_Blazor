@@ -2,9 +2,9 @@
 dotnet publish -c Release -o published
 
 Write-Host "📦 2. Construction de l'image Docker..." -ForegroundColor Cyan
-docker build -t dockerregistryastralis.azurecr.io/blazor-app:v2 .
+docker build -t dockerregistryastralis.azurecr.io/blazor-app:prod .
 
 Write-Host "☁️ 3. Envoi vers Azure..." -ForegroundColor Cyan
-docker push dockerregistryastralis.azurecr.io/blazor-app:v2
+docker push dockerregistryastralis.azurecr.io/blazor-app:prod
 
 Write-Host "✅ Terminé ! Le site va se mettre à jour." -ForegroundColor Green
