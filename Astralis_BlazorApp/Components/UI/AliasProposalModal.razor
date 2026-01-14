@@ -1,0 +1,106 @@
+@using System.Net
+@using Astralis.Shared.DTOs
+@using Astralis_BlazorApp.Services.Interfaces
+@inject IDiscoveryService DiscoveryService
+@inject IJSRuntime JsRuntime
+
+@if (Show)
+{
+    <div class="modal-backdrop-custom">
+        <div class="modal-dialog-custom">
+            <div class="modal-content-custom">
+                
+                <div class="modal-header-custom">
+                    <h5>Donner un nom à votre découverte</h5>
+                    <button type="button" class="btn-close-custom" @onclick="Close">X</button>
+                </div>
+
+                <div class="modal-body-custom">
+                    @if (_isPaymentStep)
+                    {
+                        <div class="payment-container">
+                            <div class="payment-icon">💳</div>
+                            <h4>Compte Standard</h4>
+                            <p>L'attribution d'un alias nécessite un compte Premium ou un paiement unique.</p>
+                            <div class="price-tag">4.99 €</div>
+                            
+                            <button class="btn-pay" @onclick="ProcessFakePayment">
+                                Payer et Valider
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="_dto" OnValidSubmit="HandleSubmit">
+                            <DataAnnotationsValidator />
+                            
+                            <div class="form-group">
+                                <label>Alias proposé</label>
+                                <InputText @bind-Value="_dto.Alias" class="form-control-custom" placeholder="Ex: Planète Vegeta" />
+                                <ValidationMessage For="@(() => _dto.Alias)" />
+                            </div>
+
+                            <div class="info-box">
+                                ℹ️ Votre alias sera soumis à la validation des administrateurs.
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="button" class="btn-cancel" @onclick="Close">Annuler</button>
+                                <button type="submit" class="btn-submit">Proposer</button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public EventCallback<bool> ShowChanged { get; set; }
+    [Parameter] public int DiscoveryId { get; set; }
+    [Parameter] public EventCallback OnAliasSubmitted { get; set; }
+
+    private DiscoveryAliasDto _dto = new();
+    private bool _isPaymentStep = false;
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            await DiscoveryService.ProposeAliasAsync(DiscoveryId, _dto);
+            
+            await JsRuntime.InvokeVoidAsync("alert", "Demande envoyée !");
+            await Close();
+            await OnAliasSubmitted.InvokeAsync();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            _isPaymentStep = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task ProcessFakePayment()
+    {
+        await JsRuntime.InvokeVoidAsync("alert", "Paiement simulé accepté !");
+        
+        // Note: Ici en prod, on devrait rappeler l'API avec un token de paiement
+        // Pour le MVP, on ferme juste la modale
+        _isPaymentStep = false;
+        await Close();
+    }
+
+    private async Task Close()
+    {
+        Show = false;
+        _isPaymentStep = false;
+        _dto = new DiscoveryAliasDto();
+        await ShowChanged.InvokeAsync(false);
+    }
+}

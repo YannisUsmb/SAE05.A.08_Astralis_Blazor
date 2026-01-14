@@ -1,0 +1,168 @@
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    backdrop-filter: blur(5px);
+}
+
+.modal-dialog-custom {
+    width: 100%;
+    max-width: 500px;
+    margin: 1rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+.modal-content-custom {
+    background-color: #1a1a2e; /* Couleur sombre Astralis */
+    border: 1px solid #4a4e69;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    overflow: hidden;
+}
+
+/* Header */
+.modal-header-custom {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #4a4e69;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.modal-header-custom h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.btn-close-custom {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-close-custom:hover {
+    color: #fff;
+}
+
+/* Body */
+.modal-body-custom {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #bbb;
+}
+
+.form-control-custom {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #262640;
+    border: 1px solid #4a4e69;
+    border-radius: 6px;
+    color: #fff;
+    outline: none;
+}
+
+.form-control-custom:focus {
+    border-color: #7b2cbf; /* Violet Astralis */
+    box-shadow: 0 0 0 2px rgba(123, 44, 191, 0.25);
+}
+
+/* Info box */
+.info-box {
+    background-color: rgba(67, 97, 238, 0.1);
+    border-left: 4px solid #4361ee;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #dbeafe;
+}
+
+/* Actions */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 1px solid #4a4e69;
+    color: #ddd;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-submit {
+    background-color: #4361ee;
+    border: none;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-submit:hover {
+    background-color: #3a56d4;
+}
+
+/* Payment Section */
+.payment-container {
+    text-align: center;
+}
+
+.payment-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.price-tag {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffc107;
+    margin: 1rem 0;
+}
+
+.btn-pay {
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.2s;
+}
+
+.btn-pay:hover {
+    transform: scale(1.02);
+    background-color: #ffca2c;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
