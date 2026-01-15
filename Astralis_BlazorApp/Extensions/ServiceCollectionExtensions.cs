@@ -62,6 +62,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<IUploadService, UploadService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IClientAiService, ClientAiService>();
 
         return services;
     }
@@ -88,6 +89,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<AddressViewModel>();
         services.AddScoped<PremiumViewModel>();
         services.AddScoped<PreferencesViewModel>();
+        services.AddScoped<ScannerViewModel>();
 
         return services;
     }
