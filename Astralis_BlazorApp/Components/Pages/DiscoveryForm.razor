@@ -7,81 +7,101 @@
 @attribute [Authorize]
 
 <div class="discovery-form-container">
-    <div class="form-header">
-        <h1>Proposer une nouvelle découverte</h1>
-        <p class="text-muted">Partagez votre découverte avec la communauté scientifique</p>
-    </div>
     
-    <div class="stepper">
-        @for (int i = 1; i <= _totalSteps; i++)
-        {
-            <div class="step @(i == _currentStep ? "active" : "") @(i < _currentStep ? "completed" : "")">
-                <div class="step-circle">
-                    @if (i < _currentStep)
-                    {
-                        <i class="bi bi-check-lg"></i>
-                    }
-                    else
-                    {
-                        @i
-                    }
-                </div>
-                <span class="step-label">@GetStepLabel(i)</span>
+    @if (_isSuccess)
+    {
+        <div class="success-message text-center animate-fade-in">
+            <div class="success-icon mb-4">
+                <i class="bi bi-check-circle-fill text-success"></i>
             </div>
-        }
-    </div>
-    
-    <div class="form-content">
-        @if (_currentStep == 1)
-        {
-            <StepSelectType @bind-SelectedType="_selectedType" OnNext="NextStep" />
-        }
-        else if (_currentStep == 2 && _selectedType != null)
-        {
-            @switch (_selectedType.Value)
+            <h2 class="text-white mb-3">Découverte soumise !</h2>
+            <p class="text-muted mb-4">
+                Merci pour votre contribution. Votre découverte est maintenant 
+                <strong class="text-warning">en attente de validation</strong> par un administrateur.
+                Vous serez notifié une fois celle-ci approuvée.
+            </p>
+            <p class="small text-muted">Redirection en cours...</p>
+        </div>
+    }
+    else
+    {
+        <div class="form-header">
+            <h1>Proposer une nouvelle découverte</h1>
+            <p class="text-muted">Partagez votre découverte avec la communauté scientifique</p>
+        </div>
+        
+        <div class="stepper">
+            @for (int i = 1; i <= _totalSteps; i++)
             {
-                case 1: // Star
-                    <StepStarDetails @bind-Model="_starSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
-                    break;
-                case 2: // Planet
-                    <StepPlanetDetails @bind-Model="_planetSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
-                    break;
-                case 3: // Asteroid
-                    <StepAsteroidDetails @bind-Model="_asteroidSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
-                    break;
-                case 4: // Comet
-                    <StepCometDetails @bind-Model="_cometSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
-                    break;
-                case 5: // Galaxy/Quasar
-                    <StepGalaxyDetails @bind-Model="_galaxySubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
-                    break;
-                case 6: // Satellite
-                    <StepSatelliteDetails @bind-Model="_satelliteSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
-                    break;
-            }
-        }
-        else if (_currentStep == 3)
-        {
-            @if (!string.IsNullOrEmpty(_errorMessage))
-            {
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    @_errorMessage
+                <div class="step @(i == _currentStep ? "active" : "") @(i < _currentStep ? "completed" : "")">
+                    <div class="step-circle">
+                        @if (i < _currentStep)
+                        {
+                            <i class="bi bi-check-lg"></i>
+                        }
+                        else
+                        {
+                            @i
+                        }
+                    </div>
+                    <span class="step-label">@GetStepLabel(i)</span>
                 </div>
             }
-            <StepReview 
-                SelectedType="_selectedType"
-                StarSubmission="_starSubmission"
-                PlanetSubmission="_planetSubmission"
-                AsteroidSubmission="_asteroidSubmission"
-                CometSubmission="_cometSubmission"
-                GalaxySubmission="_galaxySubmission"
-                SatelliteSubmission="_satelliteSubmission"
-                OnSubmit="HandleSubmit"
-                OnPrevious="PreviousStep" 
-                IsSubmitting="_isSubmitting" />
-        }
-    </div>
+        </div>
+        
+        <div class="form-content">
+            @if (_currentStep == 1)
+            {
+                <StepSelectType @bind-SelectedType="_selectedType" OnNext="NextStep" />
+            }
+            else if (_currentStep == 2 && _selectedType != null)
+            {
+                @switch (_selectedType.Value)
+                {
+                    case 1: // Star
+                        <StepStarDetails @bind-Model="_starSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                        break;
+                    case 2: // Planet
+                        <StepPlanetDetails @bind-Model="_planetSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                        break;
+                    case 3: // Asteroid
+                        <StepAsteroidDetails @bind-Model="_asteroidSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                        break;
+                    case 4: // Comet
+                        <StepCometDetails @bind-Model="_cometSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                        break;
+                    case 5: // Galaxy/Quasar
+                        <StepGalaxyDetails @bind-Model="_galaxySubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                        break;
+                    case 6: // Satellite
+                        <StepSatelliteDetails @bind-Model="_satelliteSubmission" OnNext="NextStep" OnPrevious="PreviousStep" />
+                        break;
+                }
+            }
+            else if (_currentStep == 3)
+            {
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        @_errorMessage
+                    </div>
+                }
+                
+                 <StepReview 
+                    SelectedType="_selectedType"
+                    StarSubmission="_starSubmission"
+                    PlanetSubmission="_planetSubmission"
+                    AsteroidSubmission="_asteroidSubmission"
+                    CometSubmission="_cometSubmission"
+                    GalaxySubmission="_galaxySubmission"
+                    SatelliteSubmission="_satelliteSubmission"
+                    OnSubmit="HandleSubmit"
+                    OnPrevious="PreviousStep" 
+                    IsSubmitting="_isSubmitting" />
+            }
+        </div>
+    }
 </div>
 
 @code {
@@ -89,6 +109,7 @@
     private int _totalSteps = 3;
     private int? _selectedType;
     private bool _isSubmitting;
+    private bool _isSuccess = false;
     private string? _errorMessage = null;
     
     private DiscoveryStarSubmissionDto _starSubmission = new();
@@ -97,26 +118,21 @@
     private DiscoveryCometSubmissionDto _cometSubmission = new();
     private DiscoveryGalaxyQuasarSubmissionDto _galaxySubmission = new();
     private DiscoverySatelliteSubmissionDto _satelliteSubmission = new();
-
+    
     private void NextStep()
     {
-        if (_currentStep < _totalSteps)
-        {
-            _currentStep++;
-        }
+        if (_currentStep < _totalSteps) _currentStep++;
     }
 
     private void PreviousStep()
     {
-        if (_currentStep > 1)
-        {
-            _currentStep--;
-        }
+        if (_currentStep > 1) _currentStep--;
     }
 
     private async Task HandleSubmit()
     {
         _isSubmitting = true;
+        _errorMessage = null;
     
         try
         {
@@ -133,6 +149,11 @@
 
             if (result != null)
             {
+                _isSuccess = true;
+                StateHasChanged();
+                
+                await Task.Delay(6000);
+                
                 Navigation.NavigateTo($"/corps-celestes");
             }
             else

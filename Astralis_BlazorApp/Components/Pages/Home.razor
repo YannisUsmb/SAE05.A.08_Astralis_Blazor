@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject HomeViewModel ViewModel
+@using Astralis_BlazorApp.Constants
 
 <PageTitle>Astralis – Accueil</PageTitle>
 
@@ -28,22 +29,29 @@
 <section class="stats-section py-5 border-top border-bottom border-secondary">
     <div class="container">
         <div class="row text-center g-4">
+            
             <div class="col-md-3 col-6">
                 <div class="display-6 fw-bold text-white mb-0">@ViewModel.CountBodies</div>
                 <small class="text-uppercase text-white-50 ls-1">Corps célestes</small>
             </div>
+
             <div class="col-md-3 col-6">
-                <div class="display-6 fw-bold mb-0 text-accent-purple">@ViewModel.CountExoplanets</div>
-                <small class="text-uppercase text-white-50 ls-1">Exoplanètes</small>
+                <div class="display-6 fw-bold mb-0 text-accent-purple">@ViewModel.CountEvents</div>
+                <small class="text-uppercase text-white-50 ls-1">Événements à venir</small>
             </div>
+
             <div class="col-md-3 col-6">
-                <div class="display-6 fw-bold mb-0 text-accent-blue">@ViewModel.CountMissions</div>
-                <small class="text-uppercase text-white-50 ls-1">Missions</small>
+                <div class="display-6 fw-bold mb-0 text-accent-blue">@ViewModel.CountArticles</div>
+                <small class="text-uppercase text-white-50 ls-1">Articles publiés</small>
             </div>
+
             <div class="col-md-3 col-6">
-                <div class="display-6 fw-bold mb-0 text-accent-green">@ViewModel.CountUpdateFrequency</div>
-                <small class="text-uppercase text-white-50 ls-1">Mise à jour</small>
+                <div class="display-6 fw-bold mb-0 text-accent-green">
+                    <i class="bi bi-wifi"></i> 
+                </div>
+                <small class="text-uppercase text-white-50 ls-1">@ViewModel.UpdateStatus</small>
             </div>
+            
         </div>
     </div>
 </section>

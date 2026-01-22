@@ -69,7 +69,7 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0;
+    z-index: 0; /* Keep behind content */
     overflow: hidden;
     background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 50%, #000000 100%);
 }
@@ -81,6 +81,8 @@ body {
     border-radius: 50%;
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
     animation: spaceTravel linear infinite;
+    /* Performance optimization: tells browser to handle this on GPU */
+    will-change: transform, opacity;
 }
 
 @keyframes spaceTravel {
@@ -88,34 +90,62 @@ body {
         transform: translateY(0) scale(1);
         opacity: 0;
     }
-
     10% {
         opacity: 1;
     }
-
     90% {
         opacity: 1;
     }
-
     100% {
         transform: translateY(110vh) scale(1);
         opacity: 0;
     }
 }
 
+.badge-notification {
+    font-size: 0.6rem;
+    padding: 0.25em 0.4em;
+}
+
 /* ============================================
    ACCENT COLORS
    ============================================ */
 .text-accent-purple {
-    color: #c084fc !important;
+    color: #a76dff !important;
+    background: transparent !important;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
+.text-accent-purple:hover {
+    background: transparent !important;
+    color: #c084fc !important; /* Violet plus clair */
+    text-shadow: 0 0 12px rgba(167, 109, 255, 0.6); /* Lueur violette */
+}
+
+/* --- BLEU --- */
 .text-accent-blue {
     color: #60a5fa !important;
+    background: transparent !important;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
+.text-accent-blue:hover {
+    background: transparent !important;
+    color: #93c5fd !important; /* Bleu plus clair */
+    text-shadow: 0 0 12px rgba(96, 165, 250, 0.6); /* Lueur bleue */
+}
+
+/* --- VERT --- */
 .text-accent-green {
     color: #4ade80 !important;
+    background: transparent !important;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.text-accent-green:hover {
+    background: transparent !important;
+    color: #86efac !important; /* Vert plus clair */
+    text-shadow: 0 0 12px rgba(74, 222, 128, 0.6); /* Lueur verte */
 }
 
 /* ============================================
@@ -352,13 +382,18 @@ body {
     font-weight: bold;
 }
 
+/* --- DÉBUT DE LA CORRECTION --- */
 .text-accent-purple {
     color: #a76dff !important;
+    background: transparent !important; /* Force le fond transparent */
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
-    .text-accent-purple:hover {
-        background: rgba(157, 78, 221, 0.15);
-    }
+.text-accent-purple:hover {
+    background: transparent !important; /* SUPPRIME LE CARRÉ VIOLET */
+    color: #c084fc !important; /* Éclaircit légèrement le texte */
+    text-shadow: 0 0 10px rgba(167, 109, 255, 0.5); /* Ajoute une lueur à la place */
+}
 
 @keyframes fadeInDown {
     from {
