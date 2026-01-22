@@ -11,14 +11,23 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
 
     public async Task<DiscoveryDto?> GetByIdAsync(int id)
     {
-        DiscoveryDto? discovery = await httpClient.GetFromJsonAsync<DiscoveryDto>($"{Controller}/{id}");
-        return discovery ?? throw new Exception("Discovery not found");
+        var response = await httpClient.GetAsync($"{Controller}/{id}");
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<DiscoveryDto>();
     }
 
     public async Task<List<DiscoveryDto>> GetAllAsync()
     {
-        List<DiscoveryDto>? discoveries = await httpClient.GetFromJsonAsync<List<DiscoveryDto>>(Controller);
-        return discoveries ?? new List<DiscoveryDto>();
+        try 
+        {
+            return await httpClient.GetFromJsonAsync<List<DiscoveryDto>>(Controller) ?? new List<DiscoveryDto>();
+        }
+        catch 
+        {
+            return new List<DiscoveryDto>();
+        }
     }
 
     // --- CREATE ---
@@ -77,31 +86,59 @@ public class DiscoveryService(HttpClient httpClient) : IDiscoveryService
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}/Alias", dto);
         
-        // If payment is required, throw an exception to notify the caller
-        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException("Payment Required", null, HttpStatusCode.PaymentRequired);
+            if (response.StatusCode == HttpStatusCode.PaymentRequired)
+            {
+                throw new HttpRequestException("Paiement requis pour cette action", null, HttpStatusCode.PaymentRequired);
+            }
+            
+            response.EnsureSuccessStatusCode();
         }
 
-        return response.IsSuccessStatusCode;
+        return true;
     }
     
     public async Task<bool> RemoveAliasAsync(int id)
     {
         HttpResponseMessage response = await httpClient.DeleteAsync($"{Controller}/{id}/Alias");
-        return response.IsSuccessStatusCode;
+        response.EnsureSuccessStatusCode();
+        return true;
     }
     
     public async Task<bool> ModerateAliasAsync(int id, DiscoveryModerationDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}/Alias/Moderate", dto);
-        return response.IsSuccessStatusCode;
+        response.EnsureSuccessStatusCode(); 
+        return true;
     }
 
     public async Task ModerateStatusAsync(int id, DiscoveryModerationDto dto)
     {
         HttpResponseMessage response = await httpClient.PutAsJsonAsync($"{Controller}/{id}/Status", dto);
         response.EnsureSuccessStatusCode();
+    }
+    
+    public async Task<string> CreateAliasPaymentSessionAsync(int discoveryId, string aliasProposed)
+    {
+        var payload = new { Alias = aliasProposed };
+        var response = await httpClient.PostAsJsonAsync($"{Controller}/{discoveryId}/Alias/Checkout", payload);
+    
+        response.EnsureSuccessStatusCode();
+        
+        var result = await response.Content.ReadFromJsonAsync<CheckoutResponseDto>();
+        return result?.Url ?? "";
+    }
+    
+    public async Task ValidateAliasPaymentAsync(string sessionId)
+    {
+        var response = await httpClient.PostAsync($"{Controller}/Alias/ValidatePayment?sessionId={sessionId}", null);
+        response.EnsureSuccessStatusCode();
+    }
+    
+    public class CheckoutResponseDto
+    {
+        public string Url { get; set; } = string.Empty;
     }
 
     public async Task<DiscoveryDto?> DeleteAsync(int id)

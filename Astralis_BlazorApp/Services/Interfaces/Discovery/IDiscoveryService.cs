@@ -18,5 +18,7 @@ public interface IDiscoveryService
     Task<bool> RemoveAliasAsync(int id);
     Task<bool> ModerateAliasAsync(int id, DiscoveryModerationDto dto);
     Task ModerateStatusAsync(int id, DiscoveryModerationDto dto);
+    Task<string> CreateAliasPaymentSessionAsync(int discoveryId, string aliasProposed);
+    Task ValidateAliasPaymentAsync(string sessionId);
     Task<DiscoveryDto?> DeleteAsync(int id);
 }

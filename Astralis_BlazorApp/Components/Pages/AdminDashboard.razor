@@ -1,10 +1,7 @@
 @page "/admin/dashboard"
 @using Microsoft.AspNetCore.Authorization
-@using Astralis.Shared.DTOs
-@using Astralis_BlazorApp.ViewModels
 @attribute [Authorize(Roles = "Admin")]
 @inject AdminDashboardViewModel ViewModel
-@inject IJSRuntime JsRuntime
 @implements IDisposable
 
 <PageTitle>Administration – Astralis</PageTitle>
@@ -47,7 +44,6 @@
             
             @if (_showDiscoveries)
             {
-                /* --- VUE DECOUVERTES --- */
                 @if (!ViewModel.PendingDiscoveries.Any())
                 {
                     <div class="empty-state">
@@ -101,7 +97,6 @@
             }
             else
             {
-                /* --- VUE ALIAS --- */
                 @if (!ViewModel.PendingAliases.Any())
                 {
                     <div class="empty-state">
@@ -138,10 +133,10 @@
                                             <a href="/corps-celestes?id=@item.CelestialBodyId" class="btn-icon info" title="Voir le contexte" target="_blank">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <button class="btn-icon success" @onclick="() => ApproveAlias(item)" title="Accepter l'alias">
+                                            <button class="btn-icon success" @onclick="() => ViewModel.OpenApproveAliasModal(item)" title="Accepter l'alias">
                                                 <i class="bi bi-check-lg"></i>
                                             </button>
-                                            <button class="btn-icon danger" @onclick="() => RejectAlias(item)" title="Refuser (Inapproprié)">
+                                            <button class="btn-icon danger" @onclick="() => ViewModel.OpenRejectAliasModal(item)" title="Refuser (Inapproprié)">
                                                 <i class="bi bi-x-lg"></i>
                                             </button>
                                         </div>
@@ -159,7 +154,7 @@
 
 @if (ViewModel.IsRejectModalOpen)
 {
-    <div class="modal-backdrop-custom" @onclick="ViewModel.CancelRejection">
+    <div class="modal-backdrop-custom" @onclick="ViewModel.CancelModals">
         <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
             <div class="modal-header border-0 pb-0">
                 <h4 class="text-white font-orbitron text-danger">
@@ -177,11 +172,54 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0 gap-2">
-                <button class="btn btn-outline-light" @onclick="ViewModel.CancelRejection">Annuler</button>
+                <button class="btn btn-outline-light" @onclick="ViewModel.CancelModals">Annuler</button>
                 <button class="btn btn-danger" 
                         @onclick="ViewModel.ConfirmRejection" 
                         disabled="@string.IsNullOrWhiteSpace(ViewModel.RejectionReason)">
                     Confirmer le refus
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ViewModel.IsConfirmAliasModalOpen && ViewModel.SelectedAliasItem != null)
+{
+    <div class="modal-backdrop-custom" @onclick="ViewModel.CancelModals">
+        <div class="modal-glass-content animate-fade-in text-center" @onclick:stopPropagation>
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+            </div>
+            <h4 class="text-white font-orbitron mb-3">Valider l'alias ?</h4>
+            <p class="text-white-50 mb-4">
+                Vous êtes sur le point d'accepter le nom <strong>"@ViewModel.SelectedAliasItem.Alias"</strong> 
+                pour l'objet <strong>@ViewModel.SelectedAliasItem.CelestialBodyName</strong>.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-outline-light" @onclick="ViewModel.CancelModals">Annuler</button>
+                <button class="btn btn-success px-4" @onclick="ViewModel.ConfirmApproveAlias">
+                    Valider
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ViewModel.IsRejectAliasModalOpen && ViewModel.SelectedAliasItem != null)
+{
+    <div class="modal-backdrop-custom" @onclick="ViewModel.CancelModals">
+        <div class="modal-glass-content animate-fade-in text-center" @onclick:stopPropagation>
+            <div class="mb-4">
+                <i class="bi bi-x-circle-fill text-danger" style="font-size: 3rem;"></i>
+            </div>
+            <h4 class="text-white font-orbitron mb-3">Refuser l'alias ?</h4>
+            <p class="text-white-50 mb-4">
+                L'alias <strong>"@ViewModel.SelectedAliasItem.Alias"</strong> sera supprimé et l'utilisateur en sera notifié.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-outline-light" @onclick="ViewModel.CancelModals">Annuler</button>
+                <button class="btn btn-danger px-4" @onclick="ViewModel.ConfirmRejectAlias">
+                    Refuser
                 </button>
             </div>
         </div>
@@ -200,23 +238,6 @@
     private void SwitchTab(bool showDiscoveries)
     {
         _showDiscoveries = showDiscoveries;
-    }
-
-    private async Task ApproveAlias(DiscoveryDto item)
-    {
-        // Attention : item.Alias ne marchera que si tu as fait la correction du DTO (étape 1) !
-        if (await JsRuntime.InvokeAsync<bool>("confirm", $"Valider l'alias '{item.Alias}' pour {item.CelestialBodyName} ?"))
-        {
-            await ViewModel.ApproveAlias(item.Id);
-        }
-    }
-
-    private async Task RejectAlias(DiscoveryDto item)
-    {
-        if (await JsRuntime.InvokeAsync<bool>("confirm", $"Refuser l'alias '{item.Alias}' ? Il sera supprimé."))
-        {
-            await ViewModel.RejectAlias(item.Id);
-        }
     }
 
     private async void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
