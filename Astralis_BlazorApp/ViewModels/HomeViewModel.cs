@@ -33,19 +33,14 @@ public partial class HomeViewModel : ObservableObject
     {
         try
         {
-            // On lance les 3 requêtes en même temps pour gagner du temps
             var bodiesTask = _bodyService.GetAllAsync();
             var eventsTask = _eventService.GetAllAsync();
             var articlesTask = _articleService.GetAllAsync();
 
             await Task.WhenAll(bodiesTask, eventsTask, articlesTask);
 
-            // Mise à jour des compteurs avec les vraies valeurs
-            // Note : Idéalement, le backend devrait avoir une méthode "GetCountAsync" 
-            // pour éviter de télécharger toute la liste, mais ceci fonctionne pour commencer.
-            
             var bodies = await bodiesTask;
-            CountBodies = bodies.Count().ToString("N0"); // "N0" ajoute des espaces (ex: 1 200)
+            CountBodies = bodies.Count().ToString("N0");
 
             var events = await eventsTask;
             CountEvents = events.Count().ToString("N0");
