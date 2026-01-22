@@ -17,8 +17,8 @@
                 <a href="@AppRoutes.CelestialBodies" class="btn btn-astralis-premium btn-lg px-5 py-3 rounded-3 fw-bold">
                     Commencer l'exploration
                 </a>
-                <a href="@AppRoutes.Articles" class="btn btn-astralis-outline btn-lg px-5 py-3 rounded-3">
-                    Découvertes récentes
+                <a href="@AppRoutes.Scanner" class="btn btn-astralis-outline btn-lg px-5 py-3 rounded-3">
+                    <i class="bi bi-stars me-2"></i>Scanner IA
                 </a>
             </div>
         </div>
@@ -74,9 +74,46 @@
         </div>
 
         <div class="col">
-            <div class="card h-100 border-secondary text-white glass-card">
+            <div class="card h-100 border-secondary text-white glass-card position-relative overflow-hidden">
                 <div class="card-body p-4">
                     <div class="mb-3 icon-wrapper text-accent-purple">
+                        <i class="bi bi-magic fs-1"></i>
+                    </div>
+                    <h4 class="card-title fw-bold d-flex align-items-center gap-2">
+                        Scanner IA
+                        <span class="badge bg-white text-dark pro-badge">BETA</span>
+                    </h4>
+                    <p class="card-text text-white-50">
+                        Identifiez n'importe quel corps céleste à partir d'une image grâce à notre Intelligence Artificielle.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                    <a href="@AppRoutes.Scanner" class="btn btn-astralis-premium w-100">Scanner</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-secondary text-white glass-card">
+                <div class="card-body p-4">
+                    <div class="mb-3 icon-wrapper text-accent-blue">
+                        <i class="bi bi-journal-text fs-1"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">Articles</h4>
+                    <p class="card-text text-white-50">
+                        Lisez les dernières publications scientifiques simplifiées et vulgarisées par notre équipe.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                    <a href="@AppRoutes.Articles" class="btn btn-astralis-outline w-100">Lire</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-secondary text-white glass-card">
+                <div class="card-body p-4">
+                    <div class="mb-3 icon-wrapper text-accent-green">
                         <i class="bi bi-soundwave fs-1"></i>
                     </div>
                     <h4 class="card-title fw-bold d-flex align-items-center gap-2">
@@ -96,16 +133,33 @@
         <div class="col">
             <div class="card h-100 border-secondary text-white glass-card">
                 <div class="card-body p-4">
-                    <div class="mb-3 icon-wrapper text-accent-blue">
-                        <i class="bi bi-journal-text fs-1"></i>
+                    <div class="mb-3 icon-wrapper text-warning">
+                        <i class="bi bi-calendar-event fs-1"></i>
                     </div>
-                    <h4 class="card-title fw-bold">Articles</h4>
+                    <h4 class="card-title fw-bold">Événements</h4>
                     <p class="card-text text-white-50">
-                        Lisez les dernières publications scientifiques simplifiées par notre IA.
+                        Ne manquez aucune éclipse, pluie d'étoiles filantes ou lancement de fusée.
                     </p>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
-                    <a href="@AppRoutes.Articles" class="btn btn-astralis-outline w-100">Lire</a>
+                    <a href="@AppRoutes.Events" class="btn btn-astralis-outline w-100">Calendrier</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-secondary text-white glass-card">
+                <div class="card-body p-4">
+                    <div class="mb-3 icon-wrapper text-danger">
+                        <i class="bi bi-bag-heart fs-1"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">Boutique</h4>
+                    <p class="card-text text-white-50">
+                        Soutenez Astralis en achetant des produits exclusifs : posters, télescopes et goodies.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                    <a href="@AppRoutes.Shop" class="btn btn-astralis-outline w-100">Visiter</a>
                 </div>
             </div>
         </div>

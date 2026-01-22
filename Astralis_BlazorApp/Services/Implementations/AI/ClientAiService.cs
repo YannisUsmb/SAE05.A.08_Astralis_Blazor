@@ -26,7 +26,12 @@ namespace Astralis_BlazorApp.Services.Implementations
             {
                 return await response.Content.ReadFromJsonAsync<PredictionResultDto>();
             }
-            return null;
+
+            var errorDetails = await response.Content.ReadAsStringAsync();
+
+            errorDetails = errorDetails.Replace("\"", "").Replace("{", "").Replace("}", "");
+
+            throw new HttpRequestException($"L'API a refusé l'image : {errorDetails}");
         }
     }
 }

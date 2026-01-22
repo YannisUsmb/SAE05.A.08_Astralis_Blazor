@@ -35,12 +35,24 @@ namespace Astralis_BlazorApp.ViewModels
             Result = null;
             _selectedFile = e.File;
 
-            var format = "image/png";
-            var resizedImage = await e.File.RequestImageFileAsync(format, 600, 600);
-            var buffer = new byte[resizedImage.Size];
-            await resizedImage.OpenReadStream().ReadAsync(buffer);
-            ImagePreviewUrl = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+            try
+            {
+                var format = "image/png";
+                var resizedImage = await e.File.RequestImageFileAsync(format, 600, 600);
+
+                var buffer = new byte[resizedImage.Size];
+
+                await resizedImage.OpenReadStream(10 * 1024 * 1024).ReadAsync(buffer);
+
+                ImagePreviewUrl = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Erreur lors du chargement de l'image. Fichier trop volumineux ?";
+                Console.WriteLine(ex.ToString());
+            }
         }
+
 
         [RelayCommand]
         public async Task AnalyzeImageAsync()
@@ -55,12 +67,17 @@ namespace Astralis_BlazorApp.ViewModels
                 Result = await _aiService.PredictAsync(_selectedFile);
                 if (Result == null)
                 {
-                    ErrorMessage = "L'analyse a échoué. Veuillez réessayer.";
+                    ErrorMessage = "L'IA n'a renvoyé aucun résultat.";
                 }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                ErrorMessage = httpEx.Message;
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Erreur de connexion au scanner.";
+                Console.WriteLine(ex.ToString());
+                ErrorMessage = "Une erreur inattendue s'est produite. Vérifiez la console.";
             }
             finally
             {

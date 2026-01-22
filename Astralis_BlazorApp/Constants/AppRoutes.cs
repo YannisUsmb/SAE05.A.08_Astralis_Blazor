@@ -15,5 +15,6 @@
         public const string Premium = "/premium";
         public const string Shop = "/boutique";
         public const string PremiumSubscribed = "/parametres/premium";
+        public const string Scanner = "/scanner";
     }
 }
