@@ -1,5 +1,6 @@
 @page "/corps-celestes"
 @using Astralis.Shared.DTOs
+@using Microsoft.AspNetCore.Components.Authorization
 @inject CelestialBodyViewModel ViewModel
 @inject NavigationManager Navigation
 
@@ -18,7 +19,7 @@
             <input type="text" class="filter-input" placeholder="🔍 Rechercher..."
                    @bind="ViewModel.Filter.SearchText"
                    @bind:event="oninput"
-                   @onkeyup="ViewModel.OnFilterChanged" />
+                   @onkeyup="ViewModel.OnFilterChanged"/>
 
             <select class="filter-input" @bind="ViewModel.SelectedTypeId" @bind:after="ViewModel.OnTypeChanged">
                 <option value="0">Toutes les catégories</option>
@@ -36,25 +37,11 @@
                 <option value="mass">Masse (Planètes)</option>
                 <option value="temperature">Température</option>
             </select>
-            
+
             <button class="btn-new-discovery" @onclick="ViewModel.NavigateToDiscoveryForm">
                 <i class="bi bi-plus-circle-fill"></i>
                 <span>Ajouter une nouvelle découverte</span>
             </button>
-            
-            @if (_showSuccessMessage)
-            {
-                <div class="alert alert-success alert-discovery-success">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <div>
-                        <strong>Découverte soumise avec succès !</strong>
-                        <p>Votre découverte sera examinée par un administrateur avant d'être publiée.</p>
-                    </div>
-                    <button class="btn-close-alert" @onclick="CloseSuccessMessage">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-            }
         </div>
 
         @if (ViewModel.SelectedTypeId != 0)
@@ -63,175 +50,129 @@
                 @{
                     bool showSubtypes = ViewModel.SelectedTypeId != 0 && ViewModel.CelestialSubtypes.Count > 0;
                 }
-                
+
                 @if (showSubtypes)
                 {
                     <div class="subtype-filter-wrapper">
-                        <select class="filter-pill-select" @bind="ViewModel.SelectedSubtypeId" @bind:after="ViewModel.OnSubtypeChanged">
+                        <select class="filter-pill-select" @bind="ViewModel.SelectedSubtypeId"
+                                @bind:after="ViewModel.OnSubtypeChanged">
                             <option value="0">Toutes les sous-catégories</option>
                             @foreach (CelestialBodySubtypeDto sub in ViewModel.CelestialSubtypes)
                             {
                                 <option value="@sub.Id">@sub.Label</option>
                             }
                         </select>
-                        
+
                         @if (ViewModel.SelectedSubtypeId != 0)
                         {
                             var selectedSubtype = ViewModel.CelestialSubtypes.FirstOrDefault(s => s.Id == ViewModel.SelectedSubtypeId);
                             if (selectedSubtype != null && !string.IsNullOrEmpty(selectedSubtype.Description))
                             {
-                                <InfoTooltip Text="@selectedSubtype.Description" />
+                                <InfoTooltip Text="@selectedSubtype.Description"/>
                             }
                         }
                     </div>
                 }
-                
+
                 @if (ViewModel.SelectedTypeId == 1 && ViewModel.Filter.StarFilter != null)
                 {
-                    <RangeFilter Label="Température (K)"
-                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinTemperature"
+                    <RangeFilter Label="Température (K)" @bind-MinValue="ViewModel.Filter.StarFilter.MinTemperature"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxTemperature"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Distance (AL)"
-                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinDistance"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Distance (AL)" @bind-MinValue="ViewModel.Filter.StarFilter.MinDistance"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxDistance"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Rayon (R☉)"
-                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinRadius"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Rayon (R☉)" @bind-MinValue="ViewModel.Filter.StarFilter.MinRadius"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxRadius"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Luminosité (L☉)"
-                                 @bind-MinValue="ViewModel.Filter.StarFilter.MinLuminosity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Luminosité (L☉)" @bind-MinValue="ViewModel.Filter.StarFilter.MinLuminosity"
                                  @bind-MaxValue="ViewModel.Filter.StarFilter.MaxLuminosity"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                 }
-                
                 @if (ViewModel.SelectedTypeId == 2 && ViewModel.Filter.PlanetFilter != null)
                 {
-                    <RangeFilter Label="Masse (M⊕)"
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinMass"
+                    <RangeFilter Label="Masse (M⊕)" @bind-MinValue="ViewModel.Filter.PlanetFilter.MinMass"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxMass"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Rayon (R⊕)"
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinRadius"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Rayon (R⊕)" @bind-MinValue="ViewModel.Filter.PlanetFilter.MinRadius"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxRadius"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Distance (AL)"
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinDistance"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Distance (AL)" @bind-MinValue="ViewModel.Filter.PlanetFilter.MinDistance"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxDistance"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Excentricité"
-                                 @bind-MinValue="ViewModel.Filter.PlanetFilter.MinEccentricity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Excentricité" @bind-MinValue="ViewModel.Filter.PlanetFilter.MinEccentricity"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxEccentricity"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                     <RangeFilter Label="Magnitude stellaire"
                                  @bind-MinValue="ViewModel.Filter.PlanetFilter.MinStellarMagnitude"
                                  @bind-MaxValue="ViewModel.Filter.PlanetFilter.MaxStellarMagnitude"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                 }
-                
                 @if (ViewModel.SelectedTypeId == 3 && ViewModel.Filter.AsteroidFilter != null)
                 {
-                    <RangeFilter Label="Diamètre (km)"
-                                 @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinDiameter"
+                    <RangeFilter Label="Diamètre (km)" @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinDiameter"
                                  @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxDiameter"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Magnitude absolue"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Magnitude abs."
                                  @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinAbsoluteMagnitude"
                                  @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxAbsoluteMagnitude"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Inclinaison (°)"
-                                 @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinInclination"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Inclinaison (°)" @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinInclination"
                                  @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxInclination"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                     <RangeFilter Label="Demi-grand axe (UA)"
                                  @bind-MinValue="ViewModel.Filter.AsteroidFilter.MinSemiMajorAxis"
                                  @bind-MaxValue="ViewModel.Filter.AsteroidFilter.MaxSemiMajorAxis"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                 }
-                
                 @if (ViewModel.SelectedTypeId == 4 && ViewModel.Filter.CometFilter != null)
                 {
-                    <RangeFilter Label="Excentricité"
-                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinEccentricity"
+                    <RangeFilter Label="Excentricité" @bind-MinValue="ViewModel.Filter.CometFilter.MinEccentricity"
                                  @bind-MaxValue="ViewModel.Filter.CometFilter.MaxEccentricity"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Inclinaison (°)"
-                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinInclination"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Inclinaison (°)" @bind-MinValue="ViewModel.Filter.CometFilter.MinInclination"
                                  @bind-MaxValue="ViewModel.Filter.CometFilter.MaxInclination"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Périhélie (UA)"
-                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinPerihelionAU"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Périhélie (UA)" @bind-MinValue="ViewModel.Filter.CometFilter.MinPerihelionAU"
                                  @bind-MaxValue="ViewModel.Filter.CometFilter.MaxPerihelionAU"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Aphélie (UA)"
-                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinAphelionAU"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Aphélie (UA)" @bind-MinValue="ViewModel.Filter.CometFilter.MinAphelionAU"
                                  @bind-MaxValue="ViewModel.Filter.CometFilter.MaxAphelionAU"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Période orbitale (ans)"
-                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinOrbitalPeriod"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Période (ans)" @bind-MinValue="ViewModel.Filter.CometFilter.MinOrbitalPeriod"
                                  @bind-MaxValue="ViewModel.Filter.CometFilter.MaxOrbitalPeriod"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="MOID (UA)"
-                                 @bind-MinValue="ViewModel.Filter.CometFilter.MinMOID"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="MOID (UA)" @bind-MinValue="ViewModel.Filter.CometFilter.MinMOID"
                                  @bind-MaxValue="ViewModel.Filter.CometFilter.MaxMOID"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                 }
-                
                 @if (ViewModel.SelectedTypeId == 5 && ViewModel.Filter.GalaxyFilter != null)
                 {
                     <RangeFilter Label="Ascension droite (°)"
                                  @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRightAscension"
                                  @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxRightAscension"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Déclinaison (°)"
-                                 @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinDeclination"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Déclinaison (°)" @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinDeclination"
                                  @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxDeclination"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Redshift"
-                                 @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRedshift"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Redshift" @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRedshift"
                                  @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxRedshift"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Magnitude R"
-                                 @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRMagnitude"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Magnitude R" @bind-MinValue="ViewModel.Filter.GalaxyFilter.MinRMagnitude"
                                  @bind-MaxValue="ViewModel.Filter.GalaxyFilter.MaxRMagnitude"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                 }
-                
                 @if (ViewModel.SelectedTypeId == 6 && ViewModel.Filter.SatelliteFilter != null)
                 {
-                    <RangeFilter Label="Rayon (km)"
-                                 @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinRadius"
+                    <RangeFilter Label="Rayon (km)" @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinRadius"
                                  @bind-MaxValue="ViewModel.Filter.SatelliteFilter.MaxRadius"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Gravité (m/s²)"
-                                 @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinGravity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Gravité (m/s²)" @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinGravity"
                                  @bind-MaxValue="ViewModel.Filter.SatelliteFilter.MaxGravity"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
-        
-                    <RangeFilter Label="Densité (g/cm³)"
-                                 @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinDensity"
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
+                    <RangeFilter Label="Densité (g/cm³)" @bind-MinValue="ViewModel.Filter.SatelliteFilter.MinDensity"
                                  @bind-MaxValue="ViewModel.Filter.SatelliteFilter.MaxDensity"
-                                 OnSearchTriggered="ViewModel.OnFilterChanged" />
+                                 OnSearchTriggered="ViewModel.OnFilterChanged"/>
                 }
             </div>
         }
@@ -266,11 +207,13 @@
         @if (!ViewModel.IsLoading && ViewModel.CelestialBodies.Count > 0)
         {
             <div class="pagination-container">
-                <button class="btn btn-astralis-outline" @onclick="ViewModel.PreviousPage" disabled="@(ViewModel.CurrentPage == 1)">
+                <button class="btn btn-astralis-outline" @onclick="ViewModel.PreviousPage"
+                        disabled="@(ViewModel.CurrentPage == 1)">
                     Précédent
                 </button>
                 <span class="text-white">Page @ViewModel.CurrentPage</span>
-                <button class="btn btn-astralis-outline" @onclick="ViewModel.NextPage" disabled="@(!ViewModel.HasNextPage)">
+                <button class="btn btn-astralis-outline" @onclick="ViewModel.NextPage"
+                        disabled="@(!ViewModel.HasNextPage)">
                     Suivant
                 </button>
             </div>
@@ -295,26 +238,110 @@
             {
                 <div class="detail-layout">
                     <div class="detail-info-panel">
+
                         <div class="detail-header">
-                            @if (!string.IsNullOrEmpty(ViewModel.SelectedBodyDetails.Alias))
-                            {
-                                <p class="alias">@ViewModel.SelectedBodyDetails.Alias</p>
-                            }
-                            <span class="badge-type-inline">@ViewModel.SelectedBodyDetails.CelestialBodyTypeName</span>
+                            <div class="d-flex align-items-center justify-content-between w-100 flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    @{
+                                        var discovery = ViewModel.SelectedBodyDetails.Discovery;
+                                        bool hasPendingAlias = discovery?.AliasStatusId == 1;
+                                        string aliasName = ViewModel.SelectedBodyDetails.Alias ?? "";
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(aliasName))
+                                    {
+                                        if (hasPendingAlias)
+                                        {
+                                            <h2 class="alias mb-0 text-white-50 fst-italic"
+                                                title="Nom en attente de validation">
+                                                @aliasName <span style="font-size: 0.5em; vertical-align: middle;">(En attente)</span>
+                                            </h2>
+                                        }
+                                        else
+                                        {
+                                            <h2 class="alias mb-0 text-white">@aliasName</h2>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <h2 class="alias mb-0 text-white">@ViewModel.SelectedBodyDetails.Name</h2>
+                                    }
+
+                                    <span
+                                        class="badge-type-inline">@ViewModel.SelectedBodyDetails.CelestialBodyTypeName</span>
+                                </div>
+
+                                <AuthorizeView>
+                                    <Authorized>
+                                        @{
+                                            var userIdClaim = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                                            int currentUserId = 0;
+                                            if (userIdClaim != null) int.TryParse(userIdClaim.Value, out currentUserId);
+
+                                            bool isOwner = discovery != null &&
+                                                           discovery.DiscoveryStatusId == 3 &&
+                                                           discovery.UserId == currentUserId;
+                                        }
+
+                                        @if (isOwner)
+                                        {
+                                            <div class="alias-controls d-flex align-items-center gap-2">
+
+                                                @if (discovery.AliasStatusId == 1)
+                                                {
+                                                    <span class="badge bg-warning text-dark me-2 animate-pulse">Validation en cours</span>
+                                                }
+                                                else if (discovery.AliasStatusId == 3)
+                                                {
+                                                    <span class="badge bg-danger me-2">Refusé</span>
+                                                }
+                                                
+                                                @if (discovery.AliasStatusId == null || discovery.AliasStatusId == 3)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-warning"
+                                                            @onclick="ViewModel.OpenAliasModal">
+                                                        <i class="bi bi-tag-fill me-2"></i> Nommer
+                                                    </button>
+                                                }
+
+                                                else if (discovery.AliasStatusId == 2)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-light"
+                                                            @onclick="ViewModel.OpenAliasModal" title="Modifier">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                            @onclick="ViewModel.RequestDeleteAlias" title="Supprimer">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
+                            </div>
                         </div>
 
-                        @* STAR DETAILS *@
                         <div class="detail-properties">
+
+                            @if (!string.IsNullOrEmpty(ViewModel.SelectedBodyDetails.Alias))
+                            {
+                                <div class="property-row">
+                                    <span class="property-label">Nom Scientifique</span>
+                                    <span class="property-value">@ViewModel.SelectedBodyDetails.Name</span>
+                                </div>
+                            }
+
                             @if (ViewModel.SelectedBodyDetails.Star != null)
                             {
                                 StarDto star = ViewModel.SelectedBodyDetails.Star;
-                                
+
                                 @if (!string.IsNullOrEmpty(star.SpectralClassName))
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Classe spectrale</span>
                                         <span class="property-value">
-                                            @star.SpectralClassName 
+                                            @star.SpectralClassName
                                             @if (!string.IsNullOrEmpty(star.SpectralClassDescription))
                                             {
                                                 <InfoTooltip Text="@star.SpectralClassDescription"/>
@@ -322,6 +349,7 @@
                                         </span>
                                     </div>
                                 }
+
                                 @if (star.Temperature.HasValue)
                                 {
                                     <div class="property-row">
@@ -329,6 +357,7 @@
                                         <span class="property-value">@star.Temperature.Value.ToString("N0") K</span>
                                     </div>
                                 }
+
                                 @if (star.Distance.HasValue)
                                 {
                                     <div class="property-row">
@@ -336,6 +365,7 @@
                                         <span class="property-value">@star.Distance.Value.ToString("N2") AL</span>
                                     </div>
                                 }
+
                                 @if (star.Radius.HasValue)
                                 {
                                     <div class="property-row">
@@ -343,6 +373,7 @@
                                         <span class="property-value">@star.Radius.Value.ToString("N2") R☉</span>
                                     </div>
                                 }
+
                                 @if (star.Luminosity.HasValue)
                                 {
                                     <div class="property-row">
@@ -350,6 +381,7 @@
                                         <span class="property-value">@star.Luminosity.Value.ToString("N2") L☉</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(star.Constellation))
                                 {
                                     <div class="property-row">
@@ -357,6 +389,7 @@
                                         <span class="property-value">@star.Constellation</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(star.Designation))
                                 {
                                     <div class="property-row">
@@ -364,6 +397,7 @@
                                         <span class="property-value">@star.Designation</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(star.BayerDesignation))
                                 {
                                     <div class="property-row">
@@ -371,20 +405,21 @@
                                         <span class="property-value">@star.BayerDesignation</span>
                                     </div>
                                 }
+
                                 @if (star.ApprovalDate.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Date d'approbation</span>
-                                        <span class="property-value">@star.ApprovalDate.Value.ToString("dd/MM/yyyy")</span>
+                                        <span
+                                            class="property-value">@star.ApprovalDate.Value.ToString("dd/MM/yyyy")</span>
                                     </div>
                                 }
                             }
 
-                            @* PLANET DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Planet != null)
                             {
                                 PlanetDto planet = ViewModel.SelectedBodyDetails.Planet;
-                                
+
                                 @if (!string.IsNullOrEmpty(planet.PlanetTypeName))
                                 {
                                     <div class="property-row">
@@ -398,6 +433,7 @@
                                         </span>
                                     </div>
                                 }
+
                                 @if (planet.Mass.HasValue)
                                 {
                                     <div class="property-row">
@@ -405,6 +441,7 @@
                                         <span class="property-value">@planet.Mass.Value.ToString("N2") M⊕</span>
                                     </div>
                                 }
+
                                 @if (planet.Radius.HasValue)
                                 {
                                     <div class="property-row">
@@ -412,6 +449,7 @@
                                         <span class="property-value">@planet.Radius.Value.ToString("N2") R⊕</span>
                                     </div>
                                 }
+
                                 @if (planet.Distance.HasValue)
                                 {
                                     <div class="property-row">
@@ -419,6 +457,7 @@
                                         <span class="property-value">@planet.Distance.Value.ToString("N2") AL</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(planet.Temperature))
                                 {
                                     <div class="property-row">
@@ -426,6 +465,7 @@
                                         <span class="property-value">@planet.Temperature</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(planet.OrbitalPeriod))
                                 {
                                     <div class="property-row">
@@ -433,6 +473,7 @@
                                         <span class="property-value">@planet.OrbitalPeriod</span>
                                     </div>
                                 }
+
                                 @if (planet.Eccentricity.HasValue)
                                 {
                                     <div class="property-row">
@@ -440,6 +481,7 @@
                                         <span class="property-value">@planet.Eccentricity.Value.ToString("N4")</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(planet.DetectionMethodName))
                                 {
                                     <div class="property-row">
@@ -447,6 +489,7 @@
                                         <span class="property-value">@planet.DetectionMethodName</span>
                                     </div>
                                 }
+
                                 @if (planet.DiscoveryYear.HasValue)
                                 {
                                     <div class="property-row">
@@ -454,6 +497,7 @@
                                         <span class="property-value">@planet.DiscoveryYear</span>
                                     </div>
                                 }
+
                                 @if (planet.SatelliteCount > 0)
                                 {
                                     <div class="property-row">
@@ -461,13 +505,16 @@
                                         <span class="property-value">@planet.SatelliteCount</span>
                                     </div>
                                 }
+
                                 @if (planet.StellarMagnitude.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Magnitude stellaire</span>
-                                        <span class="property-value">@planet.StellarMagnitude.Value.ToString("N2")</span>
+                                        <span
+                                            class="property-value">@planet.StellarMagnitude.Value.ToString("N2")</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(planet.HostStarTemperature))
                                 {
                                     <div class="property-row">
@@ -475,6 +522,7 @@
                                         <span class="property-value">@planet.HostStarTemperature</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(planet.HostStarMass))
                                 {
                                     <div class="property-row">
@@ -482,6 +530,7 @@
                                         <span class="property-value">@planet.HostStarMass</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(planet.Remark))
                                 {
                                     <div class="property-row">
@@ -491,11 +540,10 @@
                                 }
                             }
 
-                            @* ASTEROID DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Asteroid != null)
                             {
                                 AsteroidDto asteroid = ViewModel.SelectedBodyDetails.Asteroid;
-                                
+
                                 @if (!string.IsNullOrEmpty(asteroid.OrbitalClassName))
                                 {
                                     <div class="property-row">
@@ -509,43 +557,54 @@
                                         </span>
                                     </div>
                                 }
+
                                 @if (asteroid.DiameterMaxKm.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Diamètre maximal</span>
-                                        <span class="property-value">@asteroid.DiameterMaxKm.Value.ToString("N2") km</span>
+                                        <span
+                                            class="property-value">@asteroid.DiameterMaxKm.Value.ToString("N2") km</span>
                                     </div>
                                 }
+
                                 @if (asteroid.DiameterMinKm.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Diamètre minimal</span>
-                                        <span class="property-value">@asteroid.DiameterMinKm.Value.ToString("N2") km</span>
+                                        <span
+                                            class="property-value">@asteroid.DiameterMinKm.Value.ToString("N2") km</span>
                                     </div>
                                 }
+
                                 @if (asteroid.AbsoluteMagnitude.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Magnitude absolue</span>
-                                        <span class="property-value">@asteroid.AbsoluteMagnitude.Value.ToString("N2")</span>
+                                        <span
+                                            class="property-value">@asteroid.AbsoluteMagnitude.Value.ToString("N2")</span>
                                     </div>
                                 }
+
                                 @if (asteroid.IsPotentiallyHazardous.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Statut de danger</span>
-                                        <span class="property-value status-@(asteroid.IsPotentiallyHazardous.Value ? "danger" : "safe")">
+                                        <span
+                                            class="property-value status-@(asteroid.IsPotentiallyHazardous.Value ? "danger" : "safe")">
                                             @(asteroid.IsPotentiallyHazardous.Value ? "Potentiellement dangereux" : "Non dangereux")
                                         </span>
                                     </div>
                                 }
+
                                 @if (asteroid.SemiMajorAxis.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Demi-grand axe</span>
-                                        <span class="property-value">@asteroid.SemiMajorAxis.Value.ToString("N6") UA</span>
+                                        <span
+                                            class="property-value">@asteroid.SemiMajorAxis.Value.ToString("N6") UA</span>
                                     </div>
                                 }
+
                                 @if (asteroid.Inclination.HasValue)
                                 {
                                     <div class="property-row">
@@ -553,27 +612,34 @@
                                         <span class="property-value">@asteroid.Inclination.Value.ToString("N2")°</span>
                                     </div>
                                 }
+
                                 @if (asteroid.OrbitDeterminationDate.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Détermination d'orbite</span>
-                                        <span class="property-value">@asteroid.OrbitDeterminationDate.Value.ToString("dd/MM/yyyy")</span>
+                                        <span
+                                            class="property-value">@asteroid.OrbitDeterminationDate.Value.ToString("dd/MM/yyyy")</span>
                                     </div>
                                 }
+
                                 @if (asteroid.FirstObservationDate.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Première observation</span>
-                                        <span class="property-value">@asteroid.FirstObservationDate.Value.ToString("dd/MM/yyyy")</span>
+                                        <span
+                                            class="property-value">@asteroid.FirstObservationDate.Value.ToString("dd/MM/yyyy")</span>
                                     </div>
                                 }
+
                                 @if (asteroid.LastObservationDate.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Dernière observation</span>
-                                        <span class="property-value">@asteroid.LastObservationDate.Value.ToString("dd/MM/yyyy")</span>
+                                        <span
+                                            class="property-value">@asteroid.LastObservationDate.Value.ToString("dd/MM/yyyy")</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(asteroid.Reference))
                                 {
                                     <div class="property-row">
@@ -583,11 +649,10 @@
                                 }
                             }
 
-                            @* SATELLITE DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Satellite != null)
                             {
                                 SatelliteDto satellite = ViewModel.SelectedBodyDetails.Satellite;
-                                
+
                                 @if (!string.IsNullOrEmpty(satellite.PlanetName))
                                 {
                                     <div class="property-row">
@@ -595,6 +660,7 @@
                                         <span class="property-value">@satellite.PlanetName</span>
                                     </div>
                                 }
+
                                 @if (satellite.Radius.HasValue)
                                 {
                                     <div class="property-row">
@@ -602,6 +668,7 @@
                                         <span class="property-value">@satellite.Radius.Value.ToString("N2") km</span>
                                     </div>
                                 }
+
                                 @if (satellite.Gravity.HasValue)
                                 {
                                     <div class="property-row">
@@ -609,20 +676,21 @@
                                         <span class="property-value">@satellite.Gravity.Value.ToString("N2") m/s²</span>
                                     </div>
                                 }
+
                                 @if (satellite.Density.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Densité</span>
-                                        <span class="property-value">@satellite.Density.Value.ToString("N2") g/cm³</span>
+                                        <span
+                                            class="property-value">@satellite.Density.Value.ToString("N2") g/cm³</span>
                                     </div>
                                 }
                             }
 
-                            @* GALAXY/QUASAR DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.GalaxyQuasar != null)
                             {
                                 GalaxyQuasarDto galaxy = ViewModel.SelectedBodyDetails.GalaxyQuasar;
-                                
+
                                 @if (!string.IsNullOrEmpty(galaxy.GalaxyQuasarClassName))
                                 {
                                     <div class="property-row">
@@ -636,6 +704,7 @@
                                         </span>
                                     </div>
                                 }
+
                                 @if (galaxy.Redshift.HasValue)
                                 {
                                     <div class="property-row">
@@ -643,6 +712,7 @@
                                         <span class="property-value">@galaxy.Redshift.Value.ToString("N4")</span>
                                     </div>
                                 }
+
                                 @if (galaxy.RightAscension.HasValue)
                                 {
                                     <div class="property-row">
@@ -650,6 +720,7 @@
                                         <span class="property-value">@galaxy.RightAscension.Value.ToString("N6")°</span>
                                     </div>
                                 }
+
                                 @if (galaxy.Declination.HasValue)
                                 {
                                     <div class="property-row">
@@ -657,6 +728,7 @@
                                         <span class="property-value">@galaxy.Declination.Value.ToString("N6")°</span>
                                     </div>
                                 }
+
                                 @if (galaxy.RMagnitude.HasValue)
                                 {
                                     <div class="property-row">
@@ -664,6 +736,7 @@
                                         <span class="property-value">@galaxy.RMagnitude.Value.ToString("N2")</span>
                                     </div>
                                 }
+
                                 @if (galaxy.ModifiedJulianDateObservation.HasValue)
                                 {
                                     <div class="property-row">
@@ -671,6 +744,7 @@
                                         <span class="property-value">@galaxy.ModifiedJulianDateObservation</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(galaxy.Reference))
                                 {
                                     <div class="property-row">
@@ -680,60 +754,73 @@
                                 }
                             }
 
-                            @* COMET DETAILS *@
                             @if (ViewModel.SelectedBodyDetails.Comet != null)
                             {
                                 CometDto comet = ViewModel.SelectedBodyDetails.Comet;
-                                
+
                                 @if (comet.OrbitalEccentricity.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Excentricité orbitale</span>
-                                        <span class="property-value">@comet.OrbitalEccentricity.Value.ToString("N4")</span>
+                                        <span
+                                            class="property-value">@comet.OrbitalEccentricity.Value.ToString("N4")</span>
                                     </div>
                                 }
+
                                 @if (comet.OrbitalInclinationDegrees.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Inclinaison orbitale</span>
-                                        <span class="property-value">@comet.OrbitalInclinationDegrees.Value.ToString("N2")°</span>
+                                        <span
+                                            class="property-value">@comet.OrbitalInclinationDegrees.Value.ToString("N2")°</span>
                                     </div>
                                 }
+
                                 @if (comet.AscendingNodeLongitudeDegrees.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Longitude nœud ascendant</span>
-                                        <span class="property-value">@comet.AscendingNodeLongitudeDegrees.Value.ToString("N2")°</span>
+                                        <span
+                                            class="property-value">@comet.AscendingNodeLongitudeDegrees.Value.ToString("N2")°</span>
                                     </div>
                                 }
+
                                 @if (comet.PerihelionDistanceAU.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Distance périhélie</span>
-                                        <span class="property-value">@comet.PerihelionDistanceAU.Value.ToString("N4") UA</span>
+                                        <span
+                                            class="property-value">@comet.PerihelionDistanceAU.Value.ToString("N4") UA</span>
                                     </div>
                                 }
+
                                 @if (comet.AphelionDistanceAU.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Distance aphélie</span>
-                                        <span class="property-value">@comet.AphelionDistanceAU.Value.ToString("N4") UA</span>
+                                        <span
+                                            class="property-value">@comet.AphelionDistanceAU.Value.ToString("N4") UA</span>
                                     </div>
                                 }
+
                                 @if (comet.OrbitalPeriodYears.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">Période orbitale</span>
-                                        <span class="property-value">@comet.OrbitalPeriodYears.Value.ToString("N2") ans</span>
+                                        <span
+                                            class="property-value">@comet.OrbitalPeriodYears.Value.ToString("N2") ans</span>
                                     </div>
                                 }
+
                                 @if (comet.MinimumOrbitIntersectionDistanceAU.HasValue)
                                 {
                                     <div class="property-row">
                                         <span class="property-label">MOID</span>
-                                        <span class="property-value">@comet.MinimumOrbitIntersectionDistanceAU.Value.ToString("N6") UA</span>
+                                        <span
+                                            class="property-value">@comet.MinimumOrbitIntersectionDistanceAU.Value.ToString("N6") UA</span>
                                     </div>
                                 }
+
                                 @if (!string.IsNullOrEmpty(comet.Reference))
                                 {
                                     <div class="property-row">
@@ -748,9 +835,9 @@
                     <div class="detail-3d-panel">
                         @if (ShouldShow3D())
                         {
-                            <PlanetViewer 
+                            <PlanetViewer
                                 CelestialBodyId="@ViewModel.SelectedBodyDetails.Id"
-                                PlanetTypeId="@GetPlanetTypeId()" />
+                                PlanetTypeId="@GetPlanetTypeId()"/>
                         }
                         else
                         {
@@ -775,72 +862,198 @@
     }
 </div>
 
+@if (ViewModel.IsAliasModalOpen)
+{
+    <div class="modal-backdrop-custom" @onclick="ViewModel.CloseModals">
+        <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
+            <div class="modal-header border-0 pb-0 mb-3">
+                <h4 class="text-white font-orbitron">Personnaliser la découverte</h4>
+            </div>
+            <div class="modal-body text-start">
+                <p class="text-white-50 mb-3">Donnez un nom unique à cet objet céleste.</p>
+                <div class="mb-3">
+                    <input type="text" class="form-control-astralis" placeholder="Ex: Étoile des Bergers"
+                           @bind="ViewModel.AliasInputValue" @bind:event="oninput"/>
+                </div>
+                <div class="text-white-50 small fst-italic"><i class="bi bi-info-circle me-1"></i> Gratuit pour les
+                    membres Premium.
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 gap-2 justify-content-end">
+                <button class="btn btn-outline-light" @onclick="ViewModel.CloseModals">Annuler</button>
+                <button class="btn btn-astralis-premium" @onclick="ViewModel.SubmitAliasAsync"
+                        disabled="@(string.IsNullOrWhiteSpace(ViewModel.AliasInputValue) || ViewModel.IsSubmittingAlias)">
+                    @(ViewModel.IsSubmittingAlias ? "Envoi..." : "Proposer")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ViewModel.IsPaymentModalOpen)
+{
+    <div class="modal-backdrop-custom" @onclick="ViewModel.CloseModals">
+        <div class="modal-glass-content animate-fade-in text-center" @onclick:stopPropagation>
+            <div class="mb-4">
+                <div style="position: relative; display: inline-block;">
+                    <i class="bi bi-credit-card-2-front text-white" style="font-size: 3rem;"></i>
+                    <span class="badge bg-warning text-dark position-absolute top-0 start-100 translate-middle rounded-pill">
+                        5,99 €
+                    </span>
+                </div>
+            </div>
+            
+            <h4 class="text-white font-orbitron mb-3">Validation de l'Alias</h4>
+            
+            <p class="text-white-50 mb-2">
+                L'alias <strong>"@ViewModel.AliasInputValue"</strong> est disponible !
+            </p>
+            <p class="text-white-50 mb-4 small">
+                En tant que membre standard, une participation unique de <strong>5,99 €</strong> est requise pour enregistrer ce nom dans le registre officiel Astralis.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-outline-light" @onclick="ViewModel.CloseModals">Annuler</button>
+                
+                <button class="btn btn-payment-stripe" @onclick="ViewModel.ProceedToPayment">
+                    <i class="bi bi-stripe me-2"></i> Payer 5,99 €
+                </button>
+            </div>
+            
+            <div class="mt-3 text-white-50 small fst-italic">
+                Paiement sécurisé via Stripe. <br/>
+                <span class="text-muted">(Gratuit pour les membres Premium)</span>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ViewModel.IsSuccessModalOpen)
+{
+    <div class="modal-backdrop-custom" @onclick="CleanUrlAndClose">
+        <div class="modal-glass-content animate-fade-in text-center" @onclick:stopPropagation>
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+            </div>
+            <h4 class="text-white font-orbitron mb-3">Proposition envoyée !</h4>
+            <p class="text-white-50 mb-4">
+                Votre alias a été soumis à nos équipes. Il apparaitra comme "En attente" jusqu'à sa validation.
+            </p>
+            <button class="btn btn-astralis-outline w-100" @onclick="CleanUrlAndClose">
+                Compris
+            </button>
+        </div>
+    </div>
+}
+
+@if (ViewModel.IsDeleteConfirmModalOpen)
+{
+    <div class="modal-backdrop-custom" @onclick="ViewModel.CloseModals">
+        <div class="modal-glass-content animate-fade-in" @onclick:stopPropagation>
+            <h4 class="text-danger font-orbitron mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Supprimer l'alias
+                ?</h4>
+            <p class="text-white-50 mb-4">
+                Voulez-vous vraiment supprimer ce nom personnalisé ? L'objet retrouvera son nom scientifique d'origine.
+            </p>
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-outline-light" @onclick="ViewModel.CloseModals">Annuler</button>
+                <button class="btn btn-danger" @onclick="ViewModel.ConfirmDeleteAlias">
+                    Confirmer la suppression
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
+
     [SupplyParameterFromQuery(Name = "id")]
     public int? Id { get; set; }
-    
+
     [SupplyParameterFromQuery(Name = "search")]
     public string? SearchText { get; set; }
-    
+
     [SupplyParameterFromQuery(Name = "type")]
     public int? TypeId { get; set; }
-    
+
     [SupplyParameterFromQuery(Name = "subtype")]
     public int? SubtypeId { get; set; }
-    
+
     [SupplyParameterFromQuery(Name = "sort")]
     public string? Sort { get; set; }
-    
+
     [SupplyParameterFromQuery(Name = "page")]
     public int? Page { get; set; }
-    
+
     [SupplyParameterFromQuery(Name = "discoverySubmitted")]
     public bool? DiscoverySubmitted { get; set; }
 
     [SupplyParameterFromQuery(Name = "id")]
     public int? SubmittedDiscoveryId { get; set; }
     
+    [SupplyParameterFromQuery(Name = "paymentSuccess")]
+    public bool? PaymentSuccess { get; set; }
+
+    [SupplyParameterFromQuery(Name = "session_id")]
+    public string? SessionId { get; set; }
+
     private bool _showSuccessMessage = false;
-    
+
     protected override async Task OnInitializedAsync()
     {
         ViewModel.PropertyChanged += (s, e) => InvokeAsync(StateHasChanged);
-        
+
         await ViewModel.InitializeAsync();
 
         if (!string.IsNullOrEmpty(SearchText))
             ViewModel.Filter.SearchText = SearchText;
-        
+
         if (TypeId.HasValue && TypeId.Value != 0)
         {
             ViewModel.SelectedTypeId = TypeId.Value;
             await ViewModel.OnTypeChanged();
         }
-        
+
         if (SubtypeId.HasValue)
             ViewModel.SelectedSubtypeId = SubtypeId.Value;
-        
+
         if (!string.IsNullOrEmpty(Sort))
             ViewModel.SortBy = Sort;
-        
+
         if (Page.HasValue)
             ViewModel.CurrentPage = Page.Value;
-        
+
         if (Id.HasValue)
         {
-            await ViewModel.ShowDetailsById(Id.Value);
+            if (PaymentSuccess == true && !string.IsNullOrEmpty(SessionId))
+            {
+                await ViewModel.HandlePaymentCallbackAsync(SessionId, Id.Value);
+            }
+            else 
+            {
+                await ViewModel.ShowDetailsById(Id.Value);
+            }
         }
         else
         {
             await ViewModel.SearchDataAsync();
         }
-        
+
         if (DiscoverySubmitted == true && SubmittedDiscoveryId.HasValue)
         {
             _showSuccessMessage = true;
         }
     }
     
+    private void CleanUrlAndClose()
+    {
+        ViewModel.CloseModals();
+        if (Id.HasValue)
+        {
+            Navigation.NavigateTo($"/corps-celestes?id={Id.Value}", replace: true);
+        }
+    }
+
     private void CloseSuccessMessage()
     {
         _showSuccessMessage = false;

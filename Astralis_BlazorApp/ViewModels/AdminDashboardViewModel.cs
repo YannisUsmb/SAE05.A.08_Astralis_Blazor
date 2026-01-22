@@ -13,13 +13,16 @@ public partial class AdminDashboardViewModel : ObservableObject
     // --- PROPERTIES ---
     [ObservableProperty] private ObservableCollection<DiscoveryDto> pendingDiscoveries = new();
     [ObservableProperty] private ObservableCollection<DiscoveryDto> pendingAliases = new();
-    
     [ObservableProperty] private bool isLoading;
     
-    // --- REJECTION MODAL ---
+    // --- MODALES (Remplacement des alerts JS) ---
     [ObservableProperty] private bool isRejectModalOpen;
     [ObservableProperty] private string rejectionReason = string.Empty;
     [ObservableProperty] private int? selectedDiscoveryId;
+
+    [ObservableProperty] private bool isConfirmAliasModalOpen;
+    [ObservableProperty] private bool isRejectAliasModalOpen;
+    [ObservableProperty] private DiscoveryDto? selectedAliasItem;
 
     public AdminDashboardViewModel(IDiscoveryService discoveryService)
     {
@@ -88,10 +91,14 @@ public partial class AdminDashboardViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void CancelRejection()
+    public void CancelModals()
     {
         IsRejectModalOpen = false;
+        IsConfirmAliasModalOpen = false;
+        IsRejectAliasModalOpen = false;
         SelectedDiscoveryId = null;
+        SelectedAliasItem = null;
+        RejectionReason = "";
     }
 
     [RelayCommand]
@@ -107,9 +114,7 @@ public partial class AdminDashboardViewModel : ObservableObject
             var item = PendingDiscoveries.FirstOrDefault(d => d.Id == SelectedDiscoveryId);
             if (item != null) PendingDiscoveries.Remove(item);
 
-            IsRejectModalOpen = false;
-            SelectedDiscoveryId = null;
-            RejectionReason = "";
+            CancelModals();
         }
         catch (Exception ex)
         {
@@ -117,21 +122,38 @@ public partial class AdminDashboardViewModel : ObservableObject
         }
     }
 
-    // --- ALIAS MANAGEMENT ---
+    // --- ALIAS MANAGEMENT (Nouvelles méthodes pour ouvrir les modales) ---
 
     [RelayCommand]
-    public async Task ApproveAlias(int id)
+    public void OpenApproveAliasModal(DiscoveryDto item)
     {
+        SelectedAliasItem = item;
+        IsConfirmAliasModalOpen = true;
+    }
+
+    [RelayCommand]
+    public void OpenRejectAliasModal(DiscoveryDto item)
+    {
+        SelectedAliasItem = item;
+        IsRejectAliasModalOpen = true;
+    }
+
+    [RelayCommand]
+    public async Task ConfirmApproveAlias()
+    {
+        if (SelectedAliasItem == null) return;
+
         try
         {
             var dto = new DiscoveryModerationDto { AliasStatusId = 2 };
-            var success = await _discoveryService.ModerateAliasAsync(id, dto);
+            var success = await _discoveryService.ModerateAliasAsync(SelectedAliasItem.Id, dto);
 
             if (success)
             {
-                var item = PendingAliases.FirstOrDefault(a => a.Id == id);
+                var item = PendingAliases.FirstOrDefault(a => a.Id == SelectedAliasItem.Id);
                 if (item != null) PendingAliases.Remove(item);
             }
+            CancelModals();
         }
         catch (Exception ex)
         {
@@ -140,18 +162,21 @@ public partial class AdminDashboardViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task RejectAlias(int id)
+    public async Task ConfirmRejectAlias()
     {
+        if (SelectedAliasItem == null) return;
+
         try
         {
             var dto = new DiscoveryModerationDto { AliasStatusId = 3 };
-            var success = await _discoveryService.ModerateAliasAsync(id, dto);
+            var success = await _discoveryService.ModerateAliasAsync(SelectedAliasItem.Id, dto);
 
             if (success)
             {
-                var item = PendingAliases.FirstOrDefault(a => a.Id == id);
+                var item = PendingAliases.FirstOrDefault(a => a.Id == SelectedAliasItem.Id);
                 if (item != null) PendingAliases.Remove(item);
             }
+            CancelModals();
         }
         catch (Exception ex)
         {
