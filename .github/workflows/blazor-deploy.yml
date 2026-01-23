@@ -1,13 +1,13 @@
-name: Deploy Blazor WASM to Azure
+name: Deploy Blazor WASM to Azure (PROD )
 
 on:
   push:
     branches:
-      - develop
+      - master
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: 'WebAppAstralisBlazorDevCode'
+  AZURE_WEBAPP_NAME: 'WebAppAstralisBlazorProdCode'
   DOTNET_VERSION: '8.x'
   PROJECT_PATH: 'Astralis_BlazorApp/Astralis_BlazorApp.csproj'
 
@@ -42,5 +42,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BLAZOR }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BLAZOR_PROD }}
           package: ./publish/wwwroot
