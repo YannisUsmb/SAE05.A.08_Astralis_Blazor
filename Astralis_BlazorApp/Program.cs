@@ -20,17 +20,25 @@ namespace Astralis_BlazorApp
             builder.Services.AddTransient<CookieHandler>();
 
             builder.Services.AddHttpClient("AstralisAPI", client =>
-            {// Remplace localhost par ton API en ligne :
-                client.BaseAddress = new Uri("https://webappastralisapidotnetdev-h2dphretfzhnbfhb.francecentral-01.azurewebsites.net/api/");
-                //client.BaseAddress = new Uri("https://localhost:7064/api/");
+            {
+                string? apiUrl = builder.Configuration["ApiSettings:BaseUrl"];
+
+                if (string.IsNullOrEmpty(apiUrl))
+                {
+                    throw new Exception("L'URL de l'API n'est pas configurée dans appsettings.json (ApiSettings:BaseUrl)");
+                }
+
+                client.BaseAddress = new Uri(apiUrl);
             })
             .AddHttpMessageHandler<CookieHandler>()
             .AddHttpMessageHandler<HttpResponseHandler>();
 
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("AstralisAPI"));
+
             // --- Services & ViewModels ---
             builder.Services.AddApplicationServices();
             builder.Services.AddViewModels();
+
             // --- Authorization & Auth ---
             builder.Services.AddAuthorizationCore(options =>
             {
@@ -39,7 +47,6 @@ namespace Astralis_BlazorApp
             });
 
             builder.Services.AddBlazorBootstrap();
-            
 
             await builder.Build().RunAsync();
         }
