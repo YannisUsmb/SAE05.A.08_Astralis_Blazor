@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\sample-data\**" />
+    <Content Remove="wwwroot\sample-data\**" />
+    <EmbeddedResource Remove="wwwroot\sample-data\**" />
+    <None Remove="wwwroot\sample-data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazor.Bootstrap" Version="3.5.0" />
     <PackageReference Include="Blazored.TextEditor" Version="1.1.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
@@ -22,10 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Astralis.Shared\Astralis.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\sample-data\" />
   </ItemGroup>
 
 </Project>

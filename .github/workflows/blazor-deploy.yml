@@ -1,0 +1,46 @@
+name: Deploy Blazor WASM to Azure
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: 'WebAppAstralisBlazorDevCode'
+  DOTNET_VERSION: '8.x'
+  PROJECT_PATH: 'Astralis_BlazorApp/Astralis_BlazorApp.csproj'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout avec Submodules
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. Setup .NET
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # 3. Installation de l'outil pour faire fonctionner WASM (Workload)
+      - name: Install WASM Tools
+        run: dotnet workload install wasm-tools
+
+      # 4. Compilation et Publication
+      - name: Build and Publish
+        run: |
+          dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ./publish
+
+      # 5. Déploiement sur Azure
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BLAZOR }}
+          package: ./publish/wwwroot
