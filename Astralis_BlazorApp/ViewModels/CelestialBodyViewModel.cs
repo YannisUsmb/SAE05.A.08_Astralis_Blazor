@@ -1,12 +1,11 @@
-using System.Collections.ObjectModel;
-using Astralis_BlazorApp.Services.Interfaces;
 using Astralis.Shared.DTOs;
+using Astralis_BlazorApp.Extensions;
+using Astralis_BlazorApp.Services.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization; 
-using Astralis_BlazorApp.Extensions;
-using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Collections.ObjectModel;
 
 namespace Astralis_BlazorApp.ViewModels;
 
